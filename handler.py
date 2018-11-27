@@ -1,31 +1,87 @@
+import os
+
 from lib.modules.gui.menu import Menu
+
+
+
 
 class Handler:
 
-    def __init__(self, view, screen)
+    def __init__(self, screen):
 
-        self._menus = []
-        self._current_view = view
-        self._screen
-
-    def change_view(self, new_view_string):
+        self._views = {}
+        self._screen = screen
+        self.setup_views()
         
-        
-    def update(events):
+    def update(self, events):
 
-        self._current_view.update(events)
+        if self._current_view.get_visibility():
+
+            self._current_view.update(events)
+
+        else:
+            
+            if self._current_view.get_new_view() == 0:
+
+                assert False
+            
+            self._current_view = self._views[self._current_view.get_new_view()]
+            self._current_view.set_visibility(True)
 
     def setup_views(self):
+        
 
-        #Start Menu
+        # Start Menu
         Start_Menu = Menu(self._screen, 'middle', 'Start Menu')
-        Start_Menu.add_button('Play', self.change_view('game'))
-        Start_Menu.add_button('Editor', self.change_view('level_menu'))
-        Start_Menu.add_button('Quit', self.change_view('quit'))
+        Start_Menu.add_button('Play', 'level_menu')
+        Start_Menu.add_button('Editor', 'level_menu')
+        Start_Menu.add_button('Settings', 'settings_menu')
 
-        #Level Menu
-        Level_Menu = Menu(self._screen, 'middle', 'Levels')
+        self._views['start_menu'] = Start_Menu
+        
+        # Level Menu
+        Editor_Level_Menu = Menu(self._screen, 'right', 'Levels')
+        for level_file in os.listdir('lib/data/levels'):
+            Editor_Level_Menu.add_button(level_file, 'asdf')
+
+        Editor_Level_Menu.add_button('Exit', 'start_menu')
+        self._views['editor_level_menu'] = Editor_Level_Menu
+
+        # Settings Menu
+        Settings_Menu = Menu(self._screen, 'middle', 'Settings')
+        Settings_Menu.add_button('test', 123)
+        Settings_Menu.add_button('Exit', 'start_menu')
+        
+        self._views['settings_menu'] = Settings_Menu
+        
+        # set current view to start menu and turn on visibility
+        self._current_view = self._views['start_menu']
+        self._current_view.set_visibility(True)
+        
         #Write more code here
 
-        
+
+def init():
+
     
+    pygame.init()
+    screen = pygame.display.set_mode((640,480))
+    pygame.display.set_caption('The Game')
+    pygame.display.flip()
+    
+    return screen
+
+    
+ 
+if __name__ == '__main__':
+    '''
+    Tests
+    '''
+
+    import pygame
+    
+    screen = init()
+    
+    handler = Handler(screen)
+    handler.setup_views()
+    handler.update(pygame.event.get())

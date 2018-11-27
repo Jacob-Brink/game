@@ -1,8 +1,9 @@
 import pygame
-#FIX MODULE DIRECTORY PROBLEM SO MENU AND MAIN CAN BE RUN
+
 from lib.modules.gui.menu import Menu
-#from handler import Handler
-#from game import Game
+from handler import Handler
+from events import Event
+
 
 running = True
 
@@ -31,18 +32,22 @@ def main():
     
     screen = init()
 
-    m = Menu(screen, 'left', 'bla')
-    m.add_button('hey', test_callback)
+    e = Event()
+    handler = Handler(screen)
     
     while running:
 
+        # clear screen with black
+        screen.fill((0, 0, 0))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+
+        e.update(pygame.key.get_pressed(), pygame.mouse.get_pressed(), pygame.mouse.get_pos())
+        handler.update(e)
         
-        #handler.update(pygame.event.get())
-        m.update(pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0])
         pygame.display.flip()
 
 if __name__ == '__main__':

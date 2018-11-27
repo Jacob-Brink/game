@@ -1,0 +1,66 @@
+import pygame
+from enum import Enum
+'''
+This class is a wrapper for events and allows events to be handled more simply
+'''
+
+class ToggleSwitch(Enum):
+    '''
+    This class represents a toggle switch, such as a mouse button or a keyboard key.
+    '''
+    DOWN: 1,
+    UP: 2,
+    PRESSED: 3,
+    UNPRESSED: 4
+    
+
+class Mouse():
+
+    def __init__(self):
+        self._left_button = ToggleSwitch.UNPRESSED
+        self._right_button = ToggleSwitch.UNPRESSED
+
+    def left_button(self):
+        return self._left_button
+
+    def right_button(self):
+        return self._right_button
+
+    def update_left_state(new_state):
+        self._left_button = new_state
+        
+    def update_right_state(new_state):
+        self._right_button = new_state
+
+        
+class Event:
+
+    def __init__(self):
+        self._mouse = Mouse()
+
+    def update(events, pressed_keys, pressed_mouse_button):
+        '''
+        
+        '''
+
+        keys = pressed_keys
+        buttons = pressed_mouse_button
+
+        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_w]:
+        if keys[pygame.K_a]:
+        if keys[pygame.K_d]:
+        if keys[pygame.K_s]:
+
+        if buttons[0]:
+            self._mouse.update_left_state(ToggleSwitch.DOWN)
+        else:
+            self._mouse.update_left_state(ToggleSwitch.UP)
+
+        if buttons[2]:
+            self._mouse.update_right_state(ToggleSwitch.DOWN)
+        else:
+            self._mouse.update_left_state(ToggleSwitch.UP)
+
+    def return_mouse(self):
+        return self._mouse

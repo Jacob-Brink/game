@@ -30,23 +30,23 @@ class Button:
         self._screen.blit(self._text_surface, self._coordinate_tuple)
 
         
-    def update(self, mouse_pos, event):
+    def update(self, event):
         '''
         Update function updates the Button with mouse events. If the mouse hovers, the displayed text 
         surface is assigned the hover surface. If not, the displayed text will be the normal surface
         '''
-        
-        #if mouse hovers over button
-        if self._rect.collidepoint(mouse_pos):
+
+        # if mouse hovers over button
+        if self._rect.collidepoint(event.mouse().get_position()):
 
             self._text_surface = self._HOVER_SURFACE
             
-            #if mouse is clicked call callback
-            if event:
+            # if mouse is clicked call callback
+            if event.mouse().left_button():
 
                 self._callback()
 
-        #if mouse does not hover over button
+        # if mouse does not hover over button
         else:
 
             self._text_surface = self._NORMAL_SURFACE
