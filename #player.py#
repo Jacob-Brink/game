@@ -65,7 +65,7 @@ if __name__ == "__main__":
         y_diff = pygame.mouse.get_pos()[1] - p.return_rect().y
         
         
-        decrease += .01
+        
         p.add_force(Vector(math.degrees(math.atan2(y_diff, x_diff)), math.sqrt(x_diff**2 + y_diff**2)/decrease))
         #p.add_force(Vector(-90, -10))
         screen.blit(surface, (0,0))

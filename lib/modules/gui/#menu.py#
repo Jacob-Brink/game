@@ -44,7 +44,10 @@ class Menu(View):
         self._margin = 10
 
     def click_callback(self, ID):
-        self.view_switch(ID)
+        '''
+        When a button is clicked, it will call this callback with a unique id matching another view or task.
+        '''
+        self.switch(ID)
         
         
     #adds a button with text and a callback
@@ -70,7 +73,7 @@ class Menu(View):
             
 
         
-        self._buttons.append(Button(text, callback, (0, 255, 255), self._screen, self._font_size, (x,y)))
+        self._buttons.append(Button(text, self.click_callback, (0, 255, 255), self._screen, self._font_size, (x,y)))
         
     def update(self, mouse_event, click):
         '''

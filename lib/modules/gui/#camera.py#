@@ -39,6 +39,7 @@ class Camera:
         
         return object_rect.colliderect(self._view_rect)
 
+    
 if __name__ == '__main__':
     '''
     Tests for camera class.

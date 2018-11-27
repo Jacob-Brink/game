@@ -1,0 +1,31 @@
+
+class View:
+
+    def __init__(self, id_, view_class):
+        '''
+        Constructs a view object with given id and view_class. View class must have update function asdflkasj;dflkjasdlkfasdfasdfasdfasdf
+        '''
+        self._visible = False
+        self._id = id_
+        self._view_class = view_class
+        
+    def is_visible(self):
+
+        return self._visible
+
+    
+    
+    def focus(self):
+
+        self._visible = True
+
+    def unfocus(self):
+
+        self._visible = False
+
+    def update(self, events):
+        if self._visible:
+            self._view_class.update(events)
+
+        
+        

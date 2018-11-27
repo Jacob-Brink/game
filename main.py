@@ -1,8 +1,10 @@
 import pygame
 #FIX MODULE DIRECTORY PROBLEM SO MENU AND MAIN CAN BE RUN
 from lib.modules.gui.menu import Menu
+#from handler import Handler
 #from game import Game
 
+running = True
 
 def init():
     pygame.init()
@@ -15,17 +17,23 @@ def init():
 def test_callback():
     print('callback')
 
+def quit_loop():
+    print('Quitting Game')
+    global running
+    running = False
+    print('running:', running)
+
+    
 def main():
 
-    running = True
+
+    global running
     
     screen = init()
 
-    menu = Menu(screen, 'middle')
-    menu.add_button('Play Game', test_callback)
-    menu.add_button('Debug Mode', test_callback)
-    menu.add_button('Quit', test_callback)
-
+    m = Menu(screen, 'left', 'bla')
+    m.add_button('hey', test_callback)
+    
     while running:
 
 
@@ -33,7 +41,8 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
         
-        menu.update(pygame.mouse.get_pos(), True)
+        #handler.update(pygame.event.get())
+        m.update(pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0])
         pygame.display.flip()
 
 if __name__ == '__main__':
