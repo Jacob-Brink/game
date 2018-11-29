@@ -56,11 +56,11 @@ if __name__ == "__main__":
                 pygame.quit()
                 running = False
 
+                
         if running == False:
             break
 
-
-        
+       
         x_diff = pygame.mouse.get_pos()[0] - p.return_rect().x
         y_diff = pygame.mouse.get_pos()[1] - p.return_rect().y
         

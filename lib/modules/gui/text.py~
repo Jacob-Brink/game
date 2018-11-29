@@ -1,0 +1,16 @@
+
+class Text:
+
+    def __init__(self, text, size, color, pos):
+
+        self._text = text
+        self._size = size
+        self._color = color
+        self._pos = pos
+
+        self._font = pygame.font.SysFont(None, self._size)
+        self._surface = self._font.render(self._text, 1, color)
+
+    def return_surface(self):
+
+        return self._surface

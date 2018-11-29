@@ -1,25 +1,23 @@
 import pygame
 
+from lib.modules.gui.text import Text
+
 class Button:
 
-    def __init__(self, text, callback, screen, font_size, coordinate_tuple):
+    def __init__(self, normal_text_surface, hover_text_surface, callback):
         '''
         Constructs a button with the text, creates surface constants: one for when the mouse hovers
         over the button, and one for when the mouse does not hover over the button.
         '''
 
-        self._coordinate_tuple = coordinate_tuple
-        self._text = text
-        self._font = pygame.font.SysFont(None, font_size)
-        self._rect = pygame.Rect(self._coordinate_tuple, self._font.size(text))
-
         self._callback = callback
 
-        self._HOVER_SURFACE = self._font.render(self._text, 1, (24, 100, 240))
-        self._NORMAL_SURFACE = self._font.render(self._text, 1, (0, 0, 255))
-        self._text_surface = self._NORMAL_SURFACE
+        self._HOVER_SURFACE = hover_text_surface
+        self._NORMAL_SURFACE = normal_text_surface
 
-        self._screen = screen
+        self._rect = self._NORMAL_SURFACE.get_rect()
+
+        self._text_surface = self._NORMAL_SURFACE
         
 
     def _draw_button(self):
@@ -27,7 +25,7 @@ class Button:
         Private function which draws the button.
         '''
     
-        self._screen.blit(self._text_surface, self._coordinate_tuple)
+        self._text_surface.render()
 
         
     def update(self, event):

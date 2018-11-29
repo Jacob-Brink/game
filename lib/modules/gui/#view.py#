@@ -8,8 +8,8 @@ class View:
 
         self._visible = False
         self._next_view_id = 0
-        self._switch_view = False
 
+        
     def get_visibility(self):
 
         return self._visible
@@ -21,7 +21,6 @@ class View:
         '''
         
         self._visible = visible_bool
-
        
     def switch(self, ID):
         '''

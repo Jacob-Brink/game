@@ -19,18 +19,10 @@ class Handler:
 
             self._current_view.update(events)
 
-        else:
-            
-            if self._current_view.get_new_view() == 0:
-
-                assert False
-            
-            self._current_view = self._views[self._current_view.get_new_view()]
-            self._current_view.set_visibility(True)
-
+        
     def call(self, next_view_id, next_view_arg):
-
-        pass
+        # the rendered view is switched
+        self._current_view = self._views[next_view_id]
             
     def callback(self, next_view_id, next_view_arg):
 
@@ -46,16 +38,16 @@ class Handler:
 
         # Start Menu
         Start_Menu = Menu(self._screen, 'middle', 'Start Menu')
-        Start_Menu.add_button('Play', 'editor_level_menu')
-        Start_Menu.add_button('Editor', 'editor_level_menu')
-        Start_Menu.add_button('Settings', 'settings_menu')
+        Start_Menu.add_button('Play', self.callback('level_menu', None))
+        Start_Menu.add_button('Editor', self.callback('level_menu', None))
+        Start_Menu.add_button('Settings', self.callback('settings_menu', None))
 
         self._views['start_menu'] = Start_Menu
         
         # Level Menu
         Editor_Level_Menu = Menu(self._screen, 'right', 'Levels')
         for level_file in os.listdir('lib/data/levels'):
-            Editor_Level_Menu.add_button(level_file, 'asdf')
+            Editor_Level_Menu.add_button(level_file, )
 
         Editor_Level_Menu.add_button('Exit', 'start_menu')
         self._views['editor_level_menu'] = Editor_Level_Menu

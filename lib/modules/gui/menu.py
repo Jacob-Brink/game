@@ -6,7 +6,9 @@ if __name__ == '__main__':
 else:
     from lib.modules.gui.view import View
     from lib.modules.gui.button import Button
+    from lib.modules.gui.text import Text
 
+    
 import pygame
 
 # acceptable values for position argument
@@ -22,7 +24,7 @@ class Menu(View):
         Constructor constructs Menu object, which will setup the font, title, and all variables required for a menu with buttons
         '''
 
-        super().__init__(ID)
+        super().__init__()
         
         #checks if position parameter holds appropriate value
         if (not isinstance(position, str)) or (position not in acceptable_positions):
@@ -35,10 +37,9 @@ class Menu(View):
             raise ValueError('Menu->Constructor: title parameter must be of type str')
         
         #title surface creation
-        self._title = title
-        self._font = pygame.font.SysFont(None, 32)
-        self._title_surface = self._font.render(self._title, 1, (0, 255, 0))
-
+        self._title_text = title
+        self._title_surface = Text(self._title_text, 32, (200, 100, 20), (200, 200), screen)
+        
         #button setup
         self._position = position
         self._font_size = 32
@@ -46,28 +47,10 @@ class Menu(View):
         self._screen = screen
         self._margin = 10
 
-    def click(self, ID):
-        '''
-        Button click callback.
-        '''
-        super().switch(ID)
-
-        
-    def click_callback(self, ID):
-        '''
-        Wrapper for click_callback
-        When a button is clicked, it will call this callback with a unique id matching another view or task.
-        '''
-        
-        def return_func():
-            
-            self.click(ID)
-
-        return return_func
         
     
     # adds a button with text and a callback
-    def add_button(self, text, ID):
+    def add_button(self, text, callback):
         '''
         Adds a button to the button list on the menu. Takes Text and a callback to be called on when button is clicked
         '''
@@ -87,15 +70,17 @@ class Menu(View):
         elif self._position == 'right':
             x = screen_width - (self._margin + text_length)
             
-
-        self._buttons.append(Button(text, self.click_callback(ID), self._screen, self._font_size, (x,y)))
+        hover_surface = Text(text, 32, (0, 23, 43), (x, y), self._screen)
+        normal_surface = Text(text, 30, (20, 10, 40), (x, y), self._screen)
+        
+        self._buttons.append(Button(normal_surface, hover_surface, callback))
         
     def update(self, event):
         '''
         Will update the menu with realtime events, such as the mouse events. It also updates the buttons in the menu
         '''
         
-        self._screen.blit(self._title_surface, (0,0))
+        self._title_surface.render()
         
         for button in self._buttons:
 
