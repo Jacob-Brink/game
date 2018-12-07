@@ -1,0 +1,16 @@
+from lib.modules.gui.camera import Camera
+
+
+class Editor:
+
+    def __init__(self, level_file, view_rect):
+        self._level_file = level_file
+        self._rectangles = []
+        self._camera = Camera(view_rect)
+        
+    def update(self, events):
+        
+        
+
+    def _move_camera(self, change_x, change_y):
+        
