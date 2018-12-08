@@ -15,7 +15,7 @@ def return_screen():
 class TestGame(unittest.TestCase):
 
     def __init__(self):
-
+        pass
            
     
     def test_button(self):
