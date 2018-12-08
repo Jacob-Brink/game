@@ -3,7 +3,6 @@ import math
 from enum import Enum
 
 
-
 class Switch(Enum):
     '''Models a button or key and different states'''
     down = 1

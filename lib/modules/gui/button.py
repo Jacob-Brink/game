@@ -1,5 +1,6 @@
 import pygame
 
+from lib.modules.gui.events import Switch
 from lib.modules.gui.text import Text
 
 class Button:
@@ -10,6 +11,7 @@ class Button:
         over the button, and one for when the mouse does not hover over the button.
         '''
 
+        self._clicked = False
         self._callback = callback
 
         self._HOVER_SURFACE = hover_text_surface
@@ -17,37 +19,34 @@ class Button:
 
         self._rect = self._NORMAL_SURFACE.get_rect()
 
-        self._text_surface = self._NORMAL_SURFACE
-        
+        self._shown_surface = self._NORMAL_SURFACE
 
-    def _draw_button(self):
-        '''
-        Private function which draws the button.
-        '''
-    
-        self._text_surface.render()
+    def return_surface(self):
+        return self._shown_surface
 
-        
+    def return_callback(self):
+        return self._callback
+
+    def is_clicked(self):
+        return self._clicked
+
     def update(self, event):
         '''
-        Update function updates the Button with mouse events. If the mouse hovers, the displayed text 
+        Update function updates the Button with mouse events. If the mouse hovers, the displayed text
         surface is assigned the hover surface. If not, the displayed text will be the normal surface
         '''
-
+        self._clicked = False
         # if mouse hovers over button
         if self._rect.collidepoint(event.mouse().get_position()):
 
-            self._text_surface = self._HOVER_SURFACE
-            
-            # if mouse is clicked call callback
-            if event.mouse().left_button():
+            self._shown_surface = self._HOVER_SURFACE
 
-                self._callback()
+            # if mouse is clicked call callback
+            if event.mouse().left_button() == Switch.pushed_up:
+
+                self._clicked = True
 
         # if mouse does not hover over button
         else:
 
-            self._text_surface = self._NORMAL_SURFACE
-
-
-        self._draw_button()
+            self._shown_surface = self._NORMAL_SURFACE

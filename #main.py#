@@ -31,11 +31,16 @@ def main():
 
     while running:
         # measure change in time for each frame
-        delta_time = pygame.time.Clock().tick(120)
+        delta_time = pygame.time.get_ticks() - time_start
+        time_start = pygame.time.get_ticks()
 
-        if delta_time <= 0:
-            print(delta_time)
-            delta_time =.0000001
+
+        delay = delta_time - 1000/FPS_CAP
+        if delay < 0:
+            pygame.time.delay(0)
+        else:
+            pygame.time.delay(delay)
+
         
         # calls update which gets all events from pygame.events.get() and updates all values
         e.update(delta_time)
@@ -54,6 +59,10 @@ def main():
         pygame.display.flip()
         screen.fill((0, 0, 0))
 
+        
+
 
 if __name__ == '__main__':
+
+
     main()

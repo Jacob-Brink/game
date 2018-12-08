@@ -1,50 +1,29 @@
+from lib.modules.gui.camera import Camera
+
+class View(Camera):
+    def __init__(self, screen, view_rect):
+        '''Constructs a view object with given id and view_class. View class must have update function and a switch return that returns next id of view.'''
+        super().__init__(view_rect)
+        self._screen = screen
+
+    def return_screen_dimensions(self):
+        '''Returns screen dimensions of width and height in tuple type'''
+        return self._screen.get_width(),self._screen.get_height()
+
+    def camera(self):
+        '''returns camera used for placing objects in screen based on absolute positions'''
+        return super()
+
+    def render(self, screen, *surfaces):
+        '''Given a screen and surfaces, render the surfaces'''
+        self._screen = screen
+        for surface in surfaces:
+            self._screen.blit(surface[0], surface[1])
 
 
-class View:
-    def __init__(self):
-        '''
-        Constructs a view object with given id and view_class. View class must have update function and a switch return that returns next id of view.
-        '''
 
-        self._visible = False
-        self._next_view_id = 0
-        self._switch_view = False
 
-    def get_visibility(self):
 
-        return self._visible
-        
-    def set_visibility(self, visible_bool):
-        '''
-        Sets visibility to given visibility value. Used when inheriting object such as a menu has a button pressed 
-        for another view to be opened, such as the Game view.
-        '''
-        
-        self._visible = visible_bool
-
-       
-    def switch(self, ID):
-        '''
-        Called by view when a new view must be shown. E.g. A menu inheriting view will call switch when the editor is selected.
-        '''
-        print(ID)
-        self._switch_view = True
-        self._next_view_id = ID
-        self._visible = False
-        print(self._next_view_id)
-        
-    def get_new_view(self):
-        '''
-        If the view switches to another view, this function returns new view id.
-        If the current view does not change, this function returns 0
-        '''
-
-        print(self._next_view_id)
-        return self._next_view_id
-        
-
-        
-        
 if __name__ == '__main__':
 
     from menu import Menu

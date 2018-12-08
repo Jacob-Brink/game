@@ -21,18 +21,11 @@ def init():
 
     return screen
 
-# Cursor enum
 class Cursor(Enum):
     platform = 1
     start = 2
     coin = 3
-    eraser = 4
 
-# dictionary of width and height for cursor items
-ITEM_DIMENSIONS = {
-    Cursor.start: (40, 40),
-    Cursor.coin: (20, 20)
-}
         
     
 class Editor(Menu):
@@ -41,7 +34,7 @@ class Editor(Menu):
         '''Constructs an editor object derived from base class View. The editor object allows for easy creation of new levels.'''
 
         # construct view object that will handle all rendering and blitting stuff
-        super().__init__(screen, 'right', 'Editor', ('Save', self.save_level_callback()), ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback))
+        super().__init__(screen, 'right', 'Editor', ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback))
 
         self._cursor = Cursor.platform
         
@@ -50,18 +43,10 @@ class Editor(Menu):
 
         self._camera = Camera(pygame.Rect((0,0), super().return_screen_dimensions()))
 
-        # coin
-        self._coins = []
-
-        # start
-        self._start = None
-        
-        # platforms
         self._first_click = False
         self.first_pos = None
         self.second_pos = None
-        self._unfinished_rect = None
-        
+
         self.read_level()
 
     
@@ -72,10 +57,10 @@ class Editor(Menu):
         return callback
         
     def write_level(self):
-        '''Write to level all platforms and items'''
-        with open(self._level, 'w') as level_file:
-            for platform in self._platforms:
-                level_file.write(str(platform.x)+ ' ' + str(platform.y) + ' ' + str(platform.w) + ' ' + str(platform.h) + '\n')
+        '''Write to level every time a new rectangle is made'''
+        with open(self._level, 'a') as level_file:
+            print('writing new rectangle...')
+            level_file.write(str(self._platforms[-1].x)+ ' ' + str(self._platforms[-1].y) + ' ' + str(self._platforms[-1].w) + ' ' + str(self._platforms[-1].h) + '\n')
 
     def read_level(self):
         '''Load level platforms into level editor'''
@@ -112,86 +97,112 @@ class Editor(Menu):
         height = second_pos[1] - first_pos[1]
         return pygame.Rect(first_pos[0], first_pos[1], width, height)
 
-    def draw_platform(self, current_click, mouse_position):
-        '''Draws platform with mouse clicks'''
-        # Start drawing rectangle
+
+    def draw_platform(self, current_click):
+        '''draws platform'''
+        
+        # first click event
         if current_click == Switch.pushed_down and not self._first_click:
 
             self._first_click = True
 
             # get true first position
-            self.first_pos = self._camera.return_true_position(mouse_position)
+            self.first_pos = self._camera.return_true_position(events.mouse().get_position())
 
 
-        # Continue drawing rectangle
+        # dragging event
         if current_click == Switch.down and self._first_click:
 
-            # get true second position
-            self.second_pos = self._camera.return_true_position(mouse_position)
+            self.second_pos = self._camera.return_true_position(events.mouse().get_position())
 
-            self._unfinished_rect = pygame.Rect(self._return_rect(self.first_pos, self.second_pos))
-            
+            self._unfinished_rect = 
+            pygame.draw.rect(self._screen, (0, 255,0), self._camera.return_disp_rect(self._return_rect( self.first_pos, self.second_pos )
+        # first click event
+        if current_click == Switch.pushed_down and not self._first_click:
 
-        # End drawing of rectangle on second click event
+            self._first_click = True
+
+            # get true first position
+            self.first_pos = self._camera.return_true_position(events.mouse().get_position())
+
+
+        # dragging event
+        if current_click == Switch.down and self._first_click:
+
+            self.second_pos = self._camera.return_true_position(events.mouse().get_position())
+
+            pygame.draw.rect(self._screen, (0, 255,0), self._camera.return_disp_rect(self._return_rect( self.first_pos, self.second_pos )))
+
+
+        # second click event
         if self._first_click == True and current_click == Switch.pushed_up:
 
             # reset first click so new rectangle can be created
             self._first_click = False
 
             # get true second position
-            self.second_pos = self._camera.return_true_position(mouse_position)
+            self.second_pos = self._camera.return_true_position(events.mouse().get_position())
 
             # return rectangles with from two true positions
             self._platforms.append(self._return_rect(self.first_pos, self.second_pos))
 
-            # remove temp rectangle
-            self._unfinished_rect = None
+            self.write_level())
 
 
-    def save_level_callback(self):
-        '''Saves level, given to button'''
-        def callback(*args):
-            self.write_level()
-        return callback
-        
-    def _collides_platform(self, rect):
-        '''Checks for collisions, returns boolean value'''
-        for rectangle in self._platforms:
-            if rectangle.colliderect(rect):
-                return True
-        return False
-            
-    def place_item(self, current_click, mouse_pos):
-        '''Places an item only if the user places it where it does not overlap with another rectangle'''
-        item_rect = pygame.Rect(self._camera.return_true_position(mouse_pos), ITEM_DIMENSIONS[self._cursor])
+        # second click event
+        if self._first_click == True and current_click == Switch.pushed_up:
 
-        if not self._collides_platform(item_rect):
-            if current_click == Switch.pushed_up:
-                if self._cursor == Cursor.coin:
-                    self._coins.append((item_rect.x, item_rect.y))
-                if self._cursor == Cursor.start:
-                    self._start = item_rect
-        print(self._coins)
-                
+            # reset first click so new rectangle can be created
+            self._first_click = False
+
+            # get true second position
+            self.second_pos = self._camera.return_true_position(events.mouse().get_position())
+
+            # return rectangles with from two true positions
+            self._platforms.append(self._return_rect(self.first_pos, self.second_pos))
+
+            self.write_level(
+    def place_item(self):
+        '''places item if no collision detected'''
     
     def update(self, events, screen):
         '''Use mouse to drag and make rectangle platforms'''
 
         current_click = events.mouse().left_button()
-        mouse_pos = events.mouse().get_position()
-        
+
         if self._cursor == Cursor.platform:
-            self.draw_platform(current_click, events.mouse().get_position())
-        elif self._cursor == Cursor.coin or self._cursor == Cursor.start:
-            self.place_item(current_click, mouse_pos)
-        elif self._cursor == Cursor.eraser:
-            self.erase(current_click, mouse_pos)
-        
+            self.draw_platform()
+        if self._cursor == Cursor.start:
+            self.place_item()
+        if self._cursor == Cursor.coin:
+            self.place_item()
+        )
+
         for rectangle in self._platforms:
             pygame.draw.rect(self._screen, (0, 100, 0), (self._camera.return_display_position((rectangle.x, rectangle.y)), (rectangle.width, rectangle.height)))
 
-        if not self._unfinished_rect == None:
-            pygame.draw.rect(self._screen, (0, 255,0), (self._camera.return_display_position((self._unfinished_rect.x, self._unfinished_rect.y)), (self._unfinished_rect.width, self._unfinished_rect.height)))
+        super().update(events, screen)
+        self.move_camera(events)
+
+if __name__ == '__main__':
+
+    screen = init()
+    editor = Editor('level', screen)
+    event_handler = Event()
+
+    running = True
+
+    while running:
+        screen.fill((0,0,0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        event_handler.update(pygame.key.get_pressed(), pygame.mouse.get_pressed(), pygame.mouse.get_pos())
+        pygame.time.Clock().tick(60)
+        editor.update(event_handler)
+        pygame.display.flip()
+(self._unfinished_rect.width, self._unfinished_rect.height)))
             
         super().update(events, screen)
         self.move_camera(events)

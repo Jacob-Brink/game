@@ -69,9 +69,6 @@ class RigidBody:
         '''Returns rectangle of type pygame.Rect'''
         return self._rect
 
-    def return_mass(self):
-        '''Returns mass'''
-        return self._mass
 
 if __name__ == '__main__':
     '''

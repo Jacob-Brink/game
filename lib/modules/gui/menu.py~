@@ -85,6 +85,9 @@ class Menu(View):
 
 
 
+
+
+
 def init():
     pygame.init()
     screen = pygame.display.set_mode((640,480))
@@ -92,6 +95,9 @@ def init():
     pygame.display.flip()
 
     return screen
+
+
+
 
 
 if __name__ == '__main__':
