@@ -51,11 +51,11 @@ class Handler:
 
         
         # Create start menu, with buttons, with callbacks for initiating new views with more buttons and callbacks so on and so forth...
-        start_menu = Menu(self._screen, 'middle', 'Start Menu',
-            ('Play', self.switch_view_callback(Menu, self._screen, 'middle', 'GAME: CHOOSE YOUR LEVEL', *[(level_file, self.switch_view_callback(Game, self._screen, 'lib/data/levels/' + level_file, self.go_back, False)) for level_file in os.listdir('lib/data/levels')], ('Exit', self.go_back))),
-            ('Debug Play', self.switch_view_callback(Menu, self._screen, 'middle', 'GAME: CHOOSE YOUR LEVEL', *[(level_file, self.switch_view_callback(Game, self._screen, 'lib/data/levels/' + level_file, self.go_back, True)) for level_file in os.listdir('lib/data/levels')], ('Exit', self.go_back))),
-            ('Editor', self.switch_view_callback(Menu, self._screen, 'middle', 'EDITOR: CHOOSE LEVEL TO EDIT', *[(level_file, self.switch_view_callback(Editor, self._screen, 'lib/data/levels/' + level_file, self.go_back)) for level_file in os.listdir('lib/data/levels')], ('Exit', self.go_back))),
-            ('Exit', self.go_back))
+        start_menu = Menu(self._screen, 'middle', 'Start Menu', [
+            ('Play', self.switch_view_callback(Menu, self._screen, 'middle', 'GAME: CHOOSE YOUR LEVEL', [(level_file, self.switch_view_callback(Game, self._screen, 'lib/data/levels/' + level_file, self.go_back, False)) for level_file in os.listdir('lib/data/levels')] + [('Exit', self.go_back)])),
+            ('Debug Play', self.switch_view_callback(Menu, self._screen, 'middle', 'GAME: CHOOSE YOUR LEVEL', [(level_file, self.switch_view_callback(Game, self._screen, 'lib/data/levels/' + level_file, self.go_back, True)) for level_file in os.listdir('lib/data/levels')] + [('Exit', self.go_back)])),
+            ('Editor', self.switch_view_callback(Menu, self._screen, 'middle', 'EDITOR: CHOOSE LEVEL TO EDIT', [(level_file, self.switch_view_callback(Editor, self._screen, 'lib/data/levels/' + level_file, self.go_back)) for level_file in os.listdir('lib/data/levels')] + [('Exit', self.go_back)])),
+            ('Exit', self.go_back)])
         # set start menu as the current_view
         self._current_view = start_menu
 

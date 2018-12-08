@@ -16,14 +16,14 @@ acceptable_positions = ['left', 'right', 'middle']
 
 class Menu(View):
 
-    def __init__(self, screen, position, title, *buttons):
+    def __init__(self, screen, position, title, buttons):
         '''Constructor constructs Menu object, which will setup the font, title, and all variables required for a menu with buttons'''
 
         # Initialize View parent
         super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
         
         #save parameters for sending to next View so it can go back
-        self._parameters = screen, position, title, *buttons
+        self._parameters = screen, position, title, buttons
 
         # checks if position parameter holds appropriate value
         if (not isinstance(position, str)) or (position not in acceptable_positions):

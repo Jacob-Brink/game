@@ -42,7 +42,7 @@ class Editor(View):
 
         # construct view object that will handle all rendering and blitting stuff
         super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
-        self._menu = Menu(screen, 'right', 'Editor', ('Save', self.save_level_callback()), ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback))
+        self._menu = Menu(screen, 'right', 'Editor', [('Save', self.save_level_callback()), ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback)])
 
         self._cursor = Cursor.platform
         

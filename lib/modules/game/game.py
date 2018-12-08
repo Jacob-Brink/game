@@ -12,7 +12,7 @@ class Game(View):
     def __init__(self, screen, level, go_back, debug_mode):
         '''View that holds game entities, deals with collision, and handles the entire game!!!'''
         super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
-        self._menu = Menu(screen, 'right', 'THE BEST GAME EVER!!!', ('Quit', go_back))
+        self._menu = Menu(screen, 'right', 'THE BEST GAME EVER!!!', [('Quit', go_back)])
         self._player1 = Player(0)
         self._player2 = Player(1)
         self._debug = debug_mode
