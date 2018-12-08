@@ -11,53 +11,73 @@ class Game(View):
 
     def __init__(self, screen, level, go_back, debug_mode):
         '''View that holds game entities, deals with collision, and handles the entire game!!!'''
-        super().__init__(screen, pygame.Rect((0,0), (screen.get_size())))
+        super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
         self._menu = Menu(screen, 'right', 'THE BEST GAME EVER!!!', ('Quit', go_back))
-        self._player = Player()
+        self._player1 = Player(0)
+        self._player2 = Player(1)
         self._debug = debug_mode
+        self._go_back = go_back
 
-        self._paused = False
-
-        self._physics = Physics()
+        self._physics = Physics(debug_mode)
         self._level = level
         self._platforms = []
         self._load_level()
+        super().zoom(2)
+        
+        # Add way for more players and rigid body stuff
+        self._player_list = [self._player1, self._player2]
+        
+        self._rigid_body_list = []
+        self._surface_pos_list = [self._player1.return_surface_and_pos(), self._player2.return_surface_and_pos()]
 
+        self._num = 0
+        
     def _load_level(self):
         '''Loads level platforms into game'''
         with open(self._level, 'r') as level_file:
             [self._platforms.append(pygame.Rect([int(string_integer) for string_integer in line.strip().split()])) for line in level_file]
 
-    def update(self, events, screen):
-        '''Updates all game objects boi'''
+    def update(self, events):
+        '''Updates all game objects'''
 
-        # physics engine repositions player according to placement and other factors
-        self._physics.reposition(self._player, self._platforms, events.delta_time())
+        screen = events.screen()
+
+        if events.was_resized():
+            super().update_screen_size(screen.get_size())
         
-        # Pause Game if escape is pressed
-        if events.keyboard().is_pressed(pygame.K_ESCAPE) == Switch.pushed_down:
-            self._paused = not self._paused
+        if events.keyboard().is_pressed(pygame.K_RETURN) == Switch.down:
+            self._num += .01
+            super().zoom(1+self._num)
 
-
-        # Handle Game Events
-        if not self._paused:
-            self._player.update(events)
-        else:
-            self._menu.update(events, screen)
+        
+        #super().track(self._player1.return_true_rect(), self._player2.return_true_rect(), events.delta_time())
             
-        # if debug mode is on, then show velocity vectors, force vectors, and coordinate position
-        if self._debug:
-            x = self._player.return_rect().centerx
-            y = self._player.return_rect().centery
-            pygame.draw.aaline(screen, (255,0,0), (x, y), (self._player.return_velocity_vector().return_x_component()*1000 + x, self._player.return_velocity_vector().return_y_component()*1000 + y))
-            coordinate_text = Text('X: ' + str(x) + ' Y: ' + str(y), 64, (200, 0, 200), (x-100, y+100))
-            fps_text = Text('FPS: ' + str(events.fps()), 32, (0, 100, 200), (10, 40))
-            velocity_text = Text('Velocity: ' + str(round(self._player.return_velocity_vector().return_magnitude()))+' Direction:' + str(round(self._player.return_velocity_vector().return_direction())), 32, (255,255,255), (200,40))
-            super().render(screen, self._player.return_surface_and_pos(), fps_text.get_surface_and_pos(), coordinate_text.get_surface_and_pos(), velocity_text.get_surface_and_pos())
-        else:
-            # Do physics stuff
-            super().render(screen, self._player.return_surface_and_pos())
+        # update menu
+        self._menu.update(events)
 
+        # physics sim
+        self._physics.update(events, self._player_list, self._rigid_body_list, self._platforms)
+        
+        # render appropriate rigid_bodies
+        for rigid_body in self._rigid_body_list:
+            # if surface is visible, render it
+            if super().is_visible(rigid_body.return_true_rect()):
+                super().render(screen, rigid_body.return_surface_and_pos())
 
+        # render appropriate players
+        for player in self._player_list:
+            super().render(screen, player.return_surface_and_pos())
+            if self._debug:
+                super().render_line(player.return_velocity_vector()*100)
+                
+        # render platforms
         for platform in self._platforms:
-            pygame.draw.rect(screen, (0, 255,0), super().camera().return_disp_rect(platform))
+            # if rectangle is visible, render it
+            if super().is_visible(platform):
+                super().render_rectangle(platform)
+        
+        
+        # Quit Game if escape is pressed
+        if events.keyboard().is_pressed(pygame.K_ESCAPE) == Switch.pushed_down:
+            self._go_back()
+

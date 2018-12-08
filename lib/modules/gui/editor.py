@@ -35,20 +35,19 @@ ITEM_DIMENSIONS = {
 }
         
     
-class Editor(Menu):
+class Editor(View):
 
     def __init__(self, screen, level, quit_callback):
         '''Constructs an editor object derived from base class View. The editor object allows for easy creation of new levels.'''
 
         # construct view object that will handle all rendering and blitting stuff
-        super().__init__(screen, 'right', 'Editor', ('Save', self.save_level_callback()), ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback))
+        super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
+        self._menu = Menu(screen, 'right', 'Editor', ('Save', self.save_level_callback()), ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback))
 
         self._cursor = Cursor.platform
         
         self._platforms = []
         self._level = level
-
-        self._camera = Camera(pygame.Rect((0,0), super().return_screen_dimensions()))
 
         # coin
         self._coins = []
@@ -103,7 +102,7 @@ class Editor(Menu):
         if keys_pressed.is_pressed(pygame.K_s) == Switch.down:
             delta_y += change
 
-        self._camera.move(delta_x*events.delta_time(), delta_y*events.delta_time())
+        super().move(change_x=delta_x, change_y=delta_y)
 
     def _return_rect(self, first_pos, second_pos):
         '''Transforms two mouse position points into rectangle.'''
@@ -118,16 +117,14 @@ class Editor(Menu):
         if current_click == Switch.pushed_down and not self._first_click:
 
             self._first_click = True
-
             # get true first position
-            self.first_pos = self._camera.return_true_position(mouse_position)
-
+            self.first_pos = super().return_true_position(mouse_position)
 
         # Continue drawing rectangle
         if current_click == Switch.down and self._first_click:
 
             # get true second position
-            self.second_pos = self._camera.return_true_position(mouse_position)
+            self.second_pos = super().return_true_position(mouse_position)
 
             self._unfinished_rect = pygame.Rect(self._return_rect(self.first_pos, self.second_pos))
             
@@ -139,7 +136,7 @@ class Editor(Menu):
             self._first_click = False
 
             # get true second position
-            self.second_pos = self._camera.return_true_position(mouse_position)
+            self.second_pos = super().return_true_position(mouse_position)
 
             # return rectangles with from two true positions
             self._platforms.append(self._return_rect(self.first_pos, self.second_pos))
@@ -163,7 +160,7 @@ class Editor(Menu):
             
     def place_item(self, current_click, mouse_pos):
         '''Places an item only if the user places it where it does not overlap with another rectangle'''
-        item_rect = pygame.Rect(self._camera.return_true_position(mouse_pos), ITEM_DIMENSIONS[self._cursor])
+        item_rect = pygame.Rect(super().return_true_position(mouse_pos), ITEM_DIMENSIONS[self._cursor])
 
         if not self._collides_platform(item_rect):
             if current_click == Switch.pushed_up:
@@ -174,27 +171,31 @@ class Editor(Menu):
         print(self._coins)
                 
     
-    def update(self, events, screen):
+    def update(self, events):
         '''Use mouse to drag and make rectangle platforms'''
 
+        screen = events.screen()
+
+        
         current_click = events.mouse().left_button()
         mouse_pos = events.mouse().get_position()
         
         if self._cursor == Cursor.platform:
-            self.draw_platform(current_click, events.mouse().get_position())
+            self.draw_platform(current_click, mouse_pos)
         elif self._cursor == Cursor.coin or self._cursor == Cursor.start:
             self.place_item(current_click, mouse_pos)
         elif self._cursor == Cursor.eraser:
             self.erase(current_click, mouse_pos)
         
         for rectangle in self._platforms:
-            pygame.draw.rect(self._screen, (0, 100, 0), (self._camera.return_display_position((rectangle.x, rectangle.y)), (rectangle.width, rectangle.height)))
+            super().render_rectangle(rectangle, color=(200,0,100))
 
         if not self._unfinished_rect == None:
-            pygame.draw.rect(self._screen, (0, 255,0), (self._camera.return_display_position((self._unfinished_rect.x, self._unfinished_rect.y)), (self._unfinished_rect.width, self._unfinished_rect.height)))
-            
-        super().update(events, screen)
+            super().render_rectangle(self._unfinished_rect, color=(100, 100, 100))
+
         self.move_camera(events)
+        self._menu.update(events)
+    
 
 if __name__ == '__main__':
 

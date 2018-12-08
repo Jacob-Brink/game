@@ -29,7 +29,7 @@ def main():
     handler = Handler(screen)
     time_start = pygame.time.get_ticks()
 
-    while running:
+    while handler.is_running() and running:
         # measure change in time for each frame
         delta_time = pygame.time.Clock().tick(120)
 
@@ -48,7 +48,7 @@ def main():
         screen = e.screen()
 
         # update handler for all views
-        handler.update(e, screen)
+        handler.update(e)
 
         # flip display and clear it
         pygame.display.flip()

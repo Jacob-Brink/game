@@ -1,24 +1,35 @@
 from lib.modules.gui.camera import Camera
+import pygame
 
 class View(Camera):
     def __init__(self, screen, view_rect):
         '''Constructs a view object with given id and view_class. View class must have update function and a switch return that returns next id of view.'''
-        super().__init__(view_rect)
+        super().__init__(screen, view_rect)
         self._screen = screen
-
+        
     def return_screen_dimensions(self):
         '''Returns screen dimensions of width and height in tuple type'''
         return self._screen.get_width(),self._screen.get_height()
 
-    def camera(self):
-        '''returns camera used for placing objects in screen based on absolute positions'''
-        return super()
-
-    def render(self, screen, *surfaces):
+    def render_rectangle(self, rect, **keywords):
+        '''Given rect with absolute coordinates, draw rectangle'''
+        try:
+            pygame.draw.rect(self._screen, keywords['color'], super().return_disp_rect(rect))
+        except:
+            pygame.draw.rect(self._screen, (255,0,0), super().return_disp_rect(rect))
+            
+    def render_line(self, vector):
+        '''Renders a vector with absolute position as a line'''
+        pygame.draw.line(self._screen, (200, 100, 240), vector.return_start_position(), vector.return_end_position())
+        
+    def render(self, screen, *surface_pos):
         '''Given a screen and surfaces, render the surfaces'''
         self._screen = screen
-        for surface in surfaces:
-            self._screen.blit(surface[0], surface[1])
+
+        # renders surface pos types
+        for surface in surface_pos:
+            self._screen.blit(self.return_display_surface(surface[0]), self.return_display_position(surface[1]))
+
 
 
 

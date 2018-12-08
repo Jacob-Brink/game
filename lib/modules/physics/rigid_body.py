@@ -1,29 +1,35 @@
 #Handle different import methods for testing and gaming
 if __name__ == '__main__':
-
+    from physics import Collision
     from vector import Vector
 
 else:
 
     from lib.modules.physics.vector import Vector
-
+    from lib.modules.physics.physics import Collision
 
 import pygame
 import math
 
-class RigidBody:
+class RigidBody(Collision):
 
     def __init__(self, rect, mass):
         '''Constructs a new RigidBody object with given pygame.Rect rectangle and integer mass'''
+        super().__init__()
+        
         self._rect = rect
         self._past_rect = self._rect
-        
-        self._velocity = Vector(0.0, 0.0)
+        self._center_tuple = self._rect.centerx, self._rect.centery
+        self._velocity = Vector(self._center_tuple, direction=0, magnitude=0)
         self._past_velocity = self._velocity
         self._mass = mass
-        self._acceleration = Vector(0.0, 0.0)
+        self._acceleration = Vector(self._center_tuple, direction=0, magnitude=0)
         self._forces = []
 
+    def collides_with(self, other):
+        '''Returns boolean value of colliding with other object or not'''
+        return super().rect_rect(self._rect, other)
+        
     def apply_force(self, force_vector):
         '''Applies an instantaneous force to the RigidBody object. Multiple forces can be applied over a game loop cycle, but forces will disappear after the cycle.'''
         self._forces.append(force_vector)
@@ -46,15 +52,16 @@ class RigidBody:
     def update(self):
         '''Updates RigidBody object to translate force into acceleration and acceleration into new velocity.
         To be called after physics repositioning'''
-        self._acceleration = Vector(0,0)
+        self._acceleration = Vector((self._rect.centerx, self._rect.centery), direction=0, magnitude=0)
 
         for force in self._forces:
-            self._acceleration = self._acceleration + force * (1/self._mass)
+            self._acceleration += force * (1/self._mass)
 
         # velocity and past velocity are set
         self._past_velocity = self._velocity    
-        self._velocity += self._acceleration
+        self._velocity = self._acceleration + self._velocity
 
+        
         # set past and present rectangle values
         self._past_rect = self._rect
         self._rect = self._rect.move(self._velocity.return_x_component(), self._velocity.return_y_component())

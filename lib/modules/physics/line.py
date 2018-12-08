@@ -25,6 +25,8 @@ class Line:
         else:
             raise ValueError('Line->Constructor: ranges should be integer or float values')
 
+    
+        
     def isnumber(self, value):
         '''Returns boolean state of value being integer or float'''
         return type(value) == int or type(value) == float

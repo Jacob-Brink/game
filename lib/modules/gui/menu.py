@@ -74,8 +74,10 @@ class Menu(View):
         self._buttons.append(Button(normal_surface, hover_surface, callback))
 
 
-    def update(self, event, screen):
+    def update(self, event):
         '''Will update the menu with realtime events, such as the mouse events. It also updates the buttons in the menu'''
+        screen = event.screen()
+        
         for button in self._buttons:
             button.update(event)
             if button.is_clicked():

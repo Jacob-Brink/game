@@ -46,13 +46,17 @@ class Keyboard:
         # keys is a file containing a list of all possible key values
         # This makes it alot easier to have all keys supported without manually typing them out :)
         self._keys = {}
-        with open('keys') as keys_file:
+        with open('lib/data/keys') as keys_file:
             for line in keys_file:
                 exec('p = pygame.'+line.strip(), locals(), globals())
                 global p
                 self._keys[p] = Switch.up
         # create keys dictionary
 
+    def down(self, key_key):
+        '''Return boolean value of whether or not a key is held down or not'''
+        return self._keys[key_key] == Switch.down or self._keys[key_key] == Switch.pushed_down
+        
     def is_pressed(self, key_key):
         '''Returns boolean state of given key'''
         return self._keys[key_key]
@@ -75,9 +79,13 @@ class Event:
         self._window_exit = False
         self._screen = screen
 
+        self._resized = False
+        
     def update(self, delta_time):
         '''Takes events and organizes them'''
 
+        self._resized = False
+        
         # set keys to up or down first, then later check if event is up or down
         keys_pressed = pygame.key.get_pressed()
         for element in range(0, len(keys_pressed)):
@@ -95,14 +103,15 @@ class Event:
                 self._window_exit = True
 
             elif event.type == pygame.VIDEORESIZE:
+                self._resized = True
                 self._screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
 
             # handle keyboard and wrap in keyboard object
-            # handle keyboard down events
+            # handle keyboard pushed down events
             if event.type == pygame.KEYDOWN:
                 self._keyboard.set_key(event.key, Switch.pushed_down)
 
-            # handle keyboard up events
+            # handle keyboard pushed up events
             if event.type == pygame.KEYUP:
                 self._keyboard.set_key(event.key, Switch.pushed_up)
 
@@ -146,20 +155,31 @@ class Event:
             self._fps = '99999'
         else:
             self._fps = int(1/self._delta_time*1000)
+
+    def was_resized(self):
+        '''Returns boolean value of whether or not the screen was resized'''
+        return self._resized
+        
     def screen(self):
+        '''Returns screen'''
         return self._screen
 
     def quit(self):
+        '''Returns boolean state of quitting'''
         return self._window_exit
 
     def fps(self):
+        '''Returns the fps'''
         return self._fps
 
     def delta_time(self):
+        '''Returns change of time between frames'''
         return self._delta_time
 
     def mouse(self):
+        '''Returns mouse object'''
         return self._mouse
 
     def keyboard(self):
+        '''Returns keyboard object'''
         return self._keyboard

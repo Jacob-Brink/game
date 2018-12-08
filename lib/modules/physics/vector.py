@@ -30,8 +30,12 @@ class Vector:
             return 'infinite'
         return self.return_y_component() / self.return_x_component()
 
-    def return_position(self):
-        '''Returns given position'''
+    def return_end_position(self):
+        '''Returns end position'''
+        return (self._position_tuple[0]+self._x_component, self._position_tuple[1]+self._y_component)
+                
+    def return_start_position(self):
+        '''Returns start position'''
         return self._position_tuple
     
     def return_x_component(self):
@@ -54,30 +58,30 @@ class Vector:
         '''Returns unit vector'''
         return Vector(self._position_tuple, self._x_component / self._magnitude, self._y_component / self._magnitude)
 
+    def project_on(self, axis_vector):
+        '''Return vector projected on given vector'''
+        return Vector(axis_vector.return_start_position(), direction=axis_vector.return_direction(), magnitude=(self._x_component*axis_vector.return_x_component()+ self._y_component*axis_vector.return_y_component())/axis_vector.return_magnitude())
+    
     def dot_product(self, axis_vector):
         '''Returns vector projected on axis_vector'''
-        return Vector(axis_vector.return_position(), direction=axis_vector.return_direction(), magnitude=(self._x_component*axis_vector.return_x_component()+ self._y_component*axis_vector.return_y_component()))
+        return Vector(axis_vector.return_start_position(), direction=axis_vector.return_direction(), magnitude=(self._x_component*axis_vector.return_x_component()+ self._y_component*axis_vector.return_y_component()))
     
     def __str__(self):
         '''Pretty print enabled for class'''
-        return 'Direction: ' + str(self.return_direction()) + ', Magnitude: ' + str(self.return_magnitude())
+        return 'Direction: ' + str(self.return_direction()) + ', Magnitude: ' + str(self.return_magnitude()) + '<' + str(self.return_x_component()) + ',' + str(self.return_y_component())+'>'
 
     def __mul__(self, other):
         '''Allows for scalar and vector multiplication'''
-
         if isinstance(other, int) or isinstance(other, float):
-            return Vector(self.return_direction(), other * self.return_magnitude())
-        
-        if isinstance(other, Vector):
-            pass
-
+            return Vector(self._position_tuple, direction=self.return_direction(), magnitude=other * self.return_magnitude())
+    
     def __add__(self, other):
         '''Addition overloading of vectors when both terms are vectors'''
 
-        x_component = self.return_x_component() + other.return_x_component()
-        y_component = self.return_y_component() + other.return_y_component()
+        x = self.return_x_component() + other.return_x_component()
+        y = self.return_y_component() + other.return_y_component()
 
-        return Vector( self._position_tuple, direction=math.atan2(y_component, x_component), magnitude=math.sqrt((x_component)**2 + (y_component)**2) )
+        return Vector( self._position_tuple, x_component=x, y_component=y)
 
 
 if __name__ == '__main__':
@@ -126,5 +130,6 @@ if __name__ == '__main__':
 
     projected_vector = vector.dot_product(axis_vector)
     assert projected_vector.return_x_component() == 16*(math.cos(math.radians(45))*25) + 0*(math.sin(math.radians(45))*25)
-    
+
+
     print('Vector Tests passed')
