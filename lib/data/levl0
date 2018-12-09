@@ -1,0 +1,13 @@
+diff --git a/lib/data/levels/level0 b/lib/data/levels/level0
+index cdf8312..e6f1cd1 100644
+--- a/lib/data/levels/level0
++++ b/lib/data/levels/level0
+@@ -1,7 +1,7 @@
+ 467 448 67 23
+ 470 347 55 19
+ 321 439 9 18
+-273 445 17 27
++273 445 12 27
+ 169 421 8 26
+ 122 460 3 14
+ 539 64 0 0

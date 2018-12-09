@@ -2,9 +2,9 @@ from lib.modules.gui.camera import Camera
 import pygame
 
 class View(Camera):
-    def __init__(self, screen, view_rect):
+    def __init__(self, screen):
         '''Constructs a view object with given id and view_class. View class must have update function and a switch return that returns next id of view.'''
-        super().__init__(screen, view_rect)
+        super().__init__(screen, (0,0))
         self._screen = screen
         
     def return_screen_dimensions(self):
@@ -20,7 +20,7 @@ class View(Camera):
             
     def render_line(self, vector):
         '''Renders a vector with absolute position as a line'''
-        pygame.draw.line(self._screen, (200, 100, 240), vector.return_start_position(), vector.return_end_position())
+        pygame.draw.line(self._screen, (200, 100, 240), super().return_display_position(vector.return_start_position()), super().return_display_position(vector.return_end_position()))
         
     def render(self, screen, *surface_pos):
         '''Given a screen and surfaces, render the surfaces'''

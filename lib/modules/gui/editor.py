@@ -41,7 +41,7 @@ class Editor(View):
         '''Constructs an editor object derived from base class View. The editor object allows for easy creation of new levels.'''
 
         # construct view object that will handle all rendering and blitting stuff
-        super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
+        super().__init__(screen)
         self._menu = Menu(screen, 'right', 'Editor', [('Save', self.save_level_callback()), ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback)])
 
         self._cursor = Cursor.platform
@@ -109,7 +109,9 @@ class Editor(View):
 
         width = second_pos[0] - first_pos[0]
         height = second_pos[1] - first_pos[1]
-        return pygame.Rect(first_pos[0], first_pos[1], width, height)
+        rect = pygame.Rect(first_pos[0], first_pos[1], width, height)
+        rect.normalize()
+        return rect
 
     def draw_platform(self, current_click, mouse_position):
         '''Draws platform with mouse clicks'''
@@ -168,7 +170,6 @@ class Editor(View):
                     self._coins.append((item_rect.x, item_rect.y))
                 if self._cursor == Cursor.start:
                     self._start = item_rect
-        print(self._coins)
                 
     
     def update(self, events):

@@ -11,7 +11,7 @@ class Game(View):
 
     def __init__(self, screen, level, go_back, debug_mode):
         '''View that holds game entities, deals with collision, and handles the entire game!!!'''
-        super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
+        super().__init__(screen)
         self._menu = Menu(screen, 'right', 'THE BEST GAME EVER!!!', [('Quit', go_back)])
         self._player1 = Player(0)
         self._player2 = Player(1)
@@ -22,7 +22,6 @@ class Game(View):
         self._level = level
         self._platforms = []
         self._load_level()
-        super().zoom(2)
         
         # Add way for more players and rigid body stuff
         self._player_list = [self._player1, self._player2]
@@ -46,15 +45,14 @@ class Game(View):
             super().update_screen_size(screen.get_size())
         
         if events.keyboard().is_pressed(pygame.K_RETURN) == Switch.down:
-            self._num += .01
-            super().zoom(1+self._num)
-
-        
+            super().zoom(.5)
         #super().track(self._player1.return_true_rect(), self._player2.return_true_rect(), events.delta_time())
             
         # update menu
         self._menu.update(events)
 
+        super().track(self._player1.return_true_rect(), self._player2.return_true_rect(), events.delta_time())
+        
         # physics sim
         self._physics.update(events, self._player_list, self._rigid_body_list, self._platforms)
         
@@ -76,7 +74,9 @@ class Game(View):
             if super().is_visible(platform):
                 super().render_rectangle(platform)
         
-        
+
+        super().render_rectangle(pygame.Rect(super().return_camera_position(), (20,20)))
+                
         # Quit Game if escape is pressed
         if events.keyboard().is_pressed(pygame.K_ESCAPE) == Switch.pushed_down:
             self._go_back()

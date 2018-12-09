@@ -144,7 +144,6 @@ class Event:
                 
             if event.type == pygame.MOUSEMOTION:
                 self._mouse.set_position(event.pos)
-            #print(pygame.mouse.get_pos())
 
 
 

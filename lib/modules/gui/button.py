@@ -17,8 +17,6 @@ class Button:
         self._HOVER_SURFACE = hover_text_surface
         self._NORMAL_SURFACE = normal_text_surface
 
-        self._rect = self._NORMAL_SURFACE.get_rect()
-
         self._shown_surface = self._NORMAL_SURFACE
 
     def return_surface(self):
@@ -37,7 +35,7 @@ class Button:
         '''
         self._clicked = False
         # if mouse hovers over button
-        if self._rect.collidepoint(event.mouse().get_position()):
+        if self._NORMAL_SURFACE.get_rect(event.screen().get_size()[0]).collidepoint(event.mouse().get_position()):
 
             self._shown_surface = self._HOVER_SURFACE
 

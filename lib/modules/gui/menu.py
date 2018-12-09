@@ -20,7 +20,7 @@ class Menu(View):
         '''Constructor constructs Menu object, which will setup the font, title, and all variables required for a menu with buttons'''
 
         # Initialize View parent
-        super().__init__(screen, pygame.Rect((0,0), screen.get_size()))
+        super().__init__(screen)
         
         #save parameters for sending to next View so it can go back
         self._parameters = screen, position, title, buttons
@@ -35,10 +35,7 @@ class Menu(View):
 
             raise ValueError('Menu->Constructor: title parameter must be of type str')
 
-        #title surface creation
-        self._title_text = title
-        self._title_surface = Text(self._title_text, 32, (200, 100, 20), (screen.get_width()/2, 20))
-
+        
         #button setup
         self._position = position
         self._font_size = 32
@@ -47,6 +44,11 @@ class Menu(View):
 
         for button in buttons:
             self.add_button(button[0], button[1])
+
+        
+        #title surface creation
+        self._title_text = title
+        self._title_surface = Text(self._title_text, 32, (200, 100, 20), self._position, 20)
 
 
     def add_button(self, text, callback):
@@ -59,17 +61,8 @@ class Menu(View):
 
         text_length = pygame.font.SysFont(None, self._font_size).size(text)[0]
 
-        if self._position == 'left':
-            x = self._margin
-
-        elif self._position == 'middle':
-            x = (screen_width // 2) - (text_length // 2)
-
-        elif self._position == 'right':
-            x = screen_width - (self._margin + text_length)
-
-        hover_surface = Text(text, 32, (200, 200, 200), (x, y))
-        normal_surface = Text(text, 30, (100, 10, 40), (x, y))
+        hover_surface = Text(text, 32, (200, 200, 200), self._position, y)
+        normal_surface = Text(text, 30, (100, 10, 40), self._position, y)
 
         self._buttons.append(Button(normal_surface, hover_surface, callback))
 
@@ -83,7 +76,7 @@ class Menu(View):
             if button.is_clicked():
                 button.return_callback()(Menu, self._parameters)
 
-        super().render(screen, self._title_surface.get_surface_and_pos(), *[button.return_surface().get_surface_and_pos() for button in self._buttons])
+        super().render(screen, self._title_surface.get_surface_and_pos(screen.get_size()[0]), *[button.return_surface().get_surface_and_pos(screen.get_size()[0]) for button in self._buttons])
 
 
 

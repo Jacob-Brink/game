@@ -9,84 +9,101 @@ def vector_btw_points(point1, point2):
 
 def interpolate_smooth(start, end, delta_time):
     '''Given start and end position, try to return small steps of movement in a smooth fashion'''
-    #Make triangle graph of velocity
-    
     return Vector(start, x_component=(start[0]-end[0]), y_component=(start[1]-end[1]))
     #add velocity vector to self._view_rect
 
+def return_size(aspect_ratio, **kwrds):
+    '''Assumes aspect_ratio is height:width and returns size values given either value'''
+    if 'width' in kwrds:
+        return kwrds['width'], aspect_ratio * kwrds['width']
+    elif 'height' in kwrds:
+        return 1/aspect_ratio*kwrds['height'], krwds['height']
+    
 
 class Camera:
 
-    def __init__(self, screen, view_rect):
+    def __init__(self, screen, position):
         '''Constructor contructs new camera object determined by the provided viewing rectangle'''
-        self._screen_rect = pygame.Rect((0,0), screen.get_size())
-        self._screen_size = self._screen_rect.width, self._screen_rect.height
-        self._view_rect = view_rect
         self._zoom = 1
+        self._screen_rect = pygame.Rect((0, 0), screen.get_size())
+        self._view_position = position
+        self._screen_size = screen.get_size()
+        self._aspect_ratio = self._screen_size[1]/self._screen_size[0]
+        self._calculate_things()
 
-        self._start_interpolation = False
+    def return_camera_position(self):
+        return self._view_position
         
+    def _calculate_things(self):
+        '''Calculate things'''
+        view_width = self._screen_rect.width/self._zoom
+        view_height = self._screen_rect.height/self._zoom
+        view_position_delta = (view_width-self._screen_rect.width)/2, (view_height-self._screen_rect.height)/2
+        self._view_position_x = self._view_position[0]-view_position_delta[0]
+        self._view_position_y = self._view_position[1]-view_position_delta[1]
+        self._view_rect = pygame.Rect((self._view_position_x, self._view_position_y), (view_width, view_height))
+        print(self._view_rect)
+
     def zoom_values(self, *values):
         '''Given any width or height returns the displayed width and height with zoom'''
-        return [int((1/self._zoom)*v) for v in values]
+        return [int(self._zoom*v) for v in values]
 
     def unzoom_values(self, *values):
         '''Given any number of display widths and heights, returns true widths and heights'''
-        return [int((self._zoom)*v) for v in values]
-    
+        return [int(1/self._zoom*v) for v in values]
+
     def move(self, **kwords):
         '''Public method called to move camera to new location. Note that move does not provide any travel by itself and that the calling code must take this into account.'''
         if 'vector' in kwords:
-            self._view_rect = self._view_rect.move(int(kwords['vector'].return_x_component()), int(kwords['vector'].return_y_component()))
+            self._view_position_x += kwords['vector'].return_x_component()
+            self._view_position_y += kwords['vector'].return_y_component()
+            #self._view_rect = self._view_rect.move(int(kwords['vector'].return_x_component()), int(kwords['vector'].return_y_component()))
         elif 'change_x' in kwords and 'change_y' in kwords:
-            self._view_rect = self._view_rect.move(int(kwords['change_x']), int(kwords['change_y']))
+            raise Exception('Under construction!')
+            #self._view_rect = self._view_rect.move(int(kwords['change_x']), int(kwords['change_y']))
         else:
             raise ValueError('Camera->Move must be given either vector or change_x and change_y')
+        print(self._view_rect)
         
     def track(self, rect1, rect2, delta_time):
         '''Resizes camera rect to show both rectangles'''
         #ZOOM
-        vector_diagonal = vector_btw_points(rect1.center, rect2.center)
-
-        self.zoom(10)
-        
-        avg_center = vector_diagonal.return_x_component()/2, vector_diagonal.return_y_component()/2
-        #MOVE
-        velocity_vector = interpolate_smooth(self._view_rect.center, avg_center, delta_time)
-        self.move(velocity_vector)
-        #ADD FUNCTIONALITY
-        
+        target_rect = pygame.Rect(rect1.center, rect2.center)
+        target_rect.normalize()
             
-    def zoom(self, magnitude):
-        '''Zoom if I can get to this part'''
-        self._zoom = magnitude
+        #MOVE
+        velocity_vector = interpolate_smooth(self._view_rect.center, target_rect.center, delta_time)
+        #self.move(vector=velocity_vector)
+        #ADD FUNCTIONALITY
+        print(velocity_vector)
+        
 
-        x_offset = (self._zoom-1)*self._view_rect.width
-        y_offset = (self._zoom-1)*self._view_rect.height
-        print(x_offset)
-        self._view_rect = self._view_rect.inflate(int(x_offset), int(y_offset))
+    def update_screen_size(self, screen_size):
+        '''Updates screen size to given screen. (Useful for screen resizing and camera adjustment)'''
+        self._aspect_ratio = screen_size[1]/screen_size[0]
+        self._screen_size = screen_size
+        self._calculate_things()
+
+    def zoom(self, magnitude):
+        '''Zoom absolutely'''
+        self._zoom = magnitude
+        self._calculate_things()
 
     def _true_x_value(self, x_value):
         '''Return true position of disp x value'''
-        return (x_value / self._screen_size[0]) * self._view_rect.w + self._view_rect.x
+        return (x_value / self._screen_size[0]) * self._view_rect.w + self._view_position[0]+self._view_position_x
 
     def _true_y_value(self, y_value):
         '''Return true position of disp y value'''
-        return (y_value / self._screen_size[1]) * self._view_rect.h + self._view_rect.y
+        return (y_value / self._screen_size[1]) * self._view_rect.h + self._view_position[1]+self._view_position_y
         
     def _disp_x_value(self, x_value):
         '''Given value, return screen x in screen offset'''
-        return self._screen_size[0]*(x_value-self._view_rect.x)/self._view_rect.w
+        return  self._screen_size[0]*(x_value-self._view_position[0]-self._view_position_x)/self._view_rect.w
     
     def _disp_y_value(self, y_value):
         '''Given y_value, return screen y offset'''
-        return self._screen_size[1]*(y_value-self._view_rect.y)/self._view_rect.h
-        
-    def update_screen_size(self, screen_size):
-        '''Updates screen size to given screen. (Useful for screen resizing and camera adjustment)'''
-        self._screen_size = screen_size
-        self._view_rect = self._view_rect.inflate(screen_size[0]-self._view_rect.w, screen_size[1]-self._view_rect.h)
-    
+        return self._screen_size[1]*(y_value-self._view_position[1]-self._view_position_y)/self._view_rect.h
     def return_display_surface(self, surface):
         '''Given a surface, return the display surface'''
         return pygame.transform.scale(surface, self.zoom_values(*surface.get_size()))
@@ -120,14 +137,10 @@ if __name__ == '__main__':
 
     from pygame import Rect
 
-    c = Camera(Rect(0, 0, 10, 10))
-    r = Rect(1, 1, 2, 3)
+    c = Camera((640, 480), Rect(0, 0, 10, 10))
+    r = Rect(0, 0, 20, 10)
 
-    #checks visibility function
-    assert(c.is_visible(r) == True)
+    c.zoom(2)
 
-    r = r.move(100, 0)
-
-    assert(c.is_visible(r) == False)
-
-    print('\nAll Tests Have Passed.')
+    assert c.return_disp_rect(r).width == 40
+    print('Camera tests passed')

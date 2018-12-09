@@ -12,7 +12,7 @@ running = True
 def init():
     '''Initializes pygame stuff and returns the screen'''
     pygame.init()
-    screen = pygame.display.set_mode((640,480), pygame.RESIZABLE)
+    screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
     pygame.display.set_caption('The Game')
     pygame.display.flip()
 

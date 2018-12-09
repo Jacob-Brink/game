@@ -2,31 +2,37 @@ import pygame
 
 class Text:
 
-    def __init__(self, text, size, color, pos):
+    def __init__(self, text, font_size, color, pos, y_value):
         '''
         Class models text and makes creating text in the game more intuitive
         '''
-
+        
         self._text = text
-        self._size = size
+        self._font_size = font_size
         self._color = color
         self._pos = pos
+        self._y_value = y_value
 
-        self._font = pygame.font.SysFont(None, self._size)
+        self._font = pygame.font.SysFont(None, self._font_size)
         self._surface = self._font.render(self._text, 1, color)
+        self._text_size = self._font.size(self._text)
+        self._text_width = self._text_size[0]
 
-    def get_rect(self):
+    def get_rect(self, screen_width):
         '''Return pygame.Rect for Textbox'''
-        return pygame.Rect(self._pos, self._font.size(self._text))
+        return pygame.Rect((0 if self._pos == 'left' else screen_width/2 - self._text_width/2 if self._pos == 'middle' else screen_width-self._text_width, self._y_value), self._text_size)
 
     def get_surface(self):
         '''Return surface'''
         return self._surface
 
-    def get_surface_and_pos(self):
+    def change_pos(self, pos):
+        '''Change position'''
+        self._pos = pos
+    
+    def get_surface_and_pos(self, screen_width):
         '''Allows each view to send surface to view renderer'''
-        return [self._surface, self._pos]
-
+        return (self._surface, self.get_rect(screen_width).topleft)
 
 def init():
     pygame.init()
