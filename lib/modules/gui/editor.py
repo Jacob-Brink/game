@@ -9,6 +9,7 @@ else:
     from lib.modules.gui.view import View
     from lib.modules.gui.camera import Camera
     from lib.modules.gui.menu import Menu
+    from lib.modules.gui.rectangle import *
 
 from enum import Enum
 import pygame
@@ -74,12 +75,12 @@ class Editor(View):
         '''Write to level all platforms and items'''
         with open(self._level, 'w') as level_file:
             for platform in self._platforms:
-                level_file.write(str(platform.x)+ ' ' + str(platform.y) + ' ' + str(platform.w) + ' ' + str(platform.h) + '\n')
+                level_file.write(str(platform)+'\n')
 
     def read_level(self):
         '''Load level platforms into level editor'''
         with open(self._level) as level_file:
-            [self._platforms.append(pygame.Rect([int(string_integer) for string_integer in line.strip().split()])) for line in level_file]
+            [self._platforms.append(Rectangle(*[float(string_integer) for string_integer in line.strip().split()])) for line in level_file]
 
     def move_camera(self, events):
         '''With given events, controls camera movement.'''
@@ -107,11 +108,10 @@ class Editor(View):
     def _return_rect(self, first_pos, second_pos):
         '''Transforms two mouse position points into rectangle.'''
 
-        width = second_pos[0] - first_pos[0]
-        height = second_pos[1] - first_pos[1]
-        rect = pygame.Rect(first_pos[0], first_pos[1], width, height)
-        rect.normalize()
-        return rect
+        width = second_pos.x() - first_pos.x()
+        height = second_pos.y() - first_pos.y()
+        true_rect = Rectangle(first_pos.x(), first_pos.y(), width, height)
+        return true_rect
 
     def draw_platform(self, current_click, mouse_position):
         '''Draws platform with mouse clicks'''
@@ -120,15 +120,15 @@ class Editor(View):
 
             self._first_click = True
             # get true first position
-            self.first_pos = super().return_true_position(mouse_position)
+            self.first_pos = super().return_true_position(Point(*mouse_position))
 
         # Continue drawing rectangle
         if current_click == Switch.down and self._first_click:
 
             # get true second position
-            self.second_pos = super().return_true_position(mouse_position)
+            self.second_pos = super().return_true_position(Point(*mouse_position))
 
-            self._unfinished_rect = pygame.Rect(self._return_rect(self.first_pos, self.second_pos))
+            self._unfinished_rect = self._return_rect(self.first_pos, self.second_pos)
             
 
         # End drawing of rectangle on second click event
@@ -138,7 +138,7 @@ class Editor(View):
             self._first_click = False
 
             # get true second position
-            self.second_pos = super().return_true_position(mouse_position)
+            self.second_pos = super().return_true_position(Point(*mouse_position))
 
             # return rectangles with from two true positions
             self._platforms.append(self._return_rect(self.first_pos, self.second_pos))

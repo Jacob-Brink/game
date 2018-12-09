@@ -9,7 +9,7 @@ class View(Camera):
         
     def return_screen_dimensions(self):
         '''Returns screen dimensions of width and height in tuple type'''
-        return self._screen.get_width(),self._screen.get_height()
+        return self._screen.get_width(), self._screen.get_height()
 
     def render_rectangle(self, rect, **keywords):
         '''Given rect with absolute coordinates, draw rectangle'''
@@ -20,7 +20,7 @@ class View(Camera):
             
     def render_line(self, vector):
         '''Renders a vector with absolute position as a line'''
-        pygame.draw.line(self._screen, (200, 100, 240), super().return_display_position(vector.return_start_position()), super().return_display_position(vector.return_end_position()))
+        pygame.draw.line(self._screen, (200, 100, 240), super().return_display_position(vector.return_start_position()).return_tuple(), super().return_display_position(vector.return_end_position()).return_tuple())
         
     def render(self, screen, *surface_pos):
         '''Given a screen and surfaces, render the surfaces'''
@@ -28,7 +28,7 @@ class View(Camera):
 
         # renders surface pos types
         for surface in surface_pos:
-            self._screen.blit(self.return_display_surface(surface[0]), self.return_display_position(surface[1]))
+            self._screen.blit(self.return_display_surface(surface[0]), self.return_display_position(surface[1]).return_tuple())
 
 
 

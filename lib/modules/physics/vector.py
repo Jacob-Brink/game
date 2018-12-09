@@ -1,11 +1,15 @@
 import math
+from lib.modules.gui.rectangle import Point
 
 class Vector:
     '''Vector class used for velocity, force, and acceleration in physics stuff'''
 
-    def __init__(self, position_tuple, **keywords):
+    def __init__(self, position_point, **keywords):
         '''Constructs a new vector given direction (degrees :0 for facing right) and magnitude (any num type)'''
-        self._position_tuple = position_tuple
+
+        if not isinstance(position_point, Point):
+            raise ValueError('Vector->Constructor requires position to be of type Point')
+        self._position_point = position_point
         
         # constructed with direction and magnitude
         if 'direction' in keywords and 'magnitude' in keywords:
@@ -22,7 +26,7 @@ class Vector:
             self._direction = math.atan2(self._y_component, self._x_component)
             self._magnitude = math.sqrt((self._x_component)**2+(self._y_component)**2)
         else:
-            raise TypeError('Parameters must include position tuple as first arg, then either direction and magnitude or x_component and y_component')
+            raise TypeError('Parameters must include position point as first arg, then either direction and magnitude or x_component and y_component')
 
     def return_slope(self):
         '''Returns slope of vector'''
@@ -32,11 +36,11 @@ class Vector:
 
     def return_end_position(self):
         '''Returns end position'''
-        return (self._position_tuple[0]+self._x_component, self._position_tuple[1]+self._y_component)
+        return Point(self._position_point.x()+self._x_component, self._position_point.y()+self._y_component)
                 
     def return_start_position(self):
         '''Returns start position'''
-        return self._position_tuple
+        return self._position_point
     
     def return_x_component(self):
         '''Returns the x component of the vector via Trig'''
@@ -56,7 +60,7 @@ class Vector:
 
     def return_unit_vector(self):
         '''Returns unit vector'''
-        return Vector(self._position_tuple, self._x_component / self._magnitude, self._y_component / self._magnitude)
+        return Vector(self._position_point, self._x_component / self._magnitude, self._y_component / self._magnitude)
 
     def project_on(self, axis_vector):
         '''Return vector projected on given vector'''
@@ -73,7 +77,7 @@ class Vector:
     def __mul__(self, other):
         '''Allows for scalar and vector multiplication'''
         if isinstance(other, int) or isinstance(other, float):
-            return Vector(self._position_tuple, direction=self.return_direction(), magnitude=other * self.return_magnitude())
+            return Vector(self._position_point, direction=self.return_direction(), magnitude=other * self.return_magnitude())
     
     def __add__(self, other):
         '''Addition overloading of vectors when both terms are vectors'''
@@ -81,7 +85,14 @@ class Vector:
         x = self.return_x_component() + other.return_x_component()
         y = self.return_y_component() + other.return_y_component()
 
-        return Vector( self._position_tuple, x_component=x, y_component=y)
+        return Vector( self._position_point, x_component=x, y_component=y)
+
+    def __sub__(self, other):
+        '''Subtraction overloading of vectors when both terms are vectors'''
+        x = self.return_x_component() - other.return_x_component()
+        y = self.return_y_component() - other.return_y_component()
+
+        return Vector( self._position_point, x_component=x, y_component=y)
 
 
 if __name__ == '__main__':

@@ -37,6 +37,10 @@ class Mouse:
     def set_right_state(self, new_state):
         self._right_button = new_state
 
+    def reset_all(self):
+        '''Resets all events so that clicking in menu doesn't mess up stuff'''
+        self._left_button = Switch.up
+        self._right_button = Switch.down
 
 class Keyboard:
     '''This keyboard class represents a keyboard with the keys necessary for this game.'''

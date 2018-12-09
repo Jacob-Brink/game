@@ -74,24 +74,24 @@ class Physics:
 
 
                     # on top
-                    if past_rect.y+past_rect.h <= platform.y:
+                    if past_rect.get_x()+past_rect.get_h() <= platform.get_y():
                         print('correcting top')
-                        player.set_rect(pygame.Rect(rect.x, platform.y-rect.h-MARGIN_PIXEL, rect.w, rect.h))
+                        player.set_rect(pygame.Rect(rect.get_x(), platform.get_y()-rect.get_h()-MARGIN_PIXEL, rect.get_w(), rect.get_h()))
 
                     # on bottom
-                    if past_rect.y >= platform.y + platform.h:
+                    if past_rect.get_y() >= platform.get_y() + platform.get_h():
                         print('correcting bottom')
-                        player.set_rect(pygame.Rect(rect.x, platform.y+platform.h+MARGIN_PIXEL, rect.w, rect.h))
+                        player.set_rect(pygame.Rect(rect.get_x(), platform.get_y()+platform.get_h()+MARGIN_PIXEL, rect.get_w(), rect.get_h()))
 
                     # on left
-                    if past_rect.x >= platform.x + platform.w:
+                    if past_rect.get_x() >= platform.get_x() + platform.get_w():
                         print('correcting to left')
-                        player.set_rect(pygame.Rect(platform.x+platform.w+MARGIN_PIXEL, rect.y, rect.w, rect.h))
+                        player.set_rect(pygame.Rect(platform.get_x()+platform.get_w()+MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
 
                     # on right
-                    if past_rect.x+past_rect.w <= platform.x:
+                    if past_rect.get_x()+past_rect.get_w() <= platform.get_x():
                         print('correcting to right')
-                        player.set_rect(pygame.Rect(platform.x-rect.w-MARGIN_PIXEL, rect.y, rect.w, rect.h))
+                        player.set_rect(pygame.Rect(platform.get_x()-rect.get_w()-MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
                         
                     # apply appropriate force
                     print('Collision Occurred')
@@ -103,8 +103,7 @@ class Physics:
         '''Calculate collisions, reposition from collisions, work with forces, etc'''
         for player in player_list:
             player.update(events)
-            
-
+        
         self.reposition(player_list, rigid_body_list, platform_list, events.delta_time())
         
 if __name__ == '__main__':

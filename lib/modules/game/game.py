@@ -6,6 +6,7 @@ from lib.modules.game.player import Player
 from lib.modules.gui.text import Text
 from lib.modules.physics.physics_engine import Physics
 from lib.modules.gui.events import Switch
+from lib.modules.gui.rectangle import Rectangle
 
 class Game(View):
 
@@ -13,8 +14,8 @@ class Game(View):
         '''View that holds game entities, deals with collision, and handles the entire game!!!'''
         super().__init__(screen)
         self._menu = Menu(screen, 'right', 'THE BEST GAME EVER!!!', [('Quit', go_back)])
-        self._player1 = Player(0)
-        self._player2 = Player(1)
+        self._player1 = Player(0, debug_mode)
+        self._player2 = Player(1, debug_mode)
         self._debug = debug_mode
         self._go_back = go_back
 
@@ -34,8 +35,9 @@ class Game(View):
     def _load_level(self):
         '''Loads level platforms into game'''
         with open(self._level, 'r') as level_file:
-            [self._platforms.append(pygame.Rect([int(string_integer) for string_integer in line.strip().split()])) for line in level_file]
+            [self._platforms.append(Rectangle(*[float(string_integer) for string_integer in line.strip().split()])) for line in level_file]
 
+            
     def update(self, events):
         '''Updates all game objects'''
 
@@ -46,12 +48,11 @@ class Game(View):
         
         if events.keyboard().is_pressed(pygame.K_RETURN) == Switch.down:
             super().zoom(.5)
-        #super().track(self._player1.return_true_rect(), self._player2.return_true_rect(), events.delta_time())
-            
+        
         # update menu
         self._menu.update(events)
 
-        super().track(self._player1.return_true_rect(), self._player2.return_true_rect(), events.delta_time())
+        super().track(self._player1, self._player2, events.delta_time())
         
         # physics sim
         self._physics.update(events, self._player_list, self._rigid_body_list, self._platforms)
@@ -75,7 +76,7 @@ class Game(View):
                 super().render_rectangle(platform)
         
 
-        super().render_rectangle(pygame.Rect(super().return_camera_position(), (20,20)))
+        super().render_rectangle(Rectangle(super().return_camera_position().return_tuple(), (20,20)))
                 
         # Quit Game if escape is pressed
         if events.keyboard().is_pressed(pygame.K_ESCAPE) == Switch.pushed_down:

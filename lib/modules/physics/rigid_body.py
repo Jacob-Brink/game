@@ -7,23 +7,24 @@ else:
 
     from lib.modules.physics.vector import Vector
     from lib.modules.physics.physics import Collision
-
+    from lib.modules.gui.rectangle import *
 import pygame
 import math
 
 class RigidBody(Collision):
-
     def __init__(self, rect, mass):
         '''Constructs a new RigidBody object with given pygame.Rect rectangle and integer mass'''
         super().__init__()
         
+        # if given pygame.Rect type convert to floatable homemade rectangle object
+        if isinstance(rect, pygame.Rect):
+            raise ValueError('RigidBody->Constructor: rectangle must be of type Rectangle not pygame.Rect')
         self._rect = rect
-        self._past_rect = self._rect
-        self._center_tuple = self._rect.centerx, self._rect.centery
-        self._velocity = Vector(self._center_tuple, direction=0, magnitude=0)
+        
+        self._velocity = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._past_velocity = self._velocity
         self._mass = mass
-        self._acceleration = Vector(self._center_tuple, direction=0, magnitude=0)
+        self._acceleration = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._forces = []
 
     def collides_with(self, other):
@@ -44,6 +45,8 @@ class RigidBody(Collision):
     
     def set_rect(self, rect):
         '''Sets rectangle to given rect'''
+        if isinstance(rect, pygame.Rect):
+            raise ValueError('rectangle must be of type Rectangle, not pygame.Rectangle')
         self._rect = rect
 
     def set_velocity(self, velocity):
@@ -52,7 +55,7 @@ class RigidBody(Collision):
     def update(self):
         '''Updates RigidBody object to translate force into acceleration and acceleration into new velocity.
         To be called after physics repositioning'''
-        self._acceleration = Vector((self._rect.centerx, self._rect.centery), direction=0, magnitude=0)
+        self._acceleration = Vector(self._rect.get_center(), direction=0, magnitude=0)
 
         for force in self._forces:
             self._acceleration += force * (1/self._mass)
@@ -64,8 +67,8 @@ class RigidBody(Collision):
         
         # set past and present rectangle values
         self._past_rect = self._rect
-        self._rect = self._rect.move(self._velocity.return_x_component(), self._velocity.return_y_component())
-
+        delta_point = Point(self._velocity.return_x_component(), self._velocity.return_y_component())
+        self._rect.move(delta_point)
         self._forces = []
 
     def return_past_rect(self):
@@ -84,7 +87,6 @@ if __name__ == '__main__':
     '''
     Test RigidBody class with force list and mass of 1 for simplicity
     '''
-
     r = RigidBody(pygame.Rect(1,2,3,4), 1)
 
     #test apply_forces

@@ -1,5 +1,6 @@
 import pygame
 from lib.modules.physics.vector import Vector
+from lib.modules.gui.rectangle import *
 
 def list_rect_points(rect):
     return [rect.topleft, rect.topright, rect.bottomright, rect.bottomleft]
@@ -20,29 +21,46 @@ def return_size(aspect_ratio, **kwrds):
         return 1/aspect_ratio*kwrds['height'], krwds['height']
     
 
-class Camera:
+class Camera(Rectangle):
 
     def __init__(self, screen, position):
         '''Constructor contructs new camera object determined by the provided viewing rectangle'''
-        self._zoom = 1
-        self._screen_rect = pygame.Rect((0, 0), screen.get_size())
-        self._view_position = position
-        self._screen_size = screen.get_size()
-        self._aspect_ratio = self._screen_size[1]/self._screen_size[0]
-        self._calculate_things()
 
+        self._zoom = 1
+        self._zoom_speed = 0
+        
+        self._screen_rect = pygame.Rect((0, 0), screen.get_size())
+        self._aspect_ratio = self._screen_rect.h/self._screen_rect.w
+
+        # storage of total view position delta from inital start
+        self._view_position_delta = Point(0,0)
+
+        self._view_rect = Rectangle(position, screen.get_size())
+        
+        # recalculate position from screen and zoom
+        self._calculate_things()
+        
     def return_camera_position(self):
-        return self._view_position
+        return self._view_rect.get_top_left()
         
     def _calculate_things(self):
         '''Calculate things'''
         view_width = self._screen_rect.width/self._zoom
         view_height = self._screen_rect.height/self._zoom
-        view_position_delta = (view_width-self._screen_rect.width)/2, (view_height-self._screen_rect.height)/2
-        self._view_position_x = self._view_position[0]-view_position_delta[0]
-        self._view_position_y = self._view_position[1]-view_position_delta[1]
-        self._view_rect = pygame.Rect((self._view_position_x, self._view_position_y), (view_width, view_height))
-        print(self._view_rect)
+
+        # total delta
+        view_position_delta_total = Point((view_width-self._screen_rect.width)/2, (view_height-self._screen_rect.height)/2)
+
+        
+        
+        # add recent delta by subtracting the difference between current and past delta totals
+        delta_point = Point((view_position_delta_total.x()-self._view_position_delta.x()), (view_position_delta_total.y()-self._view_position_delta.y()))
+        self._view_rect.move(delta_point)
+
+        # set position_delta total to current total
+        self._view_position_delta = view_position_delta_total
+
+        
 
     def zoom_values(self, *values):
         '''Given any width or height returns the displayed width and height with zoom'''
@@ -54,79 +72,101 @@ class Camera:
 
     def move(self, **kwords):
         '''Public method called to move camera to new location. Note that move does not provide any travel by itself and that the calling code must take this into account.'''
+
         if 'vector' in kwords:
-            self._view_position_x += kwords['vector'].return_x_component()
-            self._view_position_y += kwords['vector'].return_y_component()
-            #self._view_rect = self._view_rect.move(int(kwords['vector'].return_x_component()), int(kwords['vector'].return_y_component()))
+            delta_point = Point(kwords['vector'].return_x_component(), kwords['vector'].return_y_component())
+
         elif 'change_x' in kwords and 'change_y' in kwords:
-            raise Exception('Under construction!')
-            #self._view_rect = self._view_rect.move(int(kwords['change_x']), int(kwords['change_y']))
+            delta_point = Point(kwords['change_x'], kwords['change_y'])
+
         else:
             raise ValueError('Camera->Move must be given either vector or change_x and change_y')
-        print(self._view_rect)
+        self._view_rect.move(delta_point)
+        self._calculate_things()
         
-    def track(self, rect1, rect2, delta_time):
+    def track(self, rigid_body1, rigid_body2, delta_time):
         '''Resizes camera rect to show both rectangles'''
-        #ZOOM
-        target_rect = pygame.Rect(rect1.center, rect2.center)
-        target_rect.normalize()
-            
-        #MOVE
-        velocity_vector = interpolate_smooth(self._view_rect.center, target_rect.center, delta_time)
-        #self.move(vector=velocity_vector)
-        #ADD FUNCTIONALITY
-        print(velocity_vector)
-        
+        # get average momentum of two rigid_bodies by sum of velocity and division by 2
+        average_velocity = (rigid_body1.return_velocity_vector()+rigid_body2.return_velocity_vector())*(1/2)
+        average_center_target = Point((rigid_body1.return_rect().get_center().x()-rigid_body2.return_rect().get_center().x()), (rigid_body1.return_rect().get_center().y()-rigid_body2.return_rect().get_center().y()))
 
+        
+        # get target view position
+        #target_view_position = Point(
+        distance_btw_x = rigid_body1.return_rect().get_center().x() - rigid_body2.return_rect().get_center().x()
+        
+        if not self.is_visible(rigid_body1.return_rect()) or not self.is_visible(rigid_body1.return_rect()):
+            self._zoom_speed -= .0001
+        elif distance_btw_x / self._view_rect.get_w() < .4:
+            self._zoom_speed += .0001
+        else:
+            self._zoom_speed = 0
+            
+        self.zoom(self._zoom+self._zoom_speed*delta_time)
+        self.move(vector=average_velocity*delta_time)
+
+        
+    def collides_with(self, rect1):
+        '''Returns boolean state of whether or not a rigid body collided with camera view'''
+        return True if self._view_rect.return_pygame_rect().colliderect(rect1) == 1 else False
+        
     def update_screen_size(self, screen_size):
         '''Updates screen size to given screen. (Useful for screen resizing and camera adjustment)'''
         self._aspect_ratio = screen_size[1]/screen_size[0]
-        self._screen_size = screen_size
+        self._screen_rect.w = screen_size[0]
+        self._screen_rect.h = screen_size[1]
         self._calculate_things()
 
     def zoom(self, magnitude):
         '''Zoom absolutely'''
-        self._zoom = magnitude
-        self._calculate_things()
+
+        if magnitude <= .2 or magnitude > 1:
+            print('cannot zoom in beyond (0, 1) interval')
+        else:
+            self._zoom = magnitude
+            self._calculate_things()
 
     def _true_x_value(self, x_value):
         '''Return true position of disp x value'''
-        return (x_value / self._screen_size[0]) * self._view_rect.w + self._view_position[0]+self._view_position_x
+        return (x_value / self._screen_rect.w) * self._view_rect.get_w() + self._view_rect.get_x()
 
     def _true_y_value(self, y_value):
         '''Return true position of disp y value'''
-        return (y_value / self._screen_size[1]) * self._view_rect.h + self._view_position[1]+self._view_position_y
+        return (y_value / self._screen_rect.h) * self._view_rect.get_h() + self._view_rect.get_y()
         
     def _disp_x_value(self, x_value):
         '''Given value, return screen x in screen offset'''
-        return  self._screen_size[0]*(x_value-self._view_position[0]-self._view_position_x)/self._view_rect.w
+        return  self._screen_rect.w*(x_value-self._view_rect.get_x())/self._view_rect.get_w()
     
     def _disp_y_value(self, y_value):
         '''Given y_value, return screen y offset'''
-        return self._screen_size[1]*(y_value-self._view_position[1]-self._view_position_y)/self._view_rect.h
+        return self._screen_rect.h*(y_value-self._view_rect.get_y())/self._view_rect.get_h()
+    
     def return_display_surface(self, surface):
         '''Given a surface, return the display surface'''
         return pygame.transform.scale(surface, self.zoom_values(*surface.get_size()))
         
-    def return_true_position(self, disp_position_tuple):
+    def return_true_position(self, disp_position_point):
         '''Returns absolute position of object when given position coordinates of type tuple'''
-        return self._true_x_value(disp_position_tuple[0]), self._true_y_value(disp_position_tuple[1])
+        return Point(self._true_x_value(disp_position_point.x()), self._true_y_value(disp_position_point.y()))
     
-    def return_display_position(self, tru_position_tuple):
+    def return_display_position(self, tru_position_point):
         '''Returns display position of given object by returning the difference in coordinates'''
-        return self._disp_x_value(tru_position_tuple[0]), self._disp_y_value(tru_position_tuple[1])
+        return Point(self._disp_x_value(tru_position_point.x()), self._disp_y_value(tru_position_point.y()))
     
     def return_true_rect(self, disp_rect):
-        '''Returns rectangle with absolute / true positions'''
-        return pygame.Rect(self.return_true_position(disp_rect.topleft), self.unzoom_values(*disp_rect.size))
+        '''Returns rectangle with absolute / true positions from pygame rect'''
+        return Rectangle(self.return_true_position(Point(disp_rect.topleft[0], disp_rect.topleft[0])).return_tuple(), self.unzoom_values(*disp_rect.size))
 
     def return_disp_rect(self, tru_rect):
-        '''Returns rectangle with positions relative to window screen'''
-        return pygame.Rect(self.return_display_position(tru_rect.topleft), self.zoom_values(*tru_rect.size))
+        '''Returns pygame rectangle with positions relative to window screen'''
+        if isinstance(tru_rect, pygame.Rect):
+            raise ValueError('Camera requires true rectangle object and returns pygame.rect for display. Argument must be of type Rectangle.')
+        return pygame.Rect(self.return_display_position(tru_rect.get_top_left()).return_tuple(), self.zoom_values(*tru_rect.get_size_point().return_tuple()))
 
     def is_visible(self, object_rect):
         '''Boolean value of whether given object is in the camera's viewing rectangle. True for is visible and False for invisible.'''
-        return object_rect.colliderect(self._view_rect)
+        return True if self._view_rect.return_pygame_rect().contains(object_rect.return_pygame_rect()) == 1 else False
 
 
 if __name__ == '__main__':

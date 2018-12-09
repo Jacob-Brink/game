@@ -1,4 +1,5 @@
 import pygame
+from lib.modules.gui.rectangle import Point
 
 class Text:
 
@@ -32,7 +33,7 @@ class Text:
     
     def get_surface_and_pos(self, screen_width):
         '''Allows each view to send surface to view renderer'''
-        return (self._surface, self.get_rect(screen_width).topleft)
+        return (self._surface, Point(self.get_rect(screen_width).x, self.get_rect(screen_width).y))
 
 def init():
     pygame.init()

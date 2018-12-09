@@ -11,13 +11,13 @@ class Collision:
 
     def rect_rect(self, rect1, rect2):
         '''Return boolean value of any intersection between two given pygame rects'''
-        return rect1.colliderect(rect2)
+        return rect1.get_x() < rect2.get_x()+rect2.get_w() and rect1.get_x()+rect1.get_w() > rect2.get_x() and rect1.get_y() < rect2.get_y()+rect2.get_w() and rect1.get_y()+rect1.get_h() > rect2.get_y()
         
     def _line_collides_rect(self, slope, point_coordinate, rect, range_xy):
         '''Returns boolean value of whether or not a line collided with a rectangle'''
         '''This is used to make sure that players cannot fly through objects if the position from one tick to the next creates a line of motion intersecting the platform'''
 
-
+        #FIX OR DELETE
         # range for intersection search
         x_range = range_xy[0]
         y_range = range_xy[1]
