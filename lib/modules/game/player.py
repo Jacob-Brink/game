@@ -19,15 +19,18 @@ class Player(RigidBody):
     def __init__(self, keyboard_layout, debug_mode):
         '''Constructs a new player with rigid body as Base Class'''
 
-        super().__init__(Rectangle((0,0), (400, 400)), 100)
+        self._surface = Image(image_path+'test.png').return_surface()
+        super().__init__(Rectangle((0,0), self._surface.get_size()), 100)
+
         print('Player Rect', super().return_rect().get_x())
+        
         print(keyboard_layout, debug_mode)
         self._debug = debug_mode
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
         
         self._health = 10
-        self._surface = Image(image_path+'test.png').return_surface()
+
         
     def update(self, events):
         '''To be called on every game tick'''
