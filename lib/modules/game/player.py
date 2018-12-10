@@ -62,6 +62,6 @@ class Player(RigidBody):
         '''Returns array of surface and point of x and y position. (Used for easy blitting)'''
 
         if self._debug:
-            return [Text('Player'+str(self._player_num) + 'Pos: ' + str(super().return_rect()), 64, (200,255,255), 'left', 10).get_surface(), super().return_rect().get_center()]
+            return [Text('Player'+str(self._player_num) + 'Pos: ' + str(super().return_rect()), 64, (200,255,255), 'left', 10).get_surface(), super().return_rect().get_top_left()]
         else:
-            return [self._surface, super().return_rect().get_center()]
+            return [self._surface, super().return_rect().get_top_left()]

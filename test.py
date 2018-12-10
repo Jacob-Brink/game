@@ -45,7 +45,7 @@ class TestGame(unittest.TestCase):
             pass
 
         # test normalize with negative sizes
-        assert Rectangle(1,2,-3,4) == Rectangle(-2, 2, 3, 4)
+        assert Rectangle(1,2,-3,4).get_center() == Rectangle(-2, 2, 3, 4).get_center()
         assert Rectangle(3, 5, -2, -2) == Rectangle(1, 3, 2, 2)
 
         # test basic functions
