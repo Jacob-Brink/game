@@ -19,17 +19,30 @@ class TestGame(unittest.TestCase):
         p = Point(2, 3)
         assert p.x() == 2
         assert p.y() == 3
-        assert str(p) == '<2,3>'
 
         p.change_x(4)
         p.change_y(5)
 
         assert p.x() == 4
         assert p.y() == 5
-    
+
+        # test overloading
+        
+        p = Point(1,2)
+        s = Point(1,2)
+
+        assert p == s
+
+        s = Point(0,0)
+
+        assert not p == s
+
+        assert str(p) == '<1,2>'
+        
     def test_rectangle(self):
         '''Test rectangle'''
         from lib.modules.gui.rectangle import Rectangle
+        from lib.modules.gui.rectangle import Point
 
         # test invalid rectangles
         try:
@@ -49,7 +62,7 @@ class TestGame(unittest.TestCase):
         assert Rectangle(3, 5, -2, -2) == Rectangle(1, 3, 2, 2)
 
         # test basic functions
-        assert Rectangle(1,2,3,4).list_basic_values == [1,2,3,4]
+        assert Rectangle(1,2,3,4).list_basic_values() == [1,2,3,4]
 
         r = Rectangle(1,2,3,4)
         assert r.copy() is not r
@@ -87,7 +100,7 @@ class TestGame(unittest.TestCase):
 
         r.change_bottom_left(Point(-4,4))
         assert r.get_size() == Point(4,5)
-        assert r.get_bottom_left(Point(-4,4))
+        assert r.get_bottom_left() == Point(-4,4)
 
         r.change_bottom_right(Point(-5,4))
         assert r.get_bottom_right() == Point(-5,4)
@@ -102,7 +115,7 @@ class TestGame(unittest.TestCase):
         r = Rectangle(1, 2, 3, 6)
         r.scale(10)
         assert r.get_size() == Point(30, 60)
-        assert r.get_get_center() == Point(2,4)
+        assert r.get_center() == Point(2,4)
 
         # test pretty print
         assert str(Rectangle(1, 2, 3, 4)) == '1 2 3 4'

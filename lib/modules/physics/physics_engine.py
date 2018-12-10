@@ -42,7 +42,7 @@ class Physics:
         # on right
         if past_rect.get_x()+past_rect.get_w() <= platform.get_x():
             print('correcting to right')
-            rect = Rectangle(platform.get_x()-self._MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h())
+            rect = Rectangle(platform.get_x()-past_rect.get_w()-self._MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h())
             side = 'left_platform'
 
         print(rect, platform)
