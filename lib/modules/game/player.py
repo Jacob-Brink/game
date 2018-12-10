@@ -35,7 +35,7 @@ class Player(RigidBody):
         delta_x = 0
         delta_y = 0
 
-        change = 2*events.delta_time()
+        change = 1*events.delta_time()
 
         if pressed(self._keys['left']) and  not super().get_platform_status('right_platform'):
                 delta_x -= change
@@ -55,7 +55,7 @@ class Player(RigidBody):
 
         user_force = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
         print(user_force.return_direction())
-        super().apply_force(user_force*events.delta_time())
+        super().apply_force(user_force)
         super().update()
         
     def return_surface_and_pos(self):

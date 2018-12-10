@@ -47,7 +47,7 @@ class Game(View):
             super().update_screen_size(screen.get_size())
         
         if events.keyboard().is_pressed(pygame.K_RETURN) == Switch.down:
-            super().zoom(.5)
+            super().zoom(.2)
         
         # update menu
         self._menu.update(events)

@@ -80,7 +80,7 @@ class RigidBody():
         self._past_velocity = self._velocity    
         self._velocity = self._acceleration + self._velocity
 
-        self._past_rec = copy.copy(self._rect)
+        self._past_rect = copy.copy(self._rect)
         
         # FIX: DUE TO as;lkdfja;sfdasdfasdf
         # changes rectangle from last velocity

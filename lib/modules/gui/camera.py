@@ -80,6 +80,7 @@ class Camera(Rectangle):
 
         else:
             raise ValueError('Camera->Move must be given either vector or change_x and change_y')
+
         self._view_rect.move(delta_point)
         self._calculate_things()
         
@@ -141,7 +142,7 @@ class Camera(Rectangle):
         return (y_value / self._screen_rect.h) * self._view_rect.get_h() + self._view_rect.get_y()
         
     def _disp_x_value(self, x_value):
-        '''Given value, return screen x in screen offset'''
+        '''Given x value, return screen x in screen offset'''
         return  self._screen_rect.w*(x_value-self._view_rect.get_x())/self._view_rect.get_w()
     
     def _disp_y_value(self, y_value):
