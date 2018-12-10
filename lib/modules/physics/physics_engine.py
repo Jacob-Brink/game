@@ -19,7 +19,7 @@ class Physics:
     
     def reposition(self, player_list, rigid_body_list, immovable_rect_list, delta_time):
         '''Return new rectangle based on how two rectangles collided'''
-        MARGIN_PIXEL = 1
+        MARGIN_PIXEL = 2
 
 
         
@@ -33,66 +33,36 @@ class Physics:
                     rect = player.return_rect()
                     body_velocity = player.return_velocity_vector()
 
-                    
-                    print('body_velocity.return_direction()',  body_velocity.return_direction())
 
                     direction = player.return_past_velocity().return_direction()
 
+                    print(direction)
 
-                    if  45 < direction <= 135:
-                        # player is on top
-                        print('player on top')
-                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()-rect.get_h()-MARGIN_PIXEL, rect.get_w(), rect.get_h()))
-                        player.change_platform_status('top_platform', True)
-
-                    elif 135 < direction <= 180 or -180 < direction <= -135:
-                        # player is to left
-                        print('player on left')
-                        player.set_rect(Rectangle(platform.get_x()+platform.get_w()+MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
-                        player.change_platform_status('right_platform', True)
-                        
-                    elif -135 < direction <= -45:
-                        # player is on bottom
-                        print('player on bottom')
-
-                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()+platform.get_h()+MARGIN_PIXEL, rect.get_w(), rect.get_h()))
-                        player.change_platform_status('beneath_platform', True)
-                        
-                    elif -45 < direction <= 0 or 0 < direction <= 45:
-                        # player is on right
-                        print('player on right')
-
-                        player.set_rect(Rectangle(platform.get_x()-rect.get_w()-MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
-                        player.change_platform_status('left_platform', True)
-
-                    
-                        '''    
-                    # on top
                     if past_rect.get_y()+past_rect.get_h() <= platform.get_y():
                         print('correcting top')
-                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()-rect.get_h()-MARGIN_PIXEL, rect.get_w(), rect.get_h()))
+                        player.set_rect(Rectangle(past_rect.get_x(), platform.get_y()-rect.get_h()-MARGIN_PIXEL, rect.get_w(), rect.get_h()))
                         player.change_platform_status('on_platform', True)
                     # on bottom
                     if past_rect.get_y() >= platform.get_y() + platform.get_h():
                         print('correcting bottom')
-                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()+platform.get_h()+MARGIN_PIXEL, rect.get_w(), rect.get_h()))
+                        player.set_rect(Rectangle(past_rect.get_x(), platform.get_y()+platform.get_h()+MARGIN_PIXEL, rect.get_w(), rect.get_h()))
                         player.change_platform_status('beneath_platform', True)
                     # on left
                     if past_rect.get_x() >= platform.get_x() + platform.get_w():
                         print('correcting to left')
-                        player.set_rect(Rectangle(platform.get_x()+platform.get_w()+MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
+                        player.set_rect(Rectangle(platform.get_x()+platform.get_w()+MARGIN_PIXEL, past_rect.get_y(), rect.get_w(), rect.get_h()))
                         player.change_platform_status('right_platform', True)
                     # on right
                     if past_rect.get_x()+past_rect.get_w() <= platform.get_x():
                         print('correcting to right')
-                        player.set_rect(Rectangle(platform.get_x()-rect.get_w()-MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
+                        print(platform.get_x())
+                        player.set_rect(Rectangle(platform.get_x()-MARGIN_PIXEL, past_rect.get_y(), rect.get_w(), rect.get_h()))
                         player.change_platform_status('left_platform', True)
 
 
-                    '''
                     # apply appropriate force
                     print('Collision Occurred')
-                    player.set_velocity(body_velocity*(-1))
+                    player.set_velocity(Vector(player.return_rect().get_center(), magnitude=.01, direction=direction))
                     
 
 

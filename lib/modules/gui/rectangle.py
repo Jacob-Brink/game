@@ -33,7 +33,9 @@ class Point:
     def return_tuple(self):
         '''Returns tuple of x and y'''
         return self._x, self._y
-
+    def __str__(self):
+        '''Returns string of points'''
+        return '<' + str(self._x) + ',' + str(self._y) + '>'
 
     
 class Rectangle:

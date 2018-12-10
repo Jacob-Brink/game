@@ -54,6 +54,7 @@ class Player(RigidBody):
             #ADD CODE!!!!!!!!!!!!
 
         user_force = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
+        print(user_force.return_direction())
         super().apply_force(user_force*events.delta_time())
         super().update()
         

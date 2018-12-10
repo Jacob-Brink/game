@@ -37,7 +37,8 @@ def main():
         if delta_time <= 0:
             print(delta_time)
             delta_time =.0000001
-        
+
+
         # calls update which gets all events from pygame.events.get() and updates all values
         e.update(delta_time)
 

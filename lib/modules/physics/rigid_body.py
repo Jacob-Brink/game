@@ -4,6 +4,8 @@ from lib.modules.gui.rectangle import *
 
 import pygame
 import math
+import copy
+
 
 class RigidBody():
     def __init__(self, rect, mass):
@@ -13,8 +15,8 @@ class RigidBody():
         if isinstance(rect, pygame.Rect):
             raise ValueError('RigidBody->Constructor: rectangle must be of type Rectangle not pygame.Rect')
         self._rect = rect
-        self._past_rect = self._rect
-
+        self._past_rect = copy.copy(self._rect)
+        
         self._platform_status = {'on_platform': False, 'beneath_platform': False, 'left_platform': False, 'right_platform': False}
         
         self._velocity = Vector(self._rect.get_center(), direction=0, magnitude=0)
@@ -31,8 +33,6 @@ class RigidBody():
         '''Resets values to False'''
         for key in self._platform_status:
             self._platform_status[key] = False
-
-        print(self._platform_status)
         
     def get_platform_status(self, key):
         '''Given key, will return boolean value'''
@@ -70,7 +70,8 @@ class RigidBody():
     def update(self):
         '''Updates RigidBody object to translate force into acceleration and acceleration into new velocity.
         To be called after physics repositioning'''
-        self._acceleration = Vector(self._rect.get_center(), direction=0, magnitude=0)
+
+        self._acceleration = Vector(self._rect.get_center(), direction=self._velocity.return_direction(), magnitude=0)
 
         for force in self._forces:
             self._acceleration += force * (1/self._mass)
@@ -79,16 +80,18 @@ class RigidBody():
         self._past_velocity = self._velocity    
         self._velocity = self._acceleration + self._velocity
 
+        self._past_rec = copy.copy(self._rect)
         
-        # set past and present rectangle values
-        self._past_rect = self._rect
-        
+        # FIX: DUE TO as;lkdfja;sfdasdfasdf
+        # changes rectangle from last velocity
         delta_point = Point(self._velocity.return_x_component(), self._velocity.return_y_component())
         self._rect.move(delta_point)
         self._forces = []
 
+        
+
     def return_past_rect(self):
-        '''Returns rect from last tick'''
+        '''Returns rect that is distinguishably different than current rect'''
         return self._past_rect
         
     def return_rect(self):
