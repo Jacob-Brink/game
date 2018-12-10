@@ -218,4 +218,4 @@ class Rectangle:
 
     def __eq__(self, other):
         '''Return boolean value of whether or not rectangles are equal'''
-        return self.get_top_left() == other.get_top_left() and self.get_size() == other.get_size()
+        return self.get_top_left() == other.get_top_left() and self.get_size() == other.get_size() if isinstance(other, Rectangle) else False
