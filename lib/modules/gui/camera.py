@@ -63,11 +63,11 @@ class Camera(Rectangle):
 
     def zoom_values(self, *values):
         '''Given any width or height returns the displayed width and height with zoom'''
-        return [int(1*v) for v in values]
+        return [int(self._zoom*v) for v in values]
 
     def unzoom_values(self, *values):
         '''Given any number of display widths and heights, returns true widths and heights'''
-        return [int(1*v) for v in values]
+        return [int(1/self._zoom*v) for v in values]
 
     def move(self, **kwords):
         '''Public method called to move camera to new location. Note that move does not provide any travel by itself and that the calling code must take this into account.'''
@@ -100,11 +100,11 @@ class Camera(Rectangle):
         # calculate zoom necessary for both players to be seen
         # if distance in the x direction is greater, make zoom from width
         if abs(center_1.x() - center_2.x()) > abs(center_1.y() - center_2.y()):
-            #self.zoom(abs(self._screen_rect.width / (center_1.x() - center_2.x()+margin)))
+            self.zoom(abs(self._screen_rect.width / (center_1.x() - center_2.x()+margin)))
             pass
         else:
             pass
-            #self.zoom(abs(self._screen_rect.height / (center_1.y() - center_2.y()+margin)))
+            self.zoom(abs(self._screen_rect.height / (center_1.y() - center_2.y()+margin)))
 
         self._calculate_things()
         
