@@ -24,7 +24,16 @@ class RigidBody():
         self._mass = mass
         self._acceleration = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._forces = []
+        self._collided = False
+        
+    def set_collided(self, collided):
+        '''Sets value to collided'''
+        self._collided = collided
 
+    def get_collided(self):
+        '''Returns collided bool'''
+        return self._collided
+        
     def change_platform_status(self, keyword, boolean):
         '''For knowing whether on a platform or not, other places can call this to set platform status'''
         self._platform_status[keyword] = boolean

@@ -100,6 +100,9 @@ class Rectangle:
     def set_values(self):
         '''Sets values based on root values'''
 
+        # ensures any negative widths and heights are changed so space and position are the same but with different heights and widths
+
+        
         # set corner points
         self._top_left = Point(self._x, self._y)
         self._top_right = Point(self._x+self._w, self._y)
@@ -134,7 +137,6 @@ class Rectangle:
 
         # reset values based on x,y,w, and h values
         self.set_values()
-        
     def get_x(self):
         '''Return x'''
         return self._x
@@ -175,13 +177,13 @@ class Rectangle:
         '''Change top left, recalculate corners, and leave width and height alone'''
         self._x = top_left_point.x()
         self._y = top_left_point.y()
-        self.set_values()
+        self.normalize()
 
     def change_top_right(self, top_right_point):
         '''Change top right corner of rectangle'''
         self._x = top_right_point.x()-self._w
         self._y = top_right_point.y()
-        self.set_values()
+        self.normalize()
 
     def change_bottom_left(self, bottom_left_point):
         '''Change bottom right corner of rectangle given point'''
@@ -195,6 +197,18 @@ class Rectangle:
         self._y = bottom_right_point.y()-self._h
         self.set_values()
 
+    def change_width(self, new_width):
+        '''Changes width to new_width'''
+        self._x = self._center.x()-new_width/2
+        self._w = new_width
+        self.set_values()
+
+    def change_height(self, new_height):
+        '''Changes height to new_height'''
+        self._y = self._center.y()-new_height/2
+        self._h = new_height
+        self.set_values()
+        
     def get_size(self):
         '''Return size in point form'''
         return Point(self._w, self._h)
@@ -209,9 +223,9 @@ class Rectangle:
         '''Returns width and height in point form'''
         return Point(self._w, self._h)
         
-    def __str__(self):
+    def __str__(self, rounding=True):
         '''Return string for pretty print'''
-        return str(self._x) + ' ' + str(self._y) + ' ' + str(self._w) + ' ' +str(self._h)
+        return str(round(self._x)) + ' ' + str(round(self._y)) + ' ' + str(round(self._w)) + ' ' +str(round(self._h)) if rounding else  str(self._x) + ' ' + str(self._y) + ' ' + str(self._w) + ' ' +str(self._h)
 
     def collides_with(self, other):
         '''Returns boolean state of whether or not rectangle collides with any thing else'''

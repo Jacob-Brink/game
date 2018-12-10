@@ -27,14 +27,11 @@ class Camera(Rectangle):
         '''Constructor contructs new camera object determined by the provided viewing rectangle'''
 
         self._zoom = 1
-        self.ZOOM_MIN = .1
-        self.ZOOM_MAX = 2.5
+        self.ZOOM_MIN = .05
+        self.ZOOM_MAX = 1.2
 
         self._screen_rect = pygame.Rect((0, 0), screen.get_size())
         self._aspect_ratio = self._screen_rect.h/self._screen_rect.w
-
-        # storage of total view position delta from inital start
-        self._view_position_delta = Point(0,0)
 
         self._view_rect = Rectangle(position, screen.get_size())
         
@@ -48,17 +45,9 @@ class Camera(Rectangle):
         '''Calculate things'''
         view_width = self._screen_rect.width/self._zoom
         view_height = self._screen_rect.height/self._zoom
-
-        # total delta
-        view_position_delta_total = Point((view_width-self._screen_rect.width)/2, (view_height-self._screen_rect.height)/2)
-        
-        # add recent delta by subtracting the difference between current and past delta totals
-        delta_point = Point((-view_position_delta_total.x()+self._view_position_delta.x()), (-view_position_delta_total.y()+self._view_position_delta.y()))
-        self._view_rect.move(delta_point)
-
-        # set position_delta total to current total
-        self._view_position_delta = view_position_delta_total
-
+      
+        self._view_rect.change_width(view_width)
+        self._view_rect.change_height(view_height)
         
 
     def zoom_values(self, *values):
@@ -95,16 +84,15 @@ class Camera(Rectangle):
         # set camera to center of two players
         self._view_rect.set_center(average_center_target)
 
-        margin = 10
+        margin = 1000
 
         # calculate zoom necessary for both players to be seen
         # if distance in the x direction is greater, make zoom from width
         if abs(center_1.x() - center_2.x()) > abs(center_1.y() - center_2.y()):
             self.zoom(abs(self._screen_rect.width / (center_1.x() - center_2.x()+margin)))
-            pass
         else:
-            pass
             self.zoom(abs(self._screen_rect.height / (center_1.y() - center_2.y()+margin)))
+
 
         self._calculate_things()
         
@@ -143,11 +131,11 @@ class Camera(Rectangle):
         
     def _disp_x_value(self, x_value):
         '''Given x value, return screen x in screen offset'''
-        return self._zoom*(x_value-self._view_rect.get_x())
+        return self._zoom*(x_value-self._view_rect.get_x()-self._view_rect.get_w()/2)+self._screen_rect.w/2
     
     def _disp_y_value(self, y_value):
         '''Given y_value, return screen y offset'''
-        return self._zoom*(y_value-self._view_rect.get_y())
+        return self._zoom*(y_value-self._view_rect.get_y()-self._view_rect.get_h()/2)+self._screen_rect.h/2
     
     def return_display_surface(self, surface):
         '''Given a surface, return the display surface'''
@@ -173,7 +161,7 @@ class Camera(Rectangle):
 
     def is_visible(self, object_rect):
         '''Boolean value of whether given object is in the camera's viewing rectangle. True for is visible and False for invisible.'''
-        return True if self._view_rect.return_pygame_rect().colliderect(object_rect.return_pygame_rect()) == 1 else False
+        return self._view_rect.return_pygame_rect().colliderect(object_rect.return_pygame_rect()) == 1
 
 
 if __name__ == '__main__':

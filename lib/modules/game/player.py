@@ -7,6 +7,7 @@ from lib.modules.gui.image import Image
 from lib.modules.gui.events import *
 from lib.modules.gui.text import Text
 from lib.modules.gui.rectangle import Rectangle
+from lib.modules.game.bomb import Bomb
 
 image_path = 'lib/data/assets/'
 
@@ -28,7 +29,7 @@ class Player(RigidBody):
         self._debug = debug_mode
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
-        
+
         self._health = 10
 
         
@@ -38,23 +39,22 @@ class Player(RigidBody):
         delta_x = 0
         delta_y = 0
 
-        change = 1*events.delta_time()
+        change = 2*events.delta_time()
 
         if pressed(self._keys['left']) and  not super().get_platform_status('right_platform'):
-                delta_x -= change
+            delta_x -= change
 
         if pressed(self._keys['right']) and not super().get_platform_status('left_platform'):
-                delta_x += change
+            delta_x += change
             
         if pressed(self._keys['up']) and not super().get_platform_status('beneath_platform'):
-                delta_y -= change
+            delta_y -= change
 
         if pressed(self._keys['down']) and not super().get_platform_status('on_platform'):
-                delta_y += change
+            delta_y += change
             
         if pressed(self._keys['fire']):
             pass
-            #ADD CODE!!!!!!!!!!!!
 
         user_force = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
         print(user_force.return_direction())

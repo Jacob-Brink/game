@@ -14,11 +14,12 @@ class Game(View):
         '''View that holds game entities, deals with collision, and handles the entire game!!!'''
         super().__init__(screen)
         self._menu = Menu(screen, 'right', 'THE BEST GAME EVER!!!', [('Quit', go_back)])
-        self._player1 = Player(0, debug_mode)
-        self._player2 = Player(1, debug_mode)
         self._debug = debug_mode
         self._go_back = go_back
 
+        self._player1 = Player(0, debug_mode)
+        self._player2 = Player(1, debug_mode)
+        
         self._physics = Physics(debug_mode)
         self._level = level
         self._platforms = []
@@ -26,8 +27,11 @@ class Game(View):
         
         # Add way for more players and rigid body stuff
         self._player_list = [self._player1, self._player2]
-        
+
+        # Delete rigid_body list
         self._rigid_body_list = []
+        
+        self._bomb_list = []
         self._surface_pos_list = [self._player1.return_surface_and_pos(), self._player2.return_surface_and_pos()]
 
         self._num = 0

@@ -70,9 +70,9 @@ class Vector:
         '''Returns vector projected on axis_vector'''
         return Vector(axis_vector.return_start_position(), direction=axis_vector.return_direction(), magnitude=(self._x_component*axis_vector.return_x_component()+ self._y_component*axis_vector.return_y_component()))
     
-    def __str__(self):
+    def __str__(self, rounding=True):
         '''Pretty print enabled for class'''
-        return 'Direction: ' + str(self.return_direction()) + ', Magnitude: ' + str(self.return_magnitude()) + '<' + str(self.return_x_component()) + ',' + str(self.return_y_component())+'>'
+        return 'Direction: ' + str(round(self.return_direction())) + ', Magnitude: ' + str(round(self.return_magnitude())) + '<' + str(round(self.return_x_component())) + ',' + str(round(self.return_y_component()))+'>'
 
     def __mul__(self, other):
         '''Allows for scalar and vector multiplication'''
