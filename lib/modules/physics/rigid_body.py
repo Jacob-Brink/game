@@ -80,7 +80,7 @@ class RigidBody():
         self._past_velocity = self._velocity    
         self._velocity = self._acceleration + self._velocity
 
-        self._past_rect = copy.copy(self._rect)
+        self._past_rect = self._rect.copy()
         
         # FIX: DUE TO as;lkdfja;sfdasdfasdf
         # changes rectangle from last velocity
@@ -96,6 +96,7 @@ class RigidBody():
         
     def return_rect(self):
         '''Returns rectangle of type pygame.Rect'''
+        print(self._rect)
         return self._rect
 
     def return_mass(self):

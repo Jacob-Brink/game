@@ -21,14 +21,6 @@ class Point:
     def change_y(self, new_y):
         '''Change y to new_y'''
         self._y = new_y
-
-    def change_w(self, new_w):
-        '''Change width'''
-        self._w = new_w
-
-    def change_h(self, new_h):
-        '''Change height'''
-        self._h = new_h
         
     def return_tuple(self):
         '''Returns tuple of x and y'''
@@ -56,6 +48,10 @@ class Rectangle:
         '''Raises error wrapper function'''
         raise ValueError(str(error))
 
+    def copy(self):
+        '''Returns a copy of the rectangle'''
+        return Rectangle(self.get_top_left().return_tuple(), self.get_size().return_tuple())
+    
     def normalize(self):
         '''When a rectangle has negative width or height, it is corrected for'''
         if self._h < 0:
@@ -193,7 +189,11 @@ class Rectangle:
         self._x = bottom_right_point.x()-self._w
         self._y = bottom_right_point.y()-self._h
         self.set_values()
-        
+
+    def get_size(self):
+        '''Return size in point form'''
+        return Point(self._w, self._h)
+    
     def move(self, point_delta):
         '''Moves rectangle position'''
         self._x += point_delta.x()
@@ -207,3 +207,7 @@ class Rectangle:
     def __str__(self):
         '''Return string for pretty print'''
         return str(self._x) + ' ' + str(self._y) + ' ' + str(self._w) + ' ' +str(self._h)
+
+    def collides_with(self, other):
+        '''Returns boolean state of whether or not rectangle collides with any thing else'''
+        return self.get_x() <= other.get_x()+other.get_w() and self.get_x()+self.get_w() >= other.get_x() and self.get_y() <= other.get_y()+other.get_h() and self.get_y()+self.get_h() >= other.get_y()

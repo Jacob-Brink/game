@@ -28,7 +28,7 @@ class Camera(Rectangle):
 
         self._zoom = 1
         self.ZOOM_MIN = .1
-        self.ZOOM_MAX = 1.1
+        self.ZOOM_MAX = 2.5
 
         self._screen_rect = pygame.Rect((0, 0), screen.get_size())
         self._aspect_ratio = self._screen_rect.h/self._screen_rect.w
@@ -53,7 +53,7 @@ class Camera(Rectangle):
         view_position_delta_total = Point((view_width-self._screen_rect.width)/2, (view_height-self._screen_rect.height)/2)
         
         # add recent delta by subtracting the difference between current and past delta totals
-        delta_point = Point((view_position_delta_total.x()-self._view_position_delta.x()), (view_position_delta_total.y()-self._view_position_delta.y()))
+        delta_point = Point((-view_position_delta_total.x()+self._view_position_delta.x()), (-view_position_delta_total.y()+self._view_position_delta.y()))
         self._view_rect.move(delta_point)
 
         # set position_delta total to current total
@@ -63,11 +63,11 @@ class Camera(Rectangle):
 
     def zoom_values(self, *values):
         '''Given any width or height returns the displayed width and height with zoom'''
-        return [int(self._zoom*v) for v in values]
+        return [int(1*v) for v in values]
 
     def unzoom_values(self, *values):
         '''Given any number of display widths and heights, returns true widths and heights'''
-        return [int(1/self._zoom*v) for v in values]
+        return [int(1*v) for v in values]
 
     def move(self, **kwords):
         '''Public method called to move camera to new location. Note that move does not provide any travel by itself and that the calling code must take this into account.'''

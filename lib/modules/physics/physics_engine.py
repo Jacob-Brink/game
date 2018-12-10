@@ -22,28 +22,32 @@ class Physics:
     def return_new_rect_reposition(self, past_rect, platform):
         '''Checks rigid body against platform'''
         rect = copy.copy(past_rect)
+        side = None
+        
         
         if past_rect.get_y()+past_rect.get_h() <= platform.get_y():
             print('correcting top')
             rect = Rectangle(rect.get_x(), platform.get_y()-rect.get_h()-self._MARGIN_PIXEL, rect.get_w(), rect.get_h())
             side = 'on_platform'
-            # on bottom
+        # on bottom
         if past_rect.get_y() >= platform.get_y() + platform.get_h():
             print('correcting bottom')
             rect = Rectangle(rect.get_x(), platform.get_y()+platform.get_h()+self._MARGIN_PIXEL, rect.get_w(), rect.get_h())
             side = 'beneath_platform'
-            # on left
+        # on left
         if past_rect.get_x() >= platform.get_x() + platform.get_w():
             print('correcting to left')
             rect = Rectangle(platform.get_x()+platform.get_w()+self._MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h())
             side = 'right_platform'
-            # on right
+        # on right
         if past_rect.get_x()+past_rect.get_w() <= platform.get_x():
             print('correcting to right')
             rect = Rectangle(platform.get_x()-self._MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h())
             side = 'left_platform'
+
+        print(rect, platform)
         print(str(rect), ' collided with ', str(platform), ' at side', side)
-            
+
         return rect, side
 
         

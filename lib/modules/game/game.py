@@ -47,7 +47,7 @@ class Game(View):
             super().update_screen_size(screen.get_size())
         
         if events.keyboard().is_pressed(pygame.K_RETURN) == Switch.down:
-            super().zoom(.2)
+            super().zoom(2)
         
         # update menu
         self._menu.update(events)
@@ -56,6 +56,15 @@ class Game(View):
         
         # physics sim
         self._physics.update(events, self._player_list, self._rigid_body_list, self._platforms)
+
+
+        
+        # render platforms
+        for platform in self._platforms:
+            # if rectangle is visible, render it
+            if super().is_visible(platform):
+                super().render_rectangle(platform)
+        
         
         # render appropriate rigid_bodies
         for rigid_body in self._rigid_body_list:
@@ -69,12 +78,6 @@ class Game(View):
             if self._debug:
                 super().render_line(player.return_velocity_vector()*100)
                 
-        # render platforms
-        for platform in self._platforms:
-            # if rectangle is visible, render it
-            if super().is_visible(platform):
-                super().render_rectangle(platform)
-        
 
         super().render_rectangle(Rectangle(super().return_camera_position().return_tuple(), (20,20)))
                 

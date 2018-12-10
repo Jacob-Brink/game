@@ -14,24 +14,107 @@ def return_screen():
 
 class TestGame(unittest.TestCase):
 
+    def test_point(self):
+        from lib.modules.gui.rectangle import Point
+        p = Point(2, 3)
+        assert p.x() == 2
+        assert p.y() == 3
+        assert str(p) == '<2,3>'
+
+        p.change_x(4)
+        p.change_y(5)
+
+        assert p.x() == 4
+        assert p.y() == 5
+    
     def test_rectangle(self):
         '''Test rectangle'''
         from lib.modules.gui.rectangle import Rectangle
 
+        # test invalid rectangles
+        try:
+            invalid = Rectangle('asfd', 3, 4, 5)
+            assert False
+        except:
+            pass
+
+        try:
+            invalid = Rectangle((1,2,4),3)
+            assert False
+        except:
+            pass
+
+        # test normalize with negative sizes
+        assert Rectangle(1,2,-3,4) == Rectangle(-2, 2, 3, 4)
+        assert Rectangle(3, 5, -2, -2) == Rectangle(1, 3, 2, 2)
+
+        # test basic functions
+        assert Rectangle(1,2,3,4).list_basic_values == [1,2,3,4]
+
+        r = Rectangle(1,2,3,4)
+        assert r.copy() is not r
+
+        assert isinstance(r.return_pygame_rect(), pygame.Rect)
+        
         rect = Rectangle((0,0), (4,5))
 
+        # test accessor methods
         assert rect.get_x() == 0
         assert rect.get_y() == 0
         assert rect.get_w() == 4
         assert rect.get_h() == 5
 
-        assert rect.get_center() == (2, 2.5)
+        print(rect.get_center())
+        assert rect.get_center() == Point(2, 2.5)
 
-        assert rect.get_bottom_left() == (0, 5)
-        assert rect.get_bottom_right() == (4, 5)
-        assert rect.get_top_left() == (0,0)
-        assert rect.get_top_right() == (4,0)
+        assert rect.get_bottom_left() == Point(0, 5)
+        assert rect.get_bottom_right() == Point(4, 5)
+        assert rect.get_top_left() == Point(0,0)
+        assert rect.get_top_right() == Point(4,0)
 
+        assert rect.get_size() == Point(4,5)
+        
+        # test mutator methods
+        r = Rectangle(-2, 3, 4, 5)
+        r.change_top_left(Point(1,2))
+        
+        assert r.get_top_left() == Point(1,2)
+        assert r.get_size() == Point(4,5)
+
+        r.change_top_right(Point(2,3))
+        assert r.get_top_right() == Point(2,3)
+        assert r.get_size() == Point(4,5)
+
+        r.change_bottom_left(Point(-4,4))
+        assert r.get_size() == Point(4,5)
+        assert r.get_bottom_left(Point(-4,4))
+
+        r.change_bottom_right(Point(-5,4))
+        assert r.get_bottom_right() == Point(-5,4)
+        assert r.get_size() == Point(4,5)
+
+        # test move and scale
+        r = Rectangle(-3, 4, 5, 2)
+        r.move(Point(10, 20))
+        assert r.get_size() == Point(5,2)
+        assert r.get_top_left() == Point(7, 24)
+
+        r = Rectangle(1, 2, 3, 6)
+        r.scale(10)
+        assert r.get_size() == Point(30, 60)
+        assert r.get_get_center() == Point(2,4)
+
+        # test pretty print
+        assert str(Rectangle(1, 2, 3, 4)) == '1 2 3 4'
+
+        # test collide function
+        colliding = [[(0,0,4,4), (1,2,-3,-4)],[(0,0,1,1), (1,1,2,2)], [(0,0,10,5),(-2,-3,3,4)]]
+        separate = [[(1,1,2,2), (5,5,1,1)],[(0,0,3,4),(1,40,10,1)]]
+        for r in colliding:
+            assert Rectangle(r[0]).collides_with(Rectangle(r[1]))
+        for r in separate:
+            assert not Rectangle(r[0]).collides_with(Rectangle(r1))
+        
     def test_camera(self):
         '''Test camera'''
         # import, initialize, and test transformations provided by camera
