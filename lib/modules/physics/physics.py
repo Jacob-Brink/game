@@ -11,7 +11,7 @@ class Collision:
 
     def rect_rect(self, rect1, rect2):
         '''Return boolean value of any intersection between two given pygame rects'''
-        return rect1.get_x() <= rect2.get_x()+rect2.get_w() and rect1.get_x()+rect1.get_w() >= rect2.get_x() and rect1.get_y() <= rect2.get_y()+rect2.get_w() and rect1.get_y()+rect1.get_h() >= rect2.get_y()
+        return rect1.get_x() <= rect2.get_x()+rect2.get_w() and rect1.get_x()+rect1.get_w() >= rect2.get_x() and rect1.get_y() <= rect2.get_y()+rect2.get_h() and rect1.get_y()+rect1.get_h() >= rect2.get_y()
         
     def _line_collides_rect(self, slope, point_coordinate, rect, range_xy):
         '''Returns boolean value of whether or not a line collided with a rectangle'''
