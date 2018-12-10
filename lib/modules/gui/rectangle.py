@@ -31,7 +31,7 @@ class Point:
 
     def __eq__(self, other):
         '''Returns boolean value of whether or not two points are equal to each other'''
-        return self._x == other._x and self._y == other._y
+        return self._x == other._x and self._y == other._y if isinstance(other, Point) else False
     
     
 class Rectangle:
@@ -74,12 +74,12 @@ class Rectangle:
         
         if isinstance(args[0], tuple) and isinstance(args[1], tuple):
                 
-                # set four elemental values of rectangle
-                self._x = args[0][0]
-                self._y = args[0][1]
-                
-                self._w = args[1][0]
-                self._h = args[1][1]
+            # set four elemental values of rectangle
+            self._x = args[0][0]
+            self._y = args[0][1]
+            
+            self._w = args[1][0]
+            self._h = args[1][1]
 
         elif len(args) == 4:
             self._x = args[0]
@@ -126,6 +126,7 @@ class Rectangle:
         # reset values based on x,y,w, and h values
         self.set_values()
 
+        print(self.get_center())
     def set_center(self, center_point):
         '''Given center tuple, change center without changing width or height'''
         self._x = center_point.x()-self._w / 2

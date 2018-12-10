@@ -115,7 +115,7 @@ class TestGame(unittest.TestCase):
         r = Rectangle(1, 2, 3, 6)
         r.scale(10)
         assert r.get_size() == Point(30, 60)
-        assert r.get_center() == Point(2,4)
+        assert r.get_center() == Point(2.5,5)
 
         # test pretty print
         assert str(Rectangle(1, 2, 3, 4)) == '1 2 3 4'
@@ -123,29 +123,32 @@ class TestGame(unittest.TestCase):
         # test collide function
         colliding = [[(0,0,4,4), (1,2,-3,-4)],[(0,0,1,1), (1,1,2,2)], [(0,0,10,5),(-2,-3,3,4)]]
         separate = [[(1,1,2,2), (5,5,1,1)],[(0,0,3,4),(1,40,10,1)]]
+
         for r in colliding:
-            assert Rectangle(r[0]).collides_with(Rectangle(r[1]))
+            assert Rectangle(*r[0]).collides_with(Rectangle(*r[1]))
         for r in separate:
-            assert not Rectangle(r[0]).collides_with(Rectangle(r1))
+            assert not Rectangle(*r[0]).collides_with(Rectangle(*r[1]))
         
     def test_camera(self):
         '''Test camera'''
         # import, initialize, and test transformations provided by camera
         from lib.modules.gui.camera import Camera
-
+        from lib.modules.gui.rectangle import Rectangle, Point
+        
         screen_size = (640, 480)
         camera = Camera(return_screen(), (0,0))
 
         rect = pygame.Rect(0, 0, 10, 20)
 
         # test camera is visible
-        assert camera.is_visible(rect) == True
-        assert camera.return_camera_position() == (0,0)
-        assert camera.return_disp_rect(rect).width == 10
+        assert camera.is_visible(Rectangle(1,2,3,4)) == True
+        assert camera.return_camera_position() == Point(0,0)
+        assert camera.return_disp_rect(Rectangle(10,20,10,0)).width == 10
         center = camera._view_rect.get_center()
         camera.zoom(2)
 
         # test that center of camera stays in place
+        print(center, 'vs', camera._view_rect.get_center())
         assert camera._view_rect.get_center() == center
 
         print(camera.return_camera_position())

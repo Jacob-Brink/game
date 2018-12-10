@@ -135,19 +135,19 @@ class Camera(Rectangle):
 
     def _true_x_value(self, x_value):
         '''Return true position of disp x value'''
-        return (x_value / self._screen_rect.w) * self._view_rect.get_w() + self._view_rect.get_x()
+        return x_value/self._zoom +self._view_rect.get_x()
 
     def _true_y_value(self, y_value):
         '''Return true position of disp y value'''
-        return (y_value / self._screen_rect.h) * self._view_rect.get_h() + self._view_rect.get_y()
+        return y_value/self._zoom+self._view_rect.get_y()
         
     def _disp_x_value(self, x_value):
         '''Given x value, return screen x in screen offset'''
-        return  self._screen_rect.w*(x_value-self._view_rect.get_x())/self._view_rect.get_w()
+        return self._zoom*(x_value-self._view_rect.get_x())
     
     def _disp_y_value(self, y_value):
         '''Given y_value, return screen y offset'''
-        return self._screen_rect.h*(y_value-self._view_rect.get_y())/self._view_rect.get_h()
+        return self._zoom*(y_value-self._view_rect.get_y())
     
     def return_display_surface(self, surface):
         '''Given a surface, return the display surface'''
