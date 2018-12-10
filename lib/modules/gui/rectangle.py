@@ -212,4 +212,4 @@ class Rectangle:
         '''Returns boolean state of whether or not rectangle collides with any thing else'''
         return self.get_x() <= other.get_x()+other.get_w() and self.get_x()+self.get_w() >= other.get_x() and self.get_y() <= other.get_y()+other.get_h() and self.get_y()+self.get_h() >= other.get_y()
 
-    def __equals__(
+    #def __equals__(
