@@ -54,7 +54,11 @@ class Camera(Rectangle):
     def unzoom_values(self, *values):
         '''Given any number of display widths and heights, returns true widths and heights'''
         return [int(1/self._zoom*v) for v in values]
-        
+
+    def move(self, delta_x, delta_y):
+        '''Given delta x and delta y, move view_rect'''
+        self._view_rect.move(Point(delta_x, delta_y))
+    
     def track(self, rigid_body1, rigid_body2, delta_time):
         '''Resizes camera rect to show both rectangles'''
 
@@ -80,7 +84,6 @@ class Camera(Rectangle):
             self.zoom(zoom_for_x)
         else:
             self.zoom(zoom_for_y)
-
 
         self._calculate_things()
 

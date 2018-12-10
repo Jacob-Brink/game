@@ -225,6 +225,13 @@ class Rectangle:
         '''Return string for pretty print'''
         return str(round(self._x)) + ' ' + str(round(self._y)) + ' ' + str(round(self._w)) + ' ' +str(round(self._h)) if rounding else  str(self._x) + ' ' + str(self._y) + ' ' + str(self._w) + ' ' +str(self._h)
 
+    def collide_point(self, point):
+        '''Returns boolean value of whether or not a point collides with self'''
+        if isinstance(point, Point):
+            return self.get_x() <= point.x() <= self.get_x() + self.get_w() and self.get_y() <= point.y() <= self.get_y()+self.get_h()
+        else:
+            raise TypeError('Rectangle->collide_point requires argument to be of type Point')
+
     def collides_with(self, other):
         '''Returns boolean state of whether or not rectangle collides with any thing else'''
         return self.get_x() <= other.get_x()+other.get_w() and self.get_x()+self.get_w() >= other.get_x() and self.get_y() <= other.get_y()+other.get_h() and self.get_y()+self.get_h() >= other.get_y()

@@ -128,6 +128,19 @@ class TestGame(unittest.TestCase):
             assert Rectangle(*r[0]).collides_with(Rectangle(*r[1]))
         for r in separate:
             assert not Rectangle(*r[0]).collides_with(Rectangle(*r[1]))
+
+        # test collide point function
+        rect = Rectangle(0,0,2,3)
+
+        colliding_points = [Point(0,0), Point(0,3), Point(2,3), Point(2,0)]
+        noncolliding_points = [Point(3,4), Point(-1,-1), Point(4,4), Point(8,0)]
+
+        for point in colliding_points:
+            assert rect.collide_point(point) == True
+
+        for point in noncolliding_points:
+            assert rect.collide_point(point) == False
+        
         
     def test_camera(self):
         '''Test camera'''

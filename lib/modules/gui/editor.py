@@ -25,15 +25,7 @@ def init():
 # Cursor enum
 class Cursor(Enum):
     platform = 1
-    start = 2
-    coin = 3
-    eraser = 4
-
-# dictionary of width and height for cursor items
-ITEM_DIMENSIONS = {
-    Cursor.start: (40, 40),
-    Cursor.coin: (20, 20)
-}
+    eraser = 2
         
     
 class Editor(View):
@@ -41,12 +33,15 @@ class Editor(View):
     def __init__(self, screen, level, quit_callback):
         '''Constructs an editor object derived from base class View. The editor object allows for easy creation of new levels.'''
 
+        self._quit_callback = quit_callback
+        
         # construct view object that will handle all rendering and blitting stuff
         super().__init__(screen)
-        self._menu = Menu(screen, 'right', 'Editor', [('Save', self.save_level_callback()), ('Platform', self.change_cursor(Cursor.platform)), ('Starting Block', self.change_cursor(Cursor.start)), ('Coin', self.change_cursor(Cursor.coin)),('Exit', quit_callback)])
+
+        # construct title surface
+        self._title = Text('Editor Shortcuts: (w,a,s,d for panning), (1 for rectangle paint brush), (2 for eraser), (left click for painting), (ESC to save and exit)', 32, (255,255,255), 'left', 30)
 
         self._cursor = Cursor.platform
-        
         self._platforms = []
         self._level = level
 
@@ -67,9 +62,7 @@ class Editor(View):
     
     def change_cursor(self, new_cursor):
         '''Changes cursor and is given to buttons in the menu'''
-        def callback(*args):
-            self._cursor = new_cursor
-        return callback
+        self._cursor = new_cursor
         
     def write_level(self):
         '''Write to level all platforms and items'''
@@ -82,29 +75,20 @@ class Editor(View):
         with open(self._level) as level_file:
             [self._platforms.append(Rectangle(*[float(string_integer) for string_integer in line.strip().split()])) for line in level_file]
 
-    def move_camera(self, events):
-        '''With given events, controls camera movement.'''
+    def erase(self, mouse_pos, current_click):
+        '''Given mouse position and a click, erases a rectangle'''
 
-        keys_pressed = events.keyboard()
-        delta_x = 0
-        delta_y = 0
-
-        change = 5
-
-        if keys_pressed.is_pressed(pygame.K_a) == Switch.down:
-            delta_x -= change
-
-        if keys_pressed.is_pressed(pygame.K_d) == Switch.down:
-            delta_x += change
-
-        if keys_pressed.is_pressed(pygame.K_w) == Switch.down:
-            delta_y -= change
-
-        if keys_pressed.is_pressed(pygame.K_s) == Switch.down:
-            delta_y += change
-
-        super().move(change_x=delta_x, change_y=delta_y)
-
+        mouse_display_point = Point(*mouse_pos)
+        
+        # If eraser collides with rectangle, highlight it
+        for platform in self._platforms:
+            if platform.collide_point(super().return_display_position(mouse_display_point)):
+                #Highlight rectangle
+                if current_click == Switch.pushed_down:
+                    self._platforms.remove(platform)
+        # If clicked, pop it
+        
+        
     def _return_rect(self, first_pos, second_pos):
         '''Transforms two mouse position points into rectangle.'''
 
@@ -146,12 +130,6 @@ class Editor(View):
             # remove temp rectangle
             self._unfinished_rect = None
 
-
-    def save_level_callback(self):
-        '''Saves level, given to button'''
-        def callback(*args):
-            self.write_level()
-        return callback
         
     def _collides_platform(self, rect):
         '''Checks for collisions, returns boolean value'''
@@ -159,34 +137,58 @@ class Editor(View):
             if rectangle.colliderect(rect):
                 return True
         return False
-            
-    def place_item(self, current_click, mouse_pos):
-        '''Places an item only if the user places it where it does not overlap with another rectangle'''
-        item_rect = pygame.Rect(super().return_true_position(mouse_pos), ITEM_DIMENSIONS[self._cursor])
+    
+    def handle_keyboard(self, events):
+        '''Handle Keyboard events'''
 
-        if not self._collides_platform(item_rect):
-            if current_click == Switch.pushed_up:
-                if self._cursor == Cursor.coin:
-                    self._coins.append((item_rect.x, item_rect.y))
-                if self._cursor == Cursor.start:
-                    self._start = item_rect
-                
+        delta_x = 0
+        delta_y = 0
+        
+        change = 5
+        
+        pressed = events.keyboard().is_pressed
+
+        if pressed(pygame.K_w) == Switch.down:
+            delta_y = -change
+        if pressed(pygame.K_s) == Switch.down:
+            delta_y = change
+        if pressed(pygame.K_a) == Switch.down:
+            delta_x = -change
+        if pressed(pygame.K_d) == Switch.down:
+            delta_x = change
+
+        super().move(delta_x, delta_y)
+        
+        if pressed(pygame.K_1) == Switch.pushed_down:
+            self.change_cursor(Cursor.platform)
+
+        if pressed(pygame.K_2) == Switch.pushed_down:
+            self.change_cursor(Cursor.eraser)
+
+        if pressed(pygame.K_z) == Switch.pushed_down:
+            del self._platforms[-1]
+
+        # save and exit if esc is pressed
+
+        if pressed(pygame.K_ESCAPE) == Switch.pushed_down:
+            self.write_level()
+            self._quit_callback()
+        
     
     def update(self, events):
         '''Use mouse to drag and make rectangle platforms'''
 
         screen = events.screen()
 
-        
         current_click = events.mouse().left_button()
         mouse_pos = events.mouse().get_position()
+
         
         if self._cursor == Cursor.platform:
             self.draw_platform(current_click, mouse_pos)
-        elif self._cursor == Cursor.coin or self._cursor == Cursor.start:
-            self.place_item(current_click, mouse_pos)
+
         elif self._cursor == Cursor.eraser:
-            self.erase(current_click, mouse_pos)
+            self.erase(mouse_pos, current_click)
         
         for rectangle in self._platforms:
             super().render_rectangle(rectangle, color=(200,0,100))
@@ -194,8 +196,8 @@ class Editor(View):
         if not self._unfinished_rect == None:
             super().render_rectangle(self._unfinished_rect, color=(100, 100, 100))
 
-        self.move_camera(events)
-        self._menu.update(events)
+        super().render(screen, (self._title.get_surface(), Point(10,10)), relative_screen=True)
+        self.handle_keyboard(events)
     
 
 if __name__ == '__main__':

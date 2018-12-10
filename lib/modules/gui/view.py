@@ -18,18 +18,23 @@ class View(Camera):
         except:
             pygame.draw.rect(self._screen, (255,0,0), super().return_disp_rect(rect))
             
-    def render_line(self, vector):
+    def render_line(self, vector, **keywords):
         '''Renders a vector with absolute position as a line'''
-        pygame.draw.line(self._screen, (200, 100, 240), super().return_display_position(vector.return_start_position()).return_tuple(), super().return_display_position(vector.return_end_position()).return_tuple())
+        if 'relative_screen' in keywords and keywords['relative_screen'] == True:   
+            pygame.draw.line(self._screen, (200, 100, 240), vector.return_start_position().return_tuple(), vector.return_end_position().return_tuple())
+        else:
+            pygame.draw.line(self._screen, (200, 100, 240), super().return_display_position(vector.return_start_position()).return_tuple(), super().return_display_position(vector.return_end_position()).return_tuple())
         
-    def render(self, screen, *surface_pos):
+    def render(self, screen, *surface_pos, **keywords):
         '''Given a screen and surfaces, render the surfaces'''
-        self._screen = screen
-
+        #CHANGE PARAMETERS IF NO ERROR OCCURS WITH self._screen = screen commented
+        
         # renders surface pos types
         for surface in surface_pos:
-            self._screen.blit(self.return_display_surface(surface[0]), self.return_display_position(surface[1]).return_tuple())
-
+            if 'relative_screen' in keywords and keywords['relative_screen'] == True:
+                self._screen.blit(surface[0], surface[1].return_tuple())
+            else:
+                self._screen.blit(super().return_display_surface(surface[0]), super().return_display_position(surface[1]).return_tuple())
 
 
 
