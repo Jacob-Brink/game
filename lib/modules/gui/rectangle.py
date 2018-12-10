@@ -71,8 +71,9 @@ class Rectangle:
     '''Rectangle that stores float values unlike pygame.Rect. Models a rectangle'''
     def __init__(self, *args):
         '''Constructs a new rectangle given position tuple and size tuple'''
-        
-        if isinstance(args[0], tuple) and isinstance(args[1], tuple):
+
+        # if the argument only has two elements, those two elements must be list or tuple type
+        if len(args) == 2:
                 
             # set four elemental values of rectangle
             self._x = args[0][0]
@@ -81,6 +82,7 @@ class Rectangle:
             self._w = args[1][0]
             self._h = args[1][1]
 
+        # if the argument has 4 elements, assume they represent x,y,w, and h
         elif len(args) == 4:
             self._x = args[0]
             self._y = args[1]
@@ -88,7 +90,7 @@ class Rectangle:
             self._h = args[3]
 
         else:
-            raise ValueError('Either two tuples: one of position one and size, or 4 float or int values of x,y,w, and h')
+            raise ValueError('Either two tuples: one of position one and size, or 4 float or int values of x,y,w, and h. Given ' + str(args) + 'instead')
         
         # check for invariance
         [self.raise_error('Must be integer or float. Got ' + str(value) + ' instead') for value in self.list_basic_values() if not self.check_is_number(value)]
@@ -219,10 +221,6 @@ class Rectangle:
         self._y += point_delta.y()
         self.set_values()
 
-    def get_size_point(self):
-        '''Returns width and height in point form'''
-        return Point(self._w, self._h)
-        
     def __str__(self, rounding=True):
         '''Return string for pretty print'''
         return str(round(self._x)) + ' ' + str(round(self._y)) + ' ' + str(round(self._w)) + ' ' +str(round(self._h)) if rounding else  str(self._x) + ' ' + str(self._y) + ' ' + str(self._w) + ' ' +str(self._h)

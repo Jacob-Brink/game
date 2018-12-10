@@ -83,7 +83,7 @@ class Game(View):
                 super().render_line(player.return_velocity_vector()*100)
                 
 
-        super().render_rectangle(Rectangle(super().return_camera_position().return_tuple(), (20,20)))
+        super().render_rectangle(Rectangle(super().return_rectangle().get_center().return_tuple(), (20,20)))
                 
         # Quit Game if escape is pressed
         if events.keyboard().is_pressed(pygame.K_ESCAPE) == Switch.pushed_down:

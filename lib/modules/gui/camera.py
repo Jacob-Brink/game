@@ -27,7 +27,7 @@ class Camera(Rectangle):
         '''Constructor contructs new camera object determined by the provided viewing rectangle'''
 
         self._zoom = 1
-        self.ZOOM_MIN = .05
+        self.ZOOM_MIN = .001
         self.ZOOM_MAX = 1.2
 
         self._screen_rect = pygame.Rect((0, 0), screen.get_size())
@@ -37,10 +37,7 @@ class Camera(Rectangle):
         
         # recalculate position from screen and zoom
         self._calculate_things()
-        
-    def return_camera_position(self):
-        return self._view_rect.get_top_left()
-        
+            
     def _calculate_things(self):
         '''Calculate things'''
         view_width = self._screen_rect.width/self._zoom
@@ -57,44 +54,39 @@ class Camera(Rectangle):
     def unzoom_values(self, *values):
         '''Given any number of display widths and heights, returns true widths and heights'''
         return [int(1/self._zoom*v) for v in values]
-
-    def move(self, **kwords):
-        '''Public method called to move camera to new location. Note that move does not provide any travel by itself and that the calling code must take this into account.'''
-
-        if 'vector' in kwords:
-            delta_point = Point(kwords['vector'].return_x_component(), kwords['vector'].return_y_component())
-
-        elif 'change_x' in kwords and 'change_y' in kwords:
-            delta_point = Point(kwords['change_x'], kwords['change_y'])
-
-        else:
-            raise ValueError('Camera->Move must be given either vector or change_x and change_y')
-
-        self._view_rect.move(delta_point)
-        self._calculate_things()
         
     def track(self, rigid_body1, rigid_body2, delta_time):
         '''Resizes camera rect to show both rectangles'''
 
+        # MOVE CENTER OF CAMERA TO CENTER OF RIGID BODIES
         # get average center between two players
         center_1 = rigid_body1.return_rect().get_center()
         center_2 = rigid_body2.return_rect().get_center()
         average_center_target = Point(center_1.x()+(center_2.x()-center_1.x())/2, center_1.y()+(center_2.y()-center_1.y())/2)
 
+
+        # ZOOM TO FIT RECTANGLE CREATED BY TWO RIGID BODIES
         # set camera to center of two players
         self._view_rect.set_center(average_center_target)
 
-        margin = 1000
-
         # calculate zoom necessary for both players to be seen
+        margin = rigid_body1.return_rect().get_w()*2
+
         # if distance in the x direction is greater, make zoom from width
-        if abs(center_1.x() - center_2.x()) > abs(center_1.y() - center_2.y()):
-            self.zoom(abs(self._screen_rect.width / (center_1.x() - center_2.x()+margin)))
+        zoom_for_x = abs(self._screen_rect.width / (center_1.x() - center_2.x()+margin))
+        zoom_for_y = abs(self._screen_rect.height / (center_1.y() - center_2.y()+margin))
+        
+        if zoom_for_x < zoom_for_y:
+            self.zoom(zoom_for_x)
         else:
-            self.zoom(abs(self._screen_rect.height / (center_1.y() - center_2.y()+margin)))
+            self.zoom(zoom_for_y)
 
 
         self._calculate_things()
+
+    def return_rectangle(self):
+        '''Returns camera rectangle copy'''
+        return self._view_rect.copy()
         
     def contains(self, rect1):
         '''Returns boolean state of whether or not a rigid body collided with camera view'''
@@ -157,7 +149,7 @@ class Camera(Rectangle):
         '''Returns pygame rectangle with positions relative to window screen'''
         if isinstance(tru_rect, pygame.Rect):
             raise ValueError('Camera requires true rectangle object and returns pygame.rect for display. Argument must be of type Rectangle.')
-        return pygame.Rect(self.return_display_position(tru_rect.get_top_left()).return_tuple(), self.zoom_values(*tru_rect.get_size_point().return_tuple()))
+        return pygame.Rect(self.return_display_position(tru_rect.get_top_left()).return_tuple(), self.zoom_values(*tru_rect.get_size().return_tuple()))
 
     def is_visible(self, object_rect):
         '''Boolean value of whether given object is in the camera's viewing rectangle. True for is visible and False for invisible.'''

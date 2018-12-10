@@ -135,42 +135,45 @@ class TestGame(unittest.TestCase):
         from lib.modules.gui.camera import Camera
         from lib.modules.gui.rectangle import Rectangle, Point
         
-        screen_size = (640, 480)
+        screen_size = Point(640, 480)
         camera = Camera(return_screen(), (0,0))
 
         rect = pygame.Rect(0, 0, 10, 20)
 
         # test camera is visible
         assert camera.is_visible(Rectangle(1,2,3,4)) == True
-        assert camera.return_camera_position() == Point(0,0)
+        assert camera.return_rectangle().get_top_left() == Point(0,0)
         assert camera.return_disp_rect(Rectangle(10,20,10,0)).width == 10
-        center = camera._view_rect.get_center()
-        camera.zoom(2)
 
-        # test that center of camera stays in place
-        print(center, 'vs', camera._view_rect.get_center())
-        assert camera._view_rect.get_center() == center
+        center = camera.return_rectangle().get_center()
+        camera.zoom(.5)
 
-        print(camera.return_camera_position())
-        assert camera.return_camera_position() == (160.0, 120.0)
-        assert camera.return_disp_rect(rect).width == 20
-        assert camera.return_true_rect(camera.return_disp_rect(rect)).width == 10
+        # test that center of camera stays in place and that width and height are scaled appropriately
+        assert camera.return_rectangle().get_center() == center
+        assert camera.return_rectangle().get_size() == Point(screen_size.x()*2, screen_size.y()*2)
+        assert camera.return_rectangle().get_top_left() == Point(-320.0, -240.0)
+
+        # test that zoom causes good scaling
+        assert camera.return_disp_rect(Rectangle(1,2,8,6)).width == 4
+        assert camera.return_true_rect(camera.return_disp_rect(Rectangle(1,2,10,13))).get_w() == 10
 
 
-        point = (24, 56)
+        point = Point(24, 56)
 
-        camera.zoom(4)
+        camera.zoom(1)
         
         # test camera true and display returning functions
-        assert camera.return_camera_position() == (400.0, 300.0)
-        assert camera._view_rect.size == (screen_size[0]/4, screen_size[1]/4)
+        assert camera.return_rectangle().get_top_left() == Point(0, 0)
+        assert camera.return_rectangle().get_size() == Point(screen_size.x(), screen_size.y())
 
-        assert camera.return_true_position(camera.return_display_position(point)) == (24, 56)
-        assert camera.return_display_position(point) == (-1504.0, -976.0)
+        assert camera.return_true_position(camera.return_display_position(point)) == Point(24, 56)
+        assert camera.return_display_position(point) == Point(24, 56)
 
+        camera.zoom(.5)
+        
         # test zoom and unzoom features
-        assert camera.zoom_values(1,2,3) == [4,8,12]
-        assert camera.unzoom_values(4, 8, 12) == [1, 2, 3]
+        assert camera.zoom_values(4,8,12) == [2,4,6]
+        assert camera.unzoom_values(2, 4, 6) == [4, 8, 12]
         
     
 
