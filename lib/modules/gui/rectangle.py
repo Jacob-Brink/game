@@ -55,10 +55,15 @@ class Rectangle:
         raise ValueError(str(error))
 
     def normalize(self):
+        '''When a rectangle has negative width or height, it is corrected for'''
         if self._h < 0:
             self._y += self._h
+            self._h = -self._h
+
         if self._w < 0:
             self._x += self._w
+            self._w = -self._w
+            
         self.set_values()
     
     '''Rectangle that stores float values unlike pygame.Rect. Models a rectangle'''
@@ -119,10 +124,10 @@ class Rectangle:
         # reset values based on x,y,w, and h values
         self.set_values()
 
-    def set_center(self, center_tuple):
+    def set_center(self, center_point):
         '''Given center tuple, change center without changing width or height'''
-        self._x = center_tuple[0]-self._w / 2
-        self._y = center_tuple[1]-self._h / 2
+        self._x = center_point.x()-self._w / 2
+        self._y = center_point.y()-self._h / 2
 
         # reset values based on x,y,w, and h values
         self.set_values()

@@ -1,25 +1,21 @@
-#Handle different import methods for testing and gaming
-if __name__ == '__main__':
-    from physics import Collision
-    from vector import Vector
+from lib.modules.physics.vector import Vector
+from lib.modules.physics.physics import Collision
+from lib.modules.gui.rectangle import *
 
-else:
-
-    from lib.modules.physics.vector import Vector
-    from lib.modules.physics.physics import Collision
-    from lib.modules.gui.rectangle import *
 import pygame
 import math
 
-class RigidBody(Collision):
+class RigidBody():
     def __init__(self, rect, mass):
         '''Constructs a new RigidBody object with given pygame.Rect rectangle and integer mass'''
-        super().__init__()
         
         # if given pygame.Rect type convert to floatable homemade rectangle object
         if isinstance(rect, pygame.Rect):
             raise ValueError('RigidBody->Constructor: rectangle must be of type Rectangle not pygame.Rect')
         self._rect = rect
+        self._past_rect = self._rect
+
+        self._platform_status = {'on_platform': False, 'beneath_platform': False, 'left_platform': False, 'right_platform': False}
         
         self._velocity = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._past_velocity = self._velocity
@@ -27,14 +23,32 @@ class RigidBody(Collision):
         self._acceleration = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._forces = []
 
-    def collides_with(self, other):
-        '''Returns boolean value of colliding with other object or not'''
-        return super().rect_rect(self._rect, other)
+    def change_platform_status(self, keyword, boolean):
+        '''For knowing whether on a platform or not, other places can call this to set platform status'''
+        self._platform_status[keyword] = boolean
+
+    def reset_platform_status(self):
+        '''Resets values to False'''
+        for key in self._platform_status:
+            self._platform_status[key] = False
+
+        print(self._platform_status)
+        
+    def get_platform_status(self, key):
+        '''Given key, will return boolean value'''
+        return self._platform_status[key]
         
     def apply_force(self, force_vector):
         '''Applies an instantaneous force to the RigidBody object. Multiple forces can be applied over a game loop cycle, but forces will disappear after the cycle.'''
         self._forces.append(force_vector)
 
+    def return_net_force(self):
+        '''Returns net force'''
+        net_force = Vector(self._rect.get_center(), direction=0, magnitude=0)
+        for force in self._forces:
+            net_force = net_force + force
+        return net_force
+        
     def return_past_velocity(self):
         '''Return velocity vector of last tick'''
         return self._past_velocity
@@ -50,6 +64,7 @@ class RigidBody(Collision):
         self._rect = rect
 
     def set_velocity(self, velocity):
+        '''Set velocity to given velocity'''
         self._velocity = velocity
         
     def update(self):
@@ -67,6 +82,7 @@ class RigidBody(Collision):
         
         # set past and present rectangle values
         self._past_rect = self._rect
+        
         delta_point = Point(self._velocity.return_x_component(), self._velocity.return_y_component())
         self._rect.move(delta_point)
         self._forces = []

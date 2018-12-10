@@ -1,6 +1,8 @@
 from lib.modules.physics.vector import Vector
 from lib.modules.physics.line import Line
-from lib.modules.physics.parallelogram import Parallelogram
+from lib.modules.gui.rectangle import Rectangle
+from lib.modules.physics.physics import Collision
+
 import math
 import pygame
 
@@ -11,100 +13,98 @@ def list_points(_rect):
 class Physics:
 
     def __init__(self, debug_mode=False):
+        '''Construct Physics object'''
         self._debug_mode = debug_mode
-
-    def _collision(self, rigid_body, rect_list):
-        past_velocity_vector = rigid_body.return_past_velocity()
-        past_rect = rigid_body.return_past_rect()
-        current_rect = rigid_body.return_rect()
+        self._collision = Collision()
     
-    def return_greatest_parallelogram(self, rect1, velocity_vector):
-        '''Return parrallelogram from two rects being connected'''
-        #FIX OR DELETE, ONLY USEFUL FOR PREVENTING SUPER FAST COLLISIONS WHERE MOTION PARALLELOGRAM IS NEEDED
-        greatest_p = None
-        greatest_area = 0
-
-        # figure out greatest parallelogram formed from sides and velocity
-        rect_points = list_points(rect1)
-        for index in range(0, len(rect_points)):
-            point1 = rect_points[index]
-            point2 = rect_points[(index+1)%len(rect_points)]
-            p = Parallelogram(Vector(point1, x_component=(point2[0]-point1[0]), y_component=(point2[1]-point1[1])), Vector(point1, direction=velocity_vector.return_direction(), magnitude=velocity_vector.return_magnitude()))
-            # if the area of the figure is greater than the greatest area, update the greatest parallelogram
-            if p.return_area() > greatest_area:
-                greatest_p = p
-                greatest_area = p.return_area()
-                           
-        # check diagonals
-        for index in range(0, 2):
-            point1 = rect_points[index]
-            point2 = rect_points[(index+2)%len(rect_points)]
-            p = Parallelogram(Vector(point1, x_component=(point2[0]-point1[0]), y_component=(point2[1]-point1[1])), Vector(point1, direction=velocity_vector.return_direction(), magnitude=velocity_vector.return_magnitude()))
-            # if the area of the figure is greater than the greatest area, update the greatest parallelogram
-            if p.return_area() > greatest_area:
-                print('diagonal is bigger!!')
-                greatest_p = p
-                greatest_area = p.return_area()
-
-        return greatest_p
-    
-    
-    def _return_x_collision(self, vector, y_line, rect):
-        '''Returns x position of where vector and y_line intersect'''
-        line = Line(vector.return_slope(), (rect.topleft))
-        return line.x_value(y_line)
-        
-    def _return_y_collision(self, vector, x_line, rect):
-        '''Returns y posiiton of where vector and x_line intersect'''
-        line = Line(vector.return_slope(), (rect.topleft))
-        return line.y_value(x_line)
-
     def reposition(self, player_list, rigid_body_list, immovable_rect_list, delta_time):
         '''Return new rectangle based on how two rectangles collided'''
         MARGIN_PIXEL = 1
-        for player in player_list:
 
+
+        
+        for player in player_list:
+            player.reset_platform_status()
+            
             for platform in immovable_rect_list:
             # if a collision occurs, figure out how what side the player collided
-                if player.collides_with(platform):
+                if self._collision.rect_rect(player.return_rect(), platform):
                     past_rect = player.return_past_rect()
                     rect = player.return_rect()
                     body_velocity = player.return_velocity_vector()
-                    body_direction = body_velocity.return_direction()
+
+                    
+                    print('body_velocity.return_direction()',  body_velocity.return_direction())
+
+                    direction = player.return_past_velocity().return_direction()
 
 
+                    if  45 < direction <= 135:
+                        # player is on top
+                        print('player on top')
+                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()-rect.get_h()-MARGIN_PIXEL, rect.get_w(), rect.get_h()))
+                        player.change_platform_status('top_platform', True)
+
+                    elif 135 < direction <= 180 or -180 < direction <= -135:
+                        # player is to left
+                        print('player on left')
+                        player.set_rect(Rectangle(platform.get_x()+platform.get_w()+MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
+                        player.change_platform_status('right_platform', True)
+                        
+                    elif -135 < direction <= -45:
+                        # player is on bottom
+                        print('player on bottom')
+
+                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()+platform.get_h()+MARGIN_PIXEL, rect.get_w(), rect.get_h()))
+                        player.change_platform_status('beneath_platform', True)
+                        
+                    elif -45 < direction <= 0 or 0 < direction <= 45:
+                        # player is on right
+                        print('player on right')
+
+                        player.set_rect(Rectangle(platform.get_x()-rect.get_w()-MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
+                        player.change_platform_status('left_platform', True)
+
+                    
+                        '''    
                     # on top
-                    if past_rect.get_x()+past_rect.get_h() <= platform.get_y():
+                    if past_rect.get_y()+past_rect.get_h() <= platform.get_y():
                         print('correcting top')
-                        player.set_rect(pygame.Rect(rect.get_x(), platform.get_y()-rect.get_h()-MARGIN_PIXEL, rect.get_w(), rect.get_h()))
-
+                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()-rect.get_h()-MARGIN_PIXEL, rect.get_w(), rect.get_h()))
+                        player.change_platform_status('on_platform', True)
                     # on bottom
                     if past_rect.get_y() >= platform.get_y() + platform.get_h():
                         print('correcting bottom')
-                        player.set_rect(pygame.Rect(rect.get_x(), platform.get_y()+platform.get_h()+MARGIN_PIXEL, rect.get_w(), rect.get_h()))
-
+                        player.set_rect(Rectangle(rect.get_x(), platform.get_y()+platform.get_h()+MARGIN_PIXEL, rect.get_w(), rect.get_h()))
+                        player.change_platform_status('beneath_platform', True)
                     # on left
                     if past_rect.get_x() >= platform.get_x() + platform.get_w():
                         print('correcting to left')
-                        player.set_rect(pygame.Rect(platform.get_x()+platform.get_w()+MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
-
+                        player.set_rect(Rectangle(platform.get_x()+platform.get_w()+MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
+                        player.change_platform_status('right_platform', True)
                     # on right
                     if past_rect.get_x()+past_rect.get_w() <= platform.get_x():
                         print('correcting to right')
-                        player.set_rect(pygame.Rect(platform.get_x()-rect.get_w()-MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
-                        
+                        player.set_rect(Rectangle(platform.get_x()-rect.get_w()-MARGIN_PIXEL, rect.get_y(), rect.get_w(), rect.get_h()))
+                        player.change_platform_status('left_platform', True)
+
+
+                    '''
                     # apply appropriate force
                     print('Collision Occurred')
-                    player.set_velocity(body_velocity*(-.2))
+                    player.set_velocity(body_velocity*(-1))
                     
 
 
     def update(self, events, player_list, rigid_body_list, platform_list):
-        '''Calculate collisions, reposition from collisions, work with forces, etc'''
+        '''Calculate collisions, reposition from collisions, work with forces, etc'''        
+        
         for player in player_list:
             player.update(events)
+
         
         self.reposition(player_list, rigid_body_list, platform_list, events.delta_time())
+
         
 if __name__ == '__main__':
     '''Tests'''

@@ -27,8 +27,9 @@ class Camera(Rectangle):
         '''Constructor contructs new camera object determined by the provided viewing rectangle'''
 
         self._zoom = 1
-        self._zoom_speed = 0
-        
+        self.ZOOM_MIN = .1
+        self.ZOOM_MAX = 1.1
+
         self._screen_rect = pygame.Rect((0, 0), screen.get_size())
         self._aspect_ratio = self._screen_rect.h/self._screen_rect.w
 
@@ -50,8 +51,6 @@ class Camera(Rectangle):
 
         # total delta
         view_position_delta_total = Point((view_width-self._screen_rect.width)/2, (view_height-self._screen_rect.height)/2)
-
-        
         
         # add recent delta by subtracting the difference between current and past delta totals
         delta_point = Point((view_position_delta_total.x()-self._view_position_delta.x()), (view_position_delta_total.y()-self._view_position_delta.y()))
@@ -86,29 +85,31 @@ class Camera(Rectangle):
         
     def track(self, rigid_body1, rigid_body2, delta_time):
         '''Resizes camera rect to show both rectangles'''
-        # get average momentum of two rigid_bodies by sum of velocity and division by 2
-        average_velocity = (rigid_body1.return_velocity_vector()+rigid_body2.return_velocity_vector())*(1/2)
-        average_center_target = Point((rigid_body1.return_rect().get_center().x()-rigid_body2.return_rect().get_center().x()), (rigid_body1.return_rect().get_center().y()-rigid_body2.return_rect().get_center().y()))
 
-        
-        # get target view position
-        #target_view_position = Point(
-        distance_btw_x = rigid_body1.return_rect().get_center().x() - rigid_body2.return_rect().get_center().x()
-        
-        if not self.is_visible(rigid_body1.return_rect()) or not self.is_visible(rigid_body1.return_rect()):
-            self._zoom_speed -= .0001
-        elif distance_btw_x / self._view_rect.get_w() < .4:
-            self._zoom_speed += .0001
+        # get average center between two players
+        center_1 = rigid_body1.return_rect().get_center()
+        center_2 = rigid_body2.return_rect().get_center()
+        average_center_target = Point(center_1.x()+(center_2.x()-center_1.x())/2, center_1.y()+(center_2.y()-center_1.y())/2)
+
+        # set camera to center of two players
+        self._view_rect.set_center(average_center_target)
+
+        margin = 10
+
+        # calculate zoom necessary for both players to be seen
+        # if distance in the x direction is greater, make zoom from width
+        if abs(center_1.x() - center_2.x()) > abs(center_1.y() - center_2.y()):
+            #self.zoom(abs(self._screen_rect.width / (center_1.x() - center_2.x()+margin)))
+            pass
         else:
-            self._zoom_speed = 0
-            
-        self.zoom(self._zoom+self._zoom_speed*delta_time)
-        self.move(vector=average_velocity*delta_time)
+            pass
+            #self.zoom(abs(self._screen_rect.height / (center_1.y() - center_2.y()+margin)))
 
+        self._calculate_things()
         
-    def collides_with(self, rect1):
+    def contains(self, rect1):
         '''Returns boolean state of whether or not a rigid body collided with camera view'''
-        return True if self._view_rect.return_pygame_rect().colliderect(rect1) == 1 else False
+        return True if self._view_rect.return_pygame_rect().contains(rect1.return_pygame_rect()) == 1 else False
         
     def update_screen_size(self, screen_size):
         '''Updates screen size to given screen. (Useful for screen resizing and camera adjustment)'''
@@ -120,11 +121,16 @@ class Camera(Rectangle):
     def zoom(self, magnitude):
         '''Zoom absolutely'''
 
-        if magnitude <= .2 or magnitude > 1:
-            print('cannot zoom in beyond (0, 1) interval')
+        if magnitude <= self.ZOOM_MIN:
+            self._zoom = self.ZOOM_MIN
+            
+        elif magnitude > self.ZOOM_MAX:
+            self._zoom = self.ZOOM_MAX
+            
         else:
             self._zoom = magnitude
-            self._calculate_things()
+            
+        self._calculate_things()
 
     def _true_x_value(self, x_value):
         '''Return true position of disp x value'''
@@ -156,7 +162,7 @@ class Camera(Rectangle):
     
     def return_true_rect(self, disp_rect):
         '''Returns rectangle with absolute / true positions from pygame rect'''
-        return Rectangle(self.return_true_position(Point(disp_rect.topleft[0], disp_rect.topleft[0])).return_tuple(), self.unzoom_values(*disp_rect.size))
+        return Rectangle(self.return_true_position(Point(disp_rect.topleft[0], disp_rect.topleft[1])).return_tuple(), self.unzoom_values(*disp_rect.size))
 
     def return_disp_rect(self, tru_rect):
         '''Returns pygame rectangle with positions relative to window screen'''
@@ -166,7 +172,7 @@ class Camera(Rectangle):
 
     def is_visible(self, object_rect):
         '''Boolean value of whether given object is in the camera's viewing rectangle. True for is visible and False for invisible.'''
-        return True if self._view_rect.return_pygame_rect().contains(object_rect.return_pygame_rect()) == 1 else False
+        return True if self._view_rect.return_pygame_rect().colliderect(object_rect.return_pygame_rect()) == 1 else False
 
 
 if __name__ == '__main__':
