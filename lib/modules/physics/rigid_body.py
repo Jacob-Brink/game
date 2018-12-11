@@ -53,7 +53,10 @@ class RigidBody():
         
     def apply_force(self, force_vector):
         '''Applies an instantaneous force to the RigidBody object. Multiple forces can be applied over a game loop cycle, but forces will disappear after the cycle.'''
-        self._forces.append(force_vector)
+        if isinstance(force_vector, Vector):
+            self._forces.append(force_vector)
+        else:
+            raise ValueError('RigidBody->ApplyForce: Requires argument to be vector type')
 
     def return_net_force(self):
         '''Returns net force'''
@@ -94,13 +97,14 @@ class RigidBody():
 
         self._acceleration = Vector(self._rect.get_center(), direction=self._velocity.return_direction(), magnitude=0)*delta_time
 
+        print(self._acceleration)
         for force in self._forces:
             self._acceleration += force * (1/self._mass)
-
+        print(self._acceleration)
         # velocity and past velocity are set
         self._past_velocity = self._velocity    
         self._velocity = self._acceleration + self._velocity
-
+        print(self._acceleration)
         self._past_rect = self._rect.copy()
         
         # changes rectangle from last velocity

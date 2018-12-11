@@ -86,18 +86,18 @@ class Physics:
                 for player in player_list:
                     
                     if self._collision.circle_rect(bomb.return_rect().get_center(), bomb.get_radius(), player.return_rect()):
-                        
                         p_center = player.return_rect().get_center()
                         b_center = bomb.return_rect().get_center()
                         dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                        player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.x()-b_center.x(),p_center.y()-b_center.y())), magnitude=(bomb.get_radius()/(.1+dist_centers))*1000))
+                        player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.x()-b_center.x(),p_center.y()-b_center.y())), magnitude=(bomb.get_radius()/(.1+dist_centers))*100))
 
                         player.change_health(-1)
+                        
                 
                 bomb_list.remove(bomb)
     
         # updates, checks collision, and if collision occurs corrects and sets appropriate PlatformStatus value for player
-        for player in player_list+bomb_list:
+        for player in player_list:
 
             player.update(events)
 
@@ -121,7 +121,8 @@ class Physics:
 
             if not player.get_platform_status(PlatformStatus.on_top):
                 player.apply_force(Vector(player.return_rect().get_center(), x_component=0, y_component=self._gravity_force_magnitude))
-                
+
+        
 
 
             
