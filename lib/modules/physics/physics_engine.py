@@ -85,13 +85,12 @@ class Physics:
 
                 for player in player_list:
                     
-                    if self._collision.circle_rect(bomb.return_rect().get_center(), bomb.get_radius(), player.return_rect()):
-                        p_center = player.return_rect().get_center()
-                        b_center = bomb.return_rect().get_center()
-                        dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                        player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.x()-b_center.x(),p_center.y()-b_center.y())), magnitude=(bomb.get_radius()/(.1+dist_centers))*100))
+                    p_center = player.return_rect().get_center()
+                    b_center = bomb.return_rect().get_center()
+                    dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
+                    player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.x()-b_center.x(),p_center.y()-b_center.y())), magnitude=(bomb.get_radius()/(.1+dist_centers))*300))
 
-                        player.change_health(-1)
+                    player.change_health(-.1)
                         
                 
                 bomb_list.remove(bomb)

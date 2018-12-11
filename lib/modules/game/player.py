@@ -80,7 +80,7 @@ class Player(RigidBody):
             self._bomb_timer.restart()
 
         # reset timer after 2 seconds
-        elif self._bomb_timer.read() > 2:
+        elif self._bomb_timer.read() > .5:
             self._bomb_timer.stop()
 
             

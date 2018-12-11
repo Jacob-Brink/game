@@ -12,13 +12,16 @@ class Bomb(RigidBody):
         super().__init__(Rectangle(initial_velocity.return_start_position(), Point(self._width, self._width)), self._mass)
         super().set_velocity(initial_velocity)
 
+        # exploded
         self._exploded = False
         self._explosion_radius = explosion_radius
 
+        # color flash stuff
         self._color = (0, 0, 0)
         self._color_increase = True
         self._color_step = 30
 
+        # bomb fuse
         self._fuse_timer = Timer()
         self._fuse_timer.restart()
         self._fuse_limit = 2
@@ -36,8 +39,6 @@ class Bomb(RigidBody):
             elif color_value < self._color_step:
                 self._color_increase = True
 
-        print(color_value)
-
         return color_value
         
     def update(self, delta_time):
@@ -49,7 +50,9 @@ class Bomb(RigidBody):
         # update rigid body
         super().update(delta_time)
 
+        # make fuse flash blink faster and faster as time progresses
         self._color_step = self._fuse_timer.read()*20
+
         # change color
         self._color = (self.color_transition(self._color[0]), 255 - self._color[0], self._color[2])
         
