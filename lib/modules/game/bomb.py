@@ -7,6 +7,7 @@ class Bomb(RigidBody):
 
     def __init__(self, initial_velocity, mass, explosion_radius):
         '''Models an exploding bomb'''
+        # set rigid body
         self._width = 20
         self._mass = 10
         super().__init__(Rectangle(initial_velocity.return_start_position(), Point(self._width, self._width)), self._mass)
@@ -25,6 +26,10 @@ class Bomb(RigidBody):
         self._fuse_timer = Timer()
         self._fuse_timer.restart()
         self._fuse_limit = 2
+
+        # explosion duration timer
+        self._explosion_timer = Timer()
+        self._explosion_duration = 2
 
     def color_transition(self, color_value):
         '''Returns next color in color transition'''
@@ -45,7 +50,7 @@ class Bomb(RigidBody):
         '''Change color for flashing effect'''
 
         # explode after fuse goes out
-        if self._fuse_timer.read() > self._fuse_limit:
+        if self._fuse_timer.read() > self._fuse_limit and not self._exploded:
             self.explode()
         # update rigid body
         super().update(delta_time)
@@ -58,8 +63,15 @@ class Bomb(RigidBody):
         
     def explode(self):
         '''Explodes!'''
+        self._explosion_timer.restart()
         self._exploded = True
 
+
+    def finished_exploding(self):
+        '''Returns whether or not bomb's explosion is done'''
+        print(self._explosion_timer.read(), 'Explosion Timer!')
+        return self._explosion_timer.read() >= self._explosion_duration
+        
     def exploded(self):
         '''Returns whether or not it exploded'''
         return self._exploded

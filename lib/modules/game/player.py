@@ -16,18 +16,28 @@ class HealthBar(Rectangle):
     def __init__(self, rectangle):
         '''Constructs a health bar'''
         super().__init__(rectangle.get_top_left(), rectangle.get_size())
-        self._color = (0, 255, 0)
-        
-    def change_percentage(self, percentage):
-        '''Given percentage, will change the width of the rectangle filling the outside rectangle'''
-        original_position = super().get_top_left()
-        super().change_width(super().get_w()*percentage)
-        super().change_top_left(original_position)
+        self._green = 255
+        self._red = 0
+        self._initial_width = super().get_w()
 
     def get_color(self):
-        '''Returns color'''
-        return self._color
+        '''Sets color based on red and green values'''
+        print('Color: (', self._red, ',', self._green, ',', 0)
+        return (self._red, self._green, 0)
+    
+    def change_percentage(self, percentage):
+        '''Given percentage, will change the width of the rectangle filling the outside rectangle'''
+        if percentage > 1 or percentage < 0:
+            raise ValueError('HealthBar->change_percentage: percentage must be a value between 0 and 1')
+        self._green = 255*percentage
+        self._red = 255*(1-percentage)
 
+        
+        original_position = super().get_top_left()
+        super().change_width(self._initial_width*percentage)
+        super().change_top_left(original_position)
+
+        
 image_path = 'lib/data/assets/'
 
 KEYS_MAP = [{'left': pygame.K_a, 'right': pygame.K_d, 'down': pygame.K_s, 'up': pygame.K_w, 'fire': pygame.K_f}, {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'down': pygame.K_DOWN, 'up': pygame.K_UP, 'fire': pygame.K_RCTRL}]
@@ -52,7 +62,7 @@ class Player(RigidBody):
 
         self._alive = True
         self._health_total = 10
-        self._health = 1
+        self._health = 10
         self._health_bar = HealthBar(Rectangle((0,0), (100, 20)))
         
         self._throw_bomb_callback = throw_bomb_callback
@@ -123,13 +133,12 @@ class Player(RigidBody):
     def change_health(self, health_delta):
         '''Changes health'''
         self._health -= health_delta
-
-        self._health_bar.change_percentage(self._health/self._health_total)
         
         if self._health < 0:
-
             self._alive = False
-        
+        else:
+            self._health_bar.change_percentage(self._health/self._health_total)
+            
             
     def return_healthbar_and_color(self):
         '''Return rectangle and color'''

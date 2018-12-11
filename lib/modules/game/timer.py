@@ -5,7 +5,8 @@ class Timer:
     def __init__(self):
         '''Construct timer'''
         self._running = False
-    
+        self._time = None
+        
     def restart(self):
         '''Start timer with given time remaining'''
         self._time = time.monotonic()
