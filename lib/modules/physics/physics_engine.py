@@ -1,6 +1,6 @@
 from lib.modules.physics.vector import Vector
 from lib.modules.physics.line import Line
-from lib.modules.gui.rectangle import Rectangle
+from lib.modules.gui.rectangle import Rectangle, Point
 from lib.modules.physics.physics import Collision, PlatformStatus
 
 
@@ -81,13 +81,20 @@ class Physics:
                 if rigid_body.return_rect().collides_with(platform):
 
                     # reposition rigid_body
-                    rigid_body.set_rect(self.return_new_rect_reposition(rigid_body.return_past_rect(), platform))                  
-
-                    # set velocity to 0
-                    rigid_body.set_velocity(Vector(rigid_body.return_rect().get_center(), x_component=0, y_component=0))
-
+                    rigid_body.set_rect(self.return_new_rect_reposition(rigid_body.return_past_rect(), platform))             
 
                 rigid_body.change_platform_status(self.return_side_platform(rigid_body.return_rect(), platform), True)
+
+                # set velocity to 0
+                if rigid_body.get_platform_status(PlatformStatus.on_top) or rigid_body.get_platform_status(PlatformStatus.on_bottom):
+
+                    rigid_body.set_velocity(Vector(Point(0,0), x_component=rigid_body.return_velocity_vector().return_x_component(), y_component=0))
+
+                elif rigid_body.get_platform_status(PlatformStatus.on_left) or rigid_body.get_platform_status(PlatformStatus.on_right):
+
+                    rigid_body.set_velocity(Vector(Point(0,0), x_component=0, y_component=rigid_body.return_velocity_vector().return_y_component()))
+
+                    
 
     def update(self, events, player_list, bomb_list, platform_list):
         '''Calculate collisions, reposition from collisions, work with forces, etc'''        
@@ -114,6 +121,7 @@ class Physics:
                     player.change_health(self._delta_time*bomb.get_radius()/(.1+dist_centers*dist_centers*dist_centers))
                         
                 if bomb.finished_exploding():
+
                     bomb_list.remove(bomb)
 
         for player in player_list:

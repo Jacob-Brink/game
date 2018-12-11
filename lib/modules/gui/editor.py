@@ -23,6 +23,11 @@ class Cursor(Enum):
     start_positoin_2 = 4
 
 START_SIZE = Point(400, 400)
+TITLE_COLOR = (255,0,0)
+RECTANGLE_COLOR = (0,0,0)
+HIGHLIGHT_COLOR = (0, 0, 255)
+UNFINISHED_COLOR = (0,255,0)
+
 
 class Editor(View):
 
@@ -35,7 +40,7 @@ class Editor(View):
         super().__init__(screen)
 
         # construct title surface
-        self._title = Text('Editor Shortcuts: (w,a,s,d for panning),  1: rectangle, 2: eraser, 3: place starting position, (left click for painting), (ESC to save and exit)', 16, (255,255,255), 'left', 30)
+        self._title = Text('Editor Shortcuts: (w,a,s,d for panning),  1: rectangle, 2: eraser, 3: place starting position, (left click for painting), (ESC to save and exit)', 16, TITLE_COLOR, 'left', 30)
 
         self._cursor = Cursor.platform
         self._platforms = []
@@ -69,7 +74,7 @@ class Editor(View):
     def read_level(self):
         '''Load level platforms into level editor'''
         with open(self._level) as level_file:
-            [self._platforms.append(Platform(Rectangle(*[float(string_integer) for string_integer in line.strip().split()]), (100, 100, 100))) for line in level_file]
+            [self._platforms.append(Platform(Rectangle(*[float(string_integer) for string_integer in line.strip().split()]), RECTANGLE_COLOR)) for line in level_file]
 
 
     def place_start_position(self, current_click, mouse_pos):
@@ -89,11 +94,11 @@ class Editor(View):
         # If eraser collides with rectangle, highlight it
         for platform in self._platforms:
             if platform.collide_point(super().return_true_position(mouse_pos)):
-                platform.change_color((200, 200, 200))
+                platform.change_color(HIGHLIGHT_COLOR)
                 if current_click == Switch.pushed_down:
                     self._platforms.remove(platform)
             else:
-                platform.change_color((100,100,100))
+                platform.change_color(RECTANGLE_COLOR)
                     
         
         
@@ -120,7 +125,7 @@ class Editor(View):
             # get true second position
             self.second_pos = super().return_true_position(mouse_position)
 
-            self._unfinished_rect = Platform(self._return_rect(self.first_pos, self.second_pos), (255,255,255))
+            self._unfinished_rect = Platform(self._return_rect(self.first_pos, self.second_pos), UNFINISHED_COLOR)
             
 
         # End drawing of rectangle on second click event
@@ -133,7 +138,7 @@ class Editor(View):
             self.second_pos = super().return_true_position(mouse_position)
 
             # return rectangles with from two true positions
-            self._platforms.append(Platform(self._return_rect(self.first_pos, self.second_pos), (100, 0, 200)))
+            self._platforms.append(Platform(self._return_rect(self.first_pos, self.second_pos), RECTANGLE_COLOR))
 
             # remove temp rectangle
             self._unfinished_rect = None

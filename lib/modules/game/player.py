@@ -22,7 +22,6 @@ class HealthBar(Rectangle):
 
     def get_color(self):
         '''Sets color based on red and green values'''
-        print('Color: (', self._red, ',', self._green, ',', 0)
         return (self._red, self._green, 0)
     
     def change_percentage(self, percentage):
@@ -77,9 +76,9 @@ class Player(RigidBody):
             super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change))
             self._jump_timer.restart()
             
-        elif self._jumps < self._jump_limit and self._jump_timer.read() > 1:
+        elif self._jumps < self._jump_limit and self._jump_timer.read() > .1:
             self._jumps += 1
-            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change))
+            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change*2))
             self._jump_timer.stop()
 
             
@@ -103,11 +102,8 @@ class Player(RigidBody):
         if pressed(self._keys['right']) and not super().get_platform_status(PlatformStatus.on_left):
             delta_x += change
             
-        if pressed(self._keys['up']) and not super().get_platform_status(PlatformStatus.on_bottom):
+        if events.keyboard().is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
             self.jump(change)
-
-        if pressed(self._keys['down']):
-            delta_y += change
 
         if events.keyboard().is_pressed(self._keys['fire']) == Switch.pushed_down:
             self._bomb_charge_timer.restart()
