@@ -8,35 +8,25 @@ from lib.modules.gui.events import *
 from lib.modules.gui.text import Text
 from lib.modules.gui.rectangle import Rectangle
 from lib.modules.game.bomb import Bomb
-
 from lib.modules.physics.physics import PlatformStatus
+from lib.modules.game.timer import Timer
 
-import time
+class HealthBar(Rectangle):
 
-class Timer:
-
-    def __init__(self):
-        '''Construct timer'''
-        self._running = False
-    
-    def start(self, time):
-        '''Start timer with given time remaining'''
-        self._time = time.monotonic()
-        self._running = True
+    def __init__(self, rectangle):
+        '''Constructs a health bar'''
+        super().__init__(rectangle.get_top_left(), rectangle.get_size())
+        self._color = (0, 255, 0)
         
-    def read(self):
-        '''Return time remaining'''
-        return time.monotonic()-self._time if self._running else -1
+    def change_percentage(self, percentage):
+        '''Given percentage, will change the width of the rectangle filling the outside rectangle'''
+        original_position = super().get_top_left()
+        super().change_width(super().get_w()*percentage)
+        super().change_top_left(original_position)
 
-    def stop(self):
-        '''Stop timer from running'''
-        self._running = False
-        self._time = time.monotonic()
-        
-    def reset(self):
-        '''Reset timer'''
-        self._time = time.monotonic()
-
+    def get_color(self):
+        '''Returns color'''
+        return self._color
 
 image_path = 'lib/data/assets/'
 
@@ -46,7 +36,7 @@ KEYS_MAP = [{'left': pygame.K_a, 'right': pygame.K_d, 'down': pygame.K_s, 'up': 
 class Player(RigidBody):
     '''Models a player'''
 
-    def __init__(self, keyboard_layout, debug_mode):
+    def __init__(self, keyboard_layout, debug_mode, throw_bomb_callback):
         '''Constructs a new player with rigid body as Base Class'''
 
         self._surface = Image(image_path+'test.png').return_surface()
@@ -56,37 +46,52 @@ class Player(RigidBody):
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
 
-        self._timer = Timer()
-
+        self._jump_timer = Timer()
         self._jump_limit = 2
         self._jumps = 0
+
+        self._alive = True
+        self._health_total = 10
+        self._health = 1
+        self._health_bar = HealthBar(Rectangle((0,0), (100, 20)))
         
-        self._health = 10
+        self._throw_bomb_callback = throw_bomb_callback
+        self._bomb_timer = Timer()
 
         
     def jump(self, change):
         '''Adds upward velocity'''
-        if super().get_platform_status(PlatformStatus.on_top) and self._timer.read() == -1:
+        if super().get_platform_status(PlatformStatus.on_top) and self._jump_timer.read() == -1:
             self._jumps = 0
             super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change))
-
-        elif self._jumps < self._jump_limit and self._timer.read() > 1:
+            self._jump_timer.restart()
+            
+        elif self._jumps < self._jump_limit and self._jump_timer.read() > 1:
             self._jumps += 1
             super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change))
+            self._jump_timer.stop()
+
             
     def fire_bomb(self):
         '''Fires bomb'''
-        
-        
+        # when timer is stopped, call callback
+        if self._bomb_timer.read() == -1:
+            self._throw_bomb_callback(super().return_velocity_vector())
+            self._bomb_timer.restart()
 
-                
+        # reset timer after 2 seconds
+        elif self._bomb_timer.read() > 2:
+            self._bomb_timer.stop()
+
+            
     def update(self, events):
         '''To be called on every game tick'''
         pressed = events.keyboard().down
+        delta_time = events.delta_time()
         delta_x = 0
         delta_y = 0
 
-        change = .1*events.delta_time()
+        change = 5
 
         if pressed(self._keys['left']) and  not super().get_platform_status(PlatformStatus.on_right):
             delta_x -= change
@@ -105,9 +110,32 @@ class Player(RigidBody):
 
         user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
 
+        self._health_bar.change_bottom_left(super().return_rect().get_top_left())
         super().add_velocity(user_velocity)
-        super().update()
+        super().update(delta_time)
+
         
+    def is_alive(self):
+        '''Returns true if player is still alive'''
+        return self._alive
+
+    
+    def change_health(self, health_delta):
+        '''Changes health'''
+        self._health -= health_delta
+
+        self._health_bar.change_percentage(self._health/self._health_total)
+        
+        if self._health < 0:
+
+            self._alive = False
+        
+            
+    def return_healthbar_and_color(self):
+        '''Return rectangle and color'''
+        return self._health_bar, self._health_bar.get_color()
+
+    
     def return_surface_and_pos(self):
         '''Returns array of surface and point of x and y position. (Used for easy blitting)'''
 

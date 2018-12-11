@@ -59,7 +59,7 @@ class Camera(Rectangle):
         '''Given delta x and delta y, move view_rect'''
         self._view_rect.move(Point(delta_x, delta_y))
     
-    def track(self, rigid_body1, rigid_body2, delta_time):
+    def track(self, rigid_body1, rigid_body2):
         '''Resizes camera rect to show both rectangles'''
 
         # MOVE CENTER OF CAMERA TO CENTER OF RIGID BODIES
@@ -74,14 +74,15 @@ class Camera(Rectangle):
         self._view_rect.set_center(average_center_target)
 
         # calculate zoom necessary for both players to be seen
-        margin = rigid_body1.return_rect().get_w()*2
+        margin = rigid_body1.return_rect().get_w()*3
 
         # if distance in the x direction is greater, make zoom from width
-        zoom_for_x = abs(self._screen_rect.width / (center_1.x() - center_2.x()+margin))
-        zoom_for_y = abs(self._screen_rect.height / (center_1.y() - center_2.y()+margin))
+        zoom_for_x = abs(self._screen_rect.width / (abs(center_1.x() - center_2.x())+margin))
+        zoom_for_y = abs(self._screen_rect.height / (abs(center_1.y() - center_2.y())+margin))
         
         if zoom_for_x < zoom_for_y:
             self.zoom(zoom_for_x)
+            
         else:
             self.zoom(zoom_for_y)
 

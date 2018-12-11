@@ -54,8 +54,9 @@ def main():
 
         # flip display and clear it
         pygame.display.flip()
-        screen.fill((0, 0, 0))
+        screen.fill((255, 255, 255))
 
 
 if __name__ == '__main__':
+    '''Run main loop'''
     main()

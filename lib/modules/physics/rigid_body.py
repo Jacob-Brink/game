@@ -26,6 +26,9 @@ class RigidBody():
         self._acceleration = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._forces = []
         self._collided = False
+
+        self._max_velocity_magnitude = 10
+        
         
     def set_collided(self, collided):
         '''Sets value to collided'''
@@ -73,6 +76,11 @@ class RigidBody():
             raise ValueError('rectangle must be of type Rectangle, not pygame.Rectangle')
         self._rect = rect
 
+    def limit_velocity(self):
+        '''Limits velocity based on max velocity magnitude'''
+        if self._velocity.return_magnitude() > self._max_velocity_magnitude:
+            self._velocity = Vector(self._velocity.return_start_position(), direction=self._velocity.return_direction(), magnitude=self._max_velocity_magnitude)
+            
     def set_velocity(self, new_velocity):
         '''Sets the velocity to new velocity'''
         self._velocity = new_velocity
@@ -81,10 +89,10 @@ class RigidBody():
         '''Set velocity to given velocity'''
         self._velocity += velocity
         
-    def update(self):
+    def update(self, delta_time):
         '''Updates RigidBody object to translate force into acceleration and acceleration into new velocity. To be called after physics repositioning'''
 
-        self._acceleration = Vector(self._rect.get_center(), direction=self._velocity.return_direction(), magnitude=0)
+        self._acceleration = Vector(self._rect.get_center(), direction=self._velocity.return_direction(), magnitude=0)*delta_time
 
         for force in self._forces:
             self._acceleration += force * (1/self._mass)
@@ -100,7 +108,7 @@ class RigidBody():
         self._rect.move(delta_point)
         self._forces = []
 
-        
+        self.limit_velocity()
 
     def return_past_rect(self):
         '''Returns rect that is distinguishably different than current rect'''

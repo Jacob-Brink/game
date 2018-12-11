@@ -19,13 +19,15 @@ class Physics:
         self._debug_mode = debug_mode
         self._collision = Collision()
         self._MARGIN_PIXEL = 1
-
+        self._gravity_force_magnitude = 10
+        
     def next_to(self, value, side_value):
         return side_value - 4 <= value <= side_value + 4
         
     def return_side_platform(self, rect, platform):
         '''Returns which side the rectangle is adjacent to'''
 
+        # rectangle overlaps platform's x coordinates
         if self._collision.one_dimensional_collision((rect.get_x(), rect.get_w()),(platform.get_x(), platform.get_w())):
             # on top
             if self.next_to(rect.get_y()+rect.get_h(), platform.get_y()):
@@ -34,6 +36,7 @@ class Physics:
             if self.next_to(rect.get_y(), platform.get_y()+platform.get_h()):
                 return PlatformStatus.on_bottom
 
+        # rectangle overlaps platform's y coordinates
         elif self._collision.one_dimensional_collision((rect.get_y(), rect.get_h()),(platform.get_y(), platform.get_h())):
             # on left
             if self.next_to(rect.get_x()+rect.get_w(), platform.get_x()):
@@ -66,33 +69,62 @@ class Physics:
 
         return rect
 
-        
-    def reposition(self, player_list, rigid_body_list, immovable_rect_list, delta_time):
-        '''Return new rectangle based on how two rectangles collided'''
-        
-        for player in player_list:
+                       
 
+    def update(self, events, player_list, bomb_list, platform_list):
+        '''Calculate collisions, reposition from collisions, work with forces, etc'''        
+
+        delta_time = events.delta_time()
+        
+        # updates bomb rigid body
+        for bomb in bomb_list:
+
+            bomb.update(delta_time)
+
+            if bomb.exploded():
+
+                for player in player_list:
+                    
+                    if self._collision.circle_rect(bomb.return_rect().get_center(), bomb.get_radius(), player.return_rect()):
+                        
+                        p_center = player.return_rect().get_center()
+                        b_center = bomb.return_rect().get_center()
+                        dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
+                        player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.x()-b_center.x(),p_center.y()-b_center.y())), magnitude=(bomb.get_radius()/(.1+dist_centers))*1000))
+
+                        player.change_health(-1)
+                
+                bomb_list.remove(bomb)
+    
+        # updates, checks collision, and if collision occurs corrects and sets appropriate PlatformStatus value for player
+        for player in player_list+bomb_list:
+
+            player.update(events)
+
+            # reset player platform status to all be False
             player.reset_platform_status()
 
-            for platform in immovable_rect_list:
+            
+            for platform in platform_list:
 
                 # if a collision occurs, figure out how what side the player collided
                 if player.return_rect().collides_with(platform):
 
+                    # reposition player
                     player.set_rect(self.return_new_rect_reposition(player.return_past_rect(), platform))                  
-                    
-                    player.set_velocity(Vector(player.return_rect().get_center(), x_component=0, y_component=0))
-                    
-                player.change_platform_status(self.return_side_platform(player.return_rect(), platform), True)
-                    
 
-    def update(self, events, player_list, rigid_body_list, platform_list):
-        '''Calculate collisions, reposition from collisions, work with forces, etc'''        
-        
-        for player in player_list:
-            player.update(events)
-        
-        self.reposition(player_list, rigid_body_list, platform_list, events.delta_time())
+                    # set velocity to 0
+                    player.set_velocity(Vector(player.return_rect().get_center(), x_component=0, y_component=0))
+
+
+                player.change_platform_status(self.return_side_platform(player.return_rect(), platform), True)
+
+            if not player.get_platform_status(PlatformStatus.on_top):
+                player.apply_force(Vector(player.return_rect().get_center(), x_component=0, y_component=self._gravity_force_magnitude))
+                
+
+
+            
 
         
 if __name__ == '__main__':

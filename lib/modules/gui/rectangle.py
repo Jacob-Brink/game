@@ -103,7 +103,7 @@ class Rectangle:
         
         # check for invariance
         [self.raise_error('Must be integer or float. Got ' + str(value) + ' instead') for value in self.list_basic_values() if not self.check_is_number(value)]
-        [self.normalize() for value in [self._w, self._h] if not self.check_is_nonzero_nonnegative(value)]
+        self.normalize()
         
         # set values based on elemental values
         self.set_values()

@@ -1,4 +1,5 @@
 from enum import Enum
+from lib.modules.gui.rectangle import Point
 
 class PlatformStatus(Enum):
     on_top = 1
@@ -19,6 +20,10 @@ class Collision:
     def one_dimensional_collision(self, length_point1, length_point2):
         '''Return true if lengths overlap'''
         return length_point1[0] <= length_point2[0] + length_point2[1] and length_point1[0]+length_point1[1] >= length_point2[0]
+
+    def circle_rect(self, center_point, radius, rect):
+        '''Given radius and rectangle, determine collision'''
+        return self.one_dimensional_collision((center_point.x()-radius, center_point.x()+radius), (rect.get_x(), rect.get_x()+rect.get_w())) and self.one_dimensional_collision((center_point.y()-radius, center_point.y()+radius), (rect.get_y(), rect.get_y()+rect.get_y()))
     
     def rect_rect(self, rect1, rect2):
         '''Return boolean value of any intersection between two given pygame rects'''
