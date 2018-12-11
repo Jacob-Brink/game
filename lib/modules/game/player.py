@@ -67,6 +67,7 @@ class Player(RigidBody):
         
         self._throw_bomb_callback = throw_bomb_callback
         self._bomb_timer = Timer()
+        self._bomb_charge_timer = Timer()
 
         
     def jump(self, change):
@@ -84,15 +85,8 @@ class Player(RigidBody):
             
     def fire_bomb(self):
         '''Fires bomb'''
-        # when timer is stopped, call callback
-        if self._bomb_timer.read() == -1:
-            self._throw_bomb_callback(super().return_velocity_vector())
-            self._bomb_timer.restart()
-
-        # reset timer after 2 seconds
-        elif self._bomb_timer.read() > .5:
-            self._bomb_timer.stop()
-
+        self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_charge_timer.read()*20))
+        self._bomb_charge_timer.stop()
             
     def update(self, events):
         '''To be called on every game tick'''
@@ -114,10 +108,14 @@ class Player(RigidBody):
 
         if pressed(self._keys['down']):
             delta_y += change
-            
-        if pressed(self._keys['fire']):
-            self.fire_bomb()
 
+        if events.keyboard().is_pressed(self._keys['fire']) == Switch.pushed_down:
+            self._bomb_charge_timer.restart()
+
+        if events.keyboard().is_pressed(self._keys['fire']) == Switch.pushed_up:
+            if self._bomb_charge_timer.read() > 0:
+                self.fire_bomb()
+    
         user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
 
         self._health_bar.change_bottom_left(super().return_rect().get_top_left())

@@ -45,7 +45,7 @@ class Game(View):
         '''Returns throw bomb callback'''
         def throw_bomb_callback(velocity):
 
-            self._bomb_list.append(Bomb(velocity, 5, 100000))
+            self._bomb_list.append(Bomb(velocity))
             
         return throw_bomb_callback
 

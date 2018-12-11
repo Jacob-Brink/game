@@ -5,17 +5,17 @@ from lib.modules.game.timer import Timer
 
 class Bomb(RigidBody):
 
-    def __init__(self, initial_velocity, mass, explosion_radius):
+    def __init__(self, initial_velocity):
         '''Models an exploding bomb'''
         # set rigid body
         self._width = 20
-        self._mass = 10
+        self._mass = 100
         super().__init__(Rectangle(initial_velocity.return_start_position(), Point(self._width, self._width)), self._mass)
         super().set_velocity(initial_velocity)
 
         # exploded
         self._exploded = False
-        self._explosion_radius = explosion_radius
+        self._explosion_radius = 10000
 
         # color flash stuff
         self._color = (0, 0, 0)
@@ -49,23 +49,29 @@ class Bomb(RigidBody):
     def update(self, delta_time):
         '''Change color for flashing effect'''
 
-        # explode after fuse goes out
-        if self._fuse_timer.read() > self._fuse_limit and not self._exploded:
-            self.explode()
+        if not self._exploded:
+
+            # make fuse flash blink faster and faster as time progresses
+            self._color_step = self._fuse_timer.read()*20
+
+            # change color
+            self._color = (self.color_transition(self._color[0]), 255 - self._color[0], self._color[2])
+            
+            # explode after fuse goes out
+            if self._fuse_timer.read() > self._fuse_limit:
+                self.explode()
+
+            
+        else:
+            self._color = (0,10,200)
         # update rigid body
         super().update(delta_time)
 
-        # make fuse flash blink faster and faster as time progresses
-        self._color_step = self._fuse_timer.read()*20
-
-        # change color
-        self._color = (self.color_transition(self._color[0]), 255 - self._color[0], self._color[2])
         
     def explode(self):
         '''Explodes!'''
         self._explosion_timer.restart()
         self._exploded = True
-
 
     def finished_exploding(self):
         '''Returns whether or not bomb's explosion is done'''
