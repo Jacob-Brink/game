@@ -1,7 +1,8 @@
 import pygame
 import math
-from enum import Enum
 
+from enum import Enum
+from lib.modules.gui.rectangle import Point
 
 
 class Switch(Enum):
@@ -17,10 +18,10 @@ class Mouse:
     def __init__(self):
         self._left_button = Switch.up
         self._right_button = Switch.down
-        self._cursor_position = (0,0)
+        self._cursor_position = Point(0,0)
 
-    def set_position(self, position_tuple):
-        self._cursor_position = position_tuple
+    def set_position(self, position_point):
+        self._cursor_position = position_point
 
     def get_position(self):
         return self._cursor_position
@@ -147,7 +148,7 @@ class Event:
                 
                 
             if event.type == pygame.MOUSEMOTION:
-                self._mouse.set_position(event.pos)
+                self._mouse.set_position(Point(*event.pos))
 
 
 

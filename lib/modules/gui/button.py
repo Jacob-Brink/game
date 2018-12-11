@@ -35,7 +35,7 @@ class Button:
         '''
         self._clicked = False
         # if mouse hovers over button
-        if self._NORMAL_SURFACE.get_rect(event.screen().get_size()[0]).collidepoint(event.mouse().get_position()):
+        if self._NORMAL_SURFACE.get_rect(event.screen().get_size()[0]).collidepoint(event.mouse().get_position().return_tuple()):
 
             self._shown_surface = self._HOVER_SURFACE
 

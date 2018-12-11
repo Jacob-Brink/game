@@ -74,13 +74,22 @@ class Rectangle:
 
         # if the argument only has two elements, those two elements must be list or tuple type
         if len(args) == 2:
+
+            if isinstance(args[0], Point) and isinstance(args[1], Point):
+
+                self._x = args[0].x()
+                self._y = args[0].y()
+
+                self._w = args[1].x()
+                self._h = args[1].y()
                 
-            # set four elemental values of rectangle
-            self._x = args[0][0]
-            self._y = args[0][1]
+            else:
+                # set four elemental values of rectangle
+                self._x = args[0][0]
+                self._y = args[0][1]
             
-            self._w = args[1][0]
-            self._h = args[1][1]
+                self._w = args[1][0]
+                self._h = args[1][1]
 
         # if the argument has 4 elements, assume they represent x,y,w, and h
         elif len(args) == 4:

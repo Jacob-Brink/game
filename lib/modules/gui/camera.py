@@ -28,7 +28,7 @@ class Camera(Rectangle):
 
         self._zoom = 1
         self.ZOOM_MIN = .001
-        self.ZOOM_MAX = 1.2
+        self.ZOOM_MAX = 1
 
         self._screen_rect = pygame.Rect((0, 0), screen.get_size())
         self._aspect_ratio = self._screen_rect.h/self._screen_rect.w
