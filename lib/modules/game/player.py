@@ -9,6 +9,35 @@ from lib.modules.gui.text import Text
 from lib.modules.gui.rectangle import Rectangle
 from lib.modules.game.bomb import Bomb
 
+from lib.modules.physics.physics import PlatformStatus
+
+import time
+
+class Timer:
+
+    def __init__(self):
+        '''Construct timer'''
+        self._running = False
+    
+    def start(self, time):
+        '''Start timer with given time remaining'''
+        self._time = time.monotonic()
+        self._running = True
+        
+    def read(self):
+        '''Return time remaining'''
+        return time.monotonic()-self._time if self._running else -1
+
+    def stop(self):
+        '''Stop timer from running'''
+        self._running = False
+        self._time = time.monotonic()
+        
+    def reset(self):
+        '''Reset timer'''
+        self._time = time.monotonic()
+
+
 image_path = 'lib/data/assets/'
 
 KEYS_MAP = [{'left': pygame.K_a, 'right': pygame.K_d, 'down': pygame.K_s, 'up': pygame.K_w, 'fire': pygame.K_f}, {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'down': pygame.K_DOWN, 'up': pygame.K_UP, 'fire': pygame.K_RCTRL}]
@@ -23,42 +52,60 @@ class Player(RigidBody):
         self._surface = Image(image_path+'test.png').return_surface()
         super().__init__(Rectangle((0,0), self._surface.get_size()), 100)
 
-        print('Player Rect', super().return_rect().get_x())
-        
-        print(keyboard_layout, debug_mode)
         self._debug = debug_mode
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
 
+        self._timer = Timer()
+
+        self._jump_limit = 2
+        self._jumps = 0
+        
         self._health = 10
 
         
+    def jump(self, change):
+        '''Adds upward velocity'''
+        if super().get_platform_status(PlatformStatus.on_top) and self._timer.read() == -1:
+            self._jumps = 0
+            super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change))
+
+        elif self._jumps < self._jump_limit and self._timer.read() > 1:
+            self._jumps += 1
+            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change))
+            
+    def fire_bomb(self):
+        '''Fires bomb'''
+        
+        
+
+                
     def update(self, events):
         '''To be called on every game tick'''
         pressed = events.keyboard().down
         delta_x = 0
         delta_y = 0
 
-        change = 2*events.delta_time()
+        change = .1*events.delta_time()
 
-        if pressed(self._keys['left']) and  not super().get_platform_status('right_platform'):
+        if pressed(self._keys['left']) and  not super().get_platform_status(PlatformStatus.on_right):
             delta_x -= change
 
-        if pressed(self._keys['right']) and not super().get_platform_status('left_platform'):
+        if pressed(self._keys['right']) and not super().get_platform_status(PlatformStatus.on_left):
             delta_x += change
             
-        if pressed(self._keys['up']) and not super().get_platform_status('beneath_platform'):
-            delta_y -= change
+        if pressed(self._keys['up']) and not super().get_platform_status(PlatformStatus.on_bottom):
+            self.jump(change)
 
-        if pressed(self._keys['down']) and not super().get_platform_status('on_platform'):
+        if pressed(self._keys['down']):
             delta_y += change
             
         if pressed(self._keys['fire']):
-            pass
+            self.fire_bomb()
 
-        user_force = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
-        print(user_force.return_direction())
-        super().apply_force(user_force)
+        user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
+
+        super().add_velocity(user_velocity)
         super().update()
         
     def return_surface_and_pos(self):

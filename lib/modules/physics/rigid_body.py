@@ -1,10 +1,11 @@
 from lib.modules.physics.vector import Vector
-from lib.modules.physics.physics import Collision
+from lib.modules.physics.physics import Collision, PlatformStatus
 from lib.modules.gui.rectangle import *
 
 import pygame
 import math
-import copy
+
+
 
 
 class RigidBody():
@@ -15,9 +16,9 @@ class RigidBody():
         if isinstance(rect, pygame.Rect):
             raise ValueError('RigidBody->Constructor: rectangle must be of type Rectangle not pygame.Rect')
         self._rect = rect
-        self._past_rect = copy.copy(self._rect)
+        self._past_rect = self._rect.copy()
         
-        self._platform_status = {'on_platform': False, 'beneath_platform': False, 'left_platform': False, 'right_platform': False}
+        self._platform_status = {PlatformStatus.on_top: False, PlatformStatus.on_left: False, PlatformStatus.on_right: False, PlatformStatus.on_bottom: False}
         
         self._velocity = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._past_velocity = self._velocity
@@ -72,13 +73,16 @@ class RigidBody():
             raise ValueError('rectangle must be of type Rectangle, not pygame.Rectangle')
         self._rect = rect
 
-    def set_velocity(self, velocity):
+    def set_velocity(self, new_velocity):
+        '''Sets the velocity to new velocity'''
+        self._velocity = new_velocity
+        
+    def add_velocity(self, velocity):
         '''Set velocity to given velocity'''
-        self._velocity = velocity
+        self._velocity += velocity
         
     def update(self):
-        '''Updates RigidBody object to translate force into acceleration and acceleration into new velocity.
-        To be called after physics repositioning'''
+        '''Updates RigidBody object to translate force into acceleration and acceleration into new velocity. To be called after physics repositioning'''
 
         self._acceleration = Vector(self._rect.get_center(), direction=self._velocity.return_direction(), magnitude=0)
 
@@ -91,7 +95,6 @@ class RigidBody():
 
         self._past_rect = self._rect.copy()
         
-        # FIX: DUE TO as;lkdfja;sfdasdfasdf
         # changes rectangle from last velocity
         delta_point = Point(self._velocity.return_x_component(), self._velocity.return_y_component())
         self._rect.move(delta_point)
@@ -105,7 +108,6 @@ class RigidBody():
         
     def return_rect(self):
         '''Returns rectangle of type pygame.Rect'''
-        print(self._rect)
         return self._rect
 
     def return_mass(self):
