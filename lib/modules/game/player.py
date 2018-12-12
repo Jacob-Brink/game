@@ -88,7 +88,7 @@ class Player(RigidBody):
     def fire_bomb(self):
         '''Fires bomb'''
         if self._bomb_reload_timer.read() > 0 and self._bomb_reload_timer.read() > self._bomb_reload_time:
-            self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_reload_timer.read()*20))
+            self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_reload_timer.read()**2))
             self._bomb_reload_timer.stop()
             
         elif self._bomb_reload_timer.read() < 0:

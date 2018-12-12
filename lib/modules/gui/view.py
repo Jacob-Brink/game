@@ -1,4 +1,6 @@
 from lib.modules.gui.camera import Camera
+from lib.modules.gui.rectangle import Point
+
 import pygame
 
 class View(Camera):
@@ -9,7 +11,7 @@ class View(Camera):
         
     def return_screen_dimensions(self):
         '''Returns screen dimensions of width and height in tuple type'''
-        return self._screen.get_width(), self._screen.get_height()
+        return Point(self._screen.get_width(), self._screen.get_height())
 
     def render_rectangle(self, rect, **keywords):
         '''Given rect with absolute coordinates, draw rectangle'''

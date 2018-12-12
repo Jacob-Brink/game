@@ -19,6 +19,8 @@ class Game(View):
 
     def __init__(self, screen, level, go_back, debug_mode):
         '''View that holds game entities, deals with collision, and handles the entire game!!!'''
+
+        self._debug = debug_mode
         self._screen = screen
         
         super().__init__(self._screen)
@@ -26,7 +28,7 @@ class Game(View):
 
         self._go_back = go_back
 
-        self.start_game(debug_mode)
+        self.start_game()
         
         self._physics = Physics(debug_mode)
         
@@ -48,14 +50,15 @@ class Game(View):
         self._restart_timer.restart()
         self._message_string = message_string
 
-    def start_game(self, debug_mode):
+    def start_game(self):
         '''Restarts game'''
-                
-        self._player1 = Player(0, debug_mode, self.throw_bomb_wrapper())
-        self._player2 = Player(1, debug_mode, self.throw_bomb_wrapper())
+        # reset players
+        self._player1 = Player(0, self._debug, self.throw_bomb_wrapper())
+        self._player2 = Player(1, self._debug, self.throw_bomb_wrapper())
         self._player_list = [self._player1, self._player2]
-        self._debug = debug_mode
 
+        # clear bomb list
+        self._bomb_list = []
         
     def _load_level(self):
         '''Loads level platforms into game'''
@@ -82,9 +85,6 @@ class Game(View):
         
         if events.was_resized():
             super().update(self._screen)
-                
-        # update menu
-        self._menu.update(events)
 
         # set camera to track two players
         super().track(self._player1, self._player2)        
@@ -113,13 +113,10 @@ class Game(View):
                 super().render_line(player.return_velocity_vector()*100)
 
         
-        
-
         super().render(Text(str(events.fps()), 20, (100,40, 100), 'left', 10).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
         # handle end game
         if not self._done:
             
-
             if not self._player1.is_alive() and not self._player2.is_alive():
                 self._game_over('Tie')
                 
