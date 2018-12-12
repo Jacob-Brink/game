@@ -39,7 +39,7 @@ class HealthBar(Rectangle):
         
 image_path = 'lib/data/assets/'
 
-KEYS_MAP = [{'left': pygame.K_a, 'right': pygame.K_d, 'down': pygame.K_s, 'up': pygame.K_w, 'fire': pygame.K_f}, {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'down': pygame.K_DOWN, 'up': pygame.K_UP, 'fire': pygame.K_RCTRL}]
+KEYS_MAP = [{'left': pygame.K_a, 'right': pygame.K_d, 'down': pygame.K_s, 'up': pygame.K_w, 'fire explosion': pygame.K_f, 'fire implosion': pygame.K_r}, {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'down': pygame.K_DOWN, 'up': pygame.K_UP, 'fire explosion': pygame.K_RCTRL, 'fire implosion': pygame.K_RSHIFT}]
 
 
 class Player(RigidBody):
@@ -85,10 +85,10 @@ class Player(RigidBody):
             self._jump_timer.stop()
 
             
-    def fire_bomb(self):
+    def fire_bomb(self, bomb_type):
         '''Fires bomb'''
         if self._bomb_reload_timer.read() > 0 and self._bomb_reload_timer.read() > self._bomb_reload_time:
-            self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_reload_timer.read()**2))
+            self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_reload_timer.read()**2), bomb_type)
             self._bomb_reload_timer.stop()
             
         elif self._bomb_reload_timer.read() < 0:
@@ -98,7 +98,6 @@ class Player(RigidBody):
     def update(self, events):
         '''To be called on every game tick'''
         pressed = events.keyboard().down
-        delta_time = events.delta_time()
         delta_x = 0
         delta_y = 0
 
@@ -115,10 +114,16 @@ class Player(RigidBody):
         if events.keyboard().is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
             self.jump(change)
             
-        if events.keyboard().is_pressed(self._keys['fire']) == Switch.pushed_up:
-            self.fire_bomb()
-        user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
+        if events.keyboard().is_pressed(self._keys['fire explosion']) == Switch.pushed_up:
+            self.fire_bomb('explosion')
 
+        if events.keyboard().is_pressed(self._keys['fire implosion']) == Switch.pushed_up:
+            self.fire_bomb('implosion')
+
+            
+        user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
+        delta_time = events.delta_time()
+        
         self._health_bar.change_bottom_left(super().return_rect().get_top_left())
         super().add_velocity(user_velocity)
         super().update(delta_time)

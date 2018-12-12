@@ -5,7 +5,7 @@ from lib.modules.game.timer import Timer
 
 class Bomb(RigidBody):
 
-    def __init__(self, initial_velocity):
+    def __init__(self, initial_velocity, bomb_type):
         '''Models an exploding bomb'''
         # set rigid body
         self._width = 20
@@ -16,7 +16,8 @@ class Bomb(RigidBody):
         # exploded
         self._exploded = False
         self._explosion_radius = 800
-
+        self._bomb_type = bomb_type
+        
         # color flash stuff
         self._color = (0, 0, 0)
         self._color_increase = True
@@ -31,6 +32,10 @@ class Bomb(RigidBody):
         self._explosion_timer = Timer()
         self._explosion_duration = 5
 
+    def get_type(self):
+        '''Returns type of bomb'''
+        return self._bomb_type
+        
     def color_transition(self, color_value):
         '''Returns next color in color transition'''
         if self._color_increase:
@@ -61,9 +66,11 @@ class Bomb(RigidBody):
             if self._fuse_timer.read() > self._fuse_limit:
                 self.explode()
             
-        else:
-            
+        elif self._bomb_type == 'implosion':
             self._color = (0,10,200)
+            
+        elif self._bomb_type == 'explosion':
+            self._color = (195,0,198)
 
         # update rigid body
         super().update(delta_time)

@@ -83,8 +83,14 @@ class Menu(View):
 
         random_magnitude = randint(1,4)/100
         random_direction = randint(-180,180)
+
+        random_type = randint(0,1)
+        if random_type == 0:
+            random_type = 'implosion'
+        else:
+            random_type = 'explosion'
         
-        self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), magnitude=random_magnitude, direction=random_direction)))
+        self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), magnitude=random_magnitude, direction=random_direction),random_type))
 
     def update(self, event):
         '''Will update the menu with realtime events, such as the mouse events. It also updates the buttons in the menu'''

@@ -34,31 +34,3 @@ class Text:
     def get_surface_and_pos(self, screen_width):
         '''Allows each view to send surface to view renderer'''
         return (self._surface, Point(self.get_rect(screen_width).x, self.get_rect(screen_width).y))
-
-def init():
-    pygame.init()
-    screen = pygame.display.set_mode((640,480))
-    pygame.display.set_caption('The Game')
-    pygame.display.flip()
-
-    return screen
-
-
-if __name__ == '__main__':
-
-    screen = init()
-
-    for i in range(0, 1000):
-
-        screen.fill((0,0,0))
-
-        t = Text(str(i), i // 10, (255,0,100), (20, 20), screen)
-
-        for event in pygame.event.get():
-
-            if event.type == pygame.QUIT:
-
-                break
-
-        t.render()
-        pygame.display.flip()
