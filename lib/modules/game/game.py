@@ -136,7 +136,7 @@ class Game(View):
         if self._restart_timer.read() > self._restart_delay:
 
             self._restart_timer.stop()
-            self.start_game(self._debug)
+            self.start_game()
             self._done = False
             
 

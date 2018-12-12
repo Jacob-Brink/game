@@ -97,14 +97,13 @@ class RigidBody():
 
         self._acceleration = Vector(self._rect.get_center(), direction=self._velocity.return_direction(), magnitude=0)*delta_time
 
-        print(self._acceleration)
         for force in self._forces:
             self._acceleration += force * (1/self._mass)
-        print(self._acceleration)
+    
         # velocity and past velocity are set
         self._past_velocity = self._velocity    
-        self._velocity = self._acceleration + self._velocity
-        print(self._acceleration)
+        self._velocity = (self._acceleration + self._velocity)
+        
         self._past_rect = self._rect.copy()
         
         # changes rectangle from last velocity
@@ -116,11 +115,11 @@ class RigidBody():
 
     def return_past_rect(self):
         '''Returns rect that is distinguishably different than current rect'''
-        return self._past_rect
+        return self._past_rect.copy()
         
     def return_rect(self):
         '''Returns rectangle of type pygame.Rect'''
-        return self._rect
+        return self._rect.copy()
 
     def return_mass(self):
         '''Returns mass'''

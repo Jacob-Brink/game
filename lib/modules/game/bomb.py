@@ -9,7 +9,7 @@ class Bomb(RigidBody):
         '''Models an exploding bomb'''
         # set rigid body
         self._width = 20
-        self._mass = 50
+        self._mass = 200
         super().__init__(Rectangle(initial_velocity.return_start_position(), Point(self._width, self._width)), self._mass)
         super().set_velocity(initial_velocity)
 

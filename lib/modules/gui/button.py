@@ -10,7 +10,6 @@ class Button:
         Constructs a button with the text, creates surface constants: one for when the mouse hovers
         over the button, and one for when the mouse does not hover over the button.
         '''
-
         self._clicked = False
         self._callback = callback
 

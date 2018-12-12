@@ -51,7 +51,6 @@ class Menu(View):
         
         for button in buttons:
             self.add_button(button[0], button[1])
-
         
         #title surface creation
         self._title_text = title
@@ -73,17 +72,17 @@ class Menu(View):
 
         self._buttons.append(Button(normal_surface, hover_surface, callback))
 
-    def create_bomb(self):
+    def create_bomb(self, position):
         '''Create bomb and append to bomb list'''
         s_dimensions = super().return_screen_dimensions()
         screen_width = s_dimensions.x()
         screen_height = s_dimensions.y()
         
-        random_x = randint(-screen_width, screen_width)
-        random_y = randint(-screen_height, screen_height)
+        random_x = position.x()
+        random_y = position.y()
 
-        random_magnitude = randint(0,10)
-        random_direction = randint(0,180)
+        random_magnitude = randint(1,4)/100
+        random_direction = randint(-180,180)
         
         self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), magnitude=random_magnitude, direction=random_direction)))
 
@@ -91,8 +90,6 @@ class Menu(View):
         '''Will update the menu with realtime events, such as the mouse events. It also updates the buttons in the menu'''
         screen = event.screen()
 
-        self._physics.update(event, [], self._bomb_list, [])    
-        
         # update buttons
         for button in self._buttons:
             button.update(event)
@@ -100,20 +97,24 @@ class Menu(View):
             if button.is_clicked():
                 button.return_callback()(Menu, self._parameters)
 
-
-        # update bombs for fun
+        # render buttons
+        super().render(self._title_surface.get_surface_and_pos(screen.get_size()[0]), *[button.return_surface().get_surface_and_pos(screen.get_size()[0]) for button in self._buttons])
+        
+        # update physics with only bombs
+        self._physics.update(event, [], self._bomb_list, [])    
+        
+        # draw bombs
         for bomb in self._bomb_list:
-
+            
             if super().is_visible(bomb.return_rect()):
                 super().render_rectangle(bomb.return_rect(), color=bomb.get_color())
             
-        create_bomb = randint(0,3)
-
-        if create_bomb == 2:
-            self.create_bomb()
+        # randomly create a bomb by random numbers
+        create_bomb = randint(0,4)
+       
+        if create_bomb == 1:
+            self.create_bomb(event.mouse().get_position())
 
         
-        super().render(self._title_surface.get_surface_and_pos(screen.get_size()[0]), *[button.return_surface().get_surface_and_pos(screen.get_size()[0]) for button in self._buttons])
-
         
 

@@ -49,13 +49,13 @@ class Player(RigidBody):
         '''Constructs a new player with rigid body as Base Class'''
 
         self._surface = Image(image_path+'test.png').return_surface()
-        super().__init__(Rectangle((0,0), self._surface.get_size()), 100)
+        super().__init__(Rectangle((0,0), self._surface.get_size()), 200)
 
         self._debug = debug_mode
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
 
-        self._x_velocity_max = 5
+        self._x_velocity_max = 1
 
         self._jump_timer = Timer()
         self._jump_limit = 2
