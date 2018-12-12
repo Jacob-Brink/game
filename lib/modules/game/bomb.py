@@ -15,7 +15,7 @@ class Bomb(RigidBody):
 
         # exploded
         self._exploded = False
-        self._explosion_radius = 10000
+        self._explosion_radius = 800
 
         # color flash stuff
         self._color = (0, 0, 0)
@@ -60,10 +60,10 @@ class Bomb(RigidBody):
             # explode after fuse goes out
             if self._fuse_timer.read() > self._fuse_limit:
                 self.explode()
-
             
         else:
             self._color = (0,10,200)
+
         # update rigid body
         super().update(delta_time)
 
@@ -75,7 +75,6 @@ class Bomb(RigidBody):
 
     def finished_exploding(self):
         '''Returns whether or not bomb's explosion is done'''
-        print(self._explosion_timer.read(), 'Explosion Timer!')
         return self._explosion_timer.read() >= self._explosion_duration
         
     def exploded(self):

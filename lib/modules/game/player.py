@@ -55,6 +55,8 @@ class Player(RigidBody):
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
 
+        self._x_velocity_max = 5
+
         self._jump_timer = Timer()
         self._jump_limit = 2
         self._jumps = 0
@@ -96,10 +98,12 @@ class Player(RigidBody):
 
         change = 5
 
-        if pressed(self._keys['left']) and  not super().get_platform_status(PlatformStatus.on_right):
+        x_component_velocity = super().return_velocity_vector().return_x_component()
+        
+        if pressed(self._keys['left']) and  not super().get_platform_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
             delta_x -= change
-
-        if pressed(self._keys['right']) and not super().get_platform_status(PlatformStatus.on_left):
+    
+        if pressed(self._keys['right']) and not super().get_platform_status(PlatformStatus.on_left) and x_component_velocity < self._x_velocity_max:
             delta_x += change
             
         if events.keyboard().is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
@@ -128,8 +132,10 @@ class Player(RigidBody):
         '''Changes health'''
         self._health -= health_delta
         
-        if self._health < 0:
+        if self._health <= 0:
             self._alive = False
+            self._health = 0
+            self._health_bar.change_percentage(self._health/self._health_total)
         else:
             self._health_bar.change_percentage(self._health/self._health_total)
             

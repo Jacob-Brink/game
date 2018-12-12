@@ -76,7 +76,9 @@ class Menu(View):
             if button.is_clicked():
                 button.return_callback()(Menu, self._parameters)
 
-        super().render(screen, self._title_surface.get_surface_and_pos(screen.get_size()[0]), *[button.return_surface().get_surface_and_pos(screen.get_size()[0]) for button in self._buttons])
+        
+        
+        super().render(self._title_surface.get_surface_and_pos(screen.get_size()[0]), *[button.return_surface().get_surface_and_pos(screen.get_size()[0]) for button in self._buttons])
 
 
 

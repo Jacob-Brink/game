@@ -209,7 +209,7 @@ class Editor(View):
         if not self._unfinished_rect == None:
             super().render_rectangle(self._unfinished_rect, color=self._unfinished_rect.get_color())
 
-        super().render(screen, (self._title.get_surface(), Point(10,10)), relative_screen=True)
+        super().render((self._title.get_surface(), Point(10,10)), relative_screen=True)
         
         self.handle_keyboard(events)
     

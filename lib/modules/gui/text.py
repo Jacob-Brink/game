@@ -6,9 +6,9 @@ class Text:
     def __init__(self, text, font_size, color, pos, y_value):
         '''
         Class models text and makes creating text in the game more intuitive
-        '''
-        
+        '''        
         self._text = text
+        self._words = self._text.strip().split()
         self._font_size = font_size
         self._color = color
         self._pos = pos
@@ -18,11 +18,12 @@ class Text:
         self._surface = self._font.render(self._text, 1, color)
         self._text_size = self._font.size(self._text)
         self._text_width = self._text_size[0]
-
+        
     def get_rect(self, screen_width):
         '''Return pygame.Rect for Textbox'''
         return pygame.Rect((0 if self._pos == 'left' else screen_width/2 - self._text_width/2 if self._pos == 'middle' else screen_width-self._text_width, self._y_value), self._text_size)
 
+    
     def get_surface(self):
         '''Return surface'''
         return self._surface

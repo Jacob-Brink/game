@@ -93,8 +93,7 @@ class Physics:
                 elif rigid_body.get_platform_status(PlatformStatus.on_left) or rigid_body.get_platform_status(PlatformStatus.on_right):
 
                     rigid_body.set_velocity(Vector(Point(0,0), x_component=0, y_component=rigid_body.return_velocity_vector().return_y_component()))
-
-                    
+        
 
     def update(self, events, player_list, bomb_list, platform_list):
         '''Calculate collisions, reposition from collisions, work with forces, etc'''        
@@ -106,24 +105,28 @@ class Physics:
 
             bomb.update(self._delta_time)
             self.apply_gravity(bomb)
-
-            self.reposition(bomb, platform_list)
             
             if bomb.exploded():
 
+                b_center = bomb.return_rect().get_center()
+                b_radius = bomb.get_radius()
+                
                 for player in player_list:
-                    
-                    p_center = player.return_rect().get_center()
-                    b_center = bomb.return_rect().get_center()
-                    dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                    player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(bomb.get_radius()/(.1+dist_centers))))
 
-                    player.change_health(self._delta_time*bomb.get_radius()/(.1+dist_centers*dist_centers*dist_centers))
-                        
+                    if self._collision.circle_rect(b_center, b_radius, player.return_rect()):
+                        p_center = player.return_rect().get_center()
+                        dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
+                        player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(10*b_radius/(.1+dist_centers))))
+
+                        player.change_health(b_radius/(.1+dist_centers*dist_centers))
+                    
                 if bomb.finished_exploding():
 
                     bomb_list.remove(bomb)
 
+            self.reposition(bomb, platform_list)
+
+            
         for player in player_list:
             
             player.update(events)

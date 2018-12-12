@@ -25,7 +25,7 @@ class View(Camera):
         else:
             pygame.draw.line(self._screen, (200, 100, 240), super().return_display_position(vector.return_start_position()).return_tuple(), super().return_display_position(vector.return_end_position()).return_tuple())
         
-    def render(self, screen, *surface_pos, **keywords):
+    def render(self, *surface_pos, **keywords):
         '''Given a screen and surfaces, render the surfaces'''
         #CHANGE PARAMETERS IF NO ERROR OCCURS WITH self._screen = screen commented
         
@@ -36,6 +36,9 @@ class View(Camera):
             else:
                 self._screen.blit(super().return_display_surface(surface[0]), super().return_display_position(surface[1]).return_tuple())
 
+    def update(self, screen):
+        '''Updates view screen'''
+        self._screen = screen
 
 
 
