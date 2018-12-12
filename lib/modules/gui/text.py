@@ -8,7 +8,6 @@ class Text:
         Class models text and makes creating text in the game more intuitive
         '''        
         self._text = text
-        self._words = self._text.strip().split()
         self._font_size = font_size
         self._color = color
         self._pos = pos

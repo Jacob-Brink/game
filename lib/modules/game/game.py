@@ -81,7 +81,7 @@ class Game(View):
         self._screen = events.screen()
         
         if events.was_resized():
-            super().update(self._screen.get_size())
+            super().update(self._screen)
                 
         # update menu
         self._menu.update(events)
@@ -98,6 +98,7 @@ class Game(View):
             if super().is_visible(platform):
                 super().render_rectangle(platform, color=(0,0,0))
         
+        
         # render appropriate bomb
         for bomb in self._bomb_list:
             # if surface is visible, render it
@@ -110,8 +111,11 @@ class Game(View):
             super().render_rectangle(player.return_healthbar_and_color()[0], color=player.return_healthbar_and_color()[1])
             if self._debug:
                 super().render_line(player.return_velocity_vector()*100)
-                
 
+        
+        
+
+        super().render(Text(str(events.fps()), 20, (100,40, 100), 'left', 10).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
         # handle end game
         if not self._done:
             
@@ -137,6 +141,4 @@ class Game(View):
             self.start_game(self._debug)
             self._done = False
             
-        # update view
-        super().update(self._screen)
 

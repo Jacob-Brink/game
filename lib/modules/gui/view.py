@@ -16,6 +16,7 @@ class View(Camera):
         try:
             pygame.draw.rect(self._screen, keywords['color'], super().return_disp_rect(rect))
         except:
+            print(self._screen)
             pygame.draw.rect(self._screen, (255,0,0), super().return_disp_rect(rect))
             
     def render_line(self, vector, **keywords):
@@ -35,9 +36,10 @@ class View(Camera):
                 self._screen.blit(surface[0], surface[1].return_tuple())
             else:
                 self._screen.blit(super().return_display_surface(surface[0]), super().return_display_position(surface[1]).return_tuple())
-
+                
     def update(self, screen):
         '''Updates view screen'''
+        print(screen)
         self._screen = screen
 
 
