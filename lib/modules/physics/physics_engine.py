@@ -19,7 +19,7 @@ class Physics:
         self._debug_mode = debug_mode
         self._collision = Collision()
         self._MARGIN_PIXEL = 1
-        self._gravity_magnitude = 40
+        self._gravity_magnitude = 80
         
     def next_to(self, value, side_value):
         '''Return tru if value is next to other value give or take 4'''

@@ -63,7 +63,7 @@ class Player(RigidBody):
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
 
-        self._x_velocity_max = 5
+        self._x_velocity_max = 10
         self._change = 10
         
         self._jump_timer = Timer()
@@ -80,7 +80,10 @@ class Player(RigidBody):
         self._bomb_reload_timer = Timer()
         self._bomb_reload_timer.restart()
         self._bomb_reload_time = .1
-    
+        self._bomb_speed = 60
+
+        # 1 indicates facing right, while -1 indicates facing left
+        self._facing = 1
         
     def jump(self, change):
         '''Adds upward velocity'''
@@ -99,8 +102,11 @@ class Player(RigidBody):
             
     def fire_bomb(self, bomb_type):
         '''Fires bomb'''
+        p_vector = super().return_velocity_vector()
+        
+        # if reload time has ended throw next bomb
         if self._bomb_reload_timer.read() > self._bomb_reload_time:
-            self._throw_bomb_callback(super().return_velocity_vector()*8, bomb_type)
+            self._throw_bomb_callback(Vector(super().return_rect().get_center(), x_component=self._facing*self._bomb_speed, y_component=self._bomb_speed/3), bomb_type)
             self._bomb_reload_timer.restart()
         
             
@@ -113,13 +119,15 @@ class Player(RigidBody):
         x_component_velocity = super().return_velocity_vector().return_x_component()
 
         # go left when left key is pressed
-        if is_pressed(self._keys['left']) == Switch.down and  not super().get_platform_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
+        if is_pressed(self._keys['left']) == Switch.down and not super().get_platform_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
             delta_x -= self._change
+            self._facing = -1
 
         # go right when right key is pressed
         if is_pressed(self._keys['right']) == Switch.down and not super().get_platform_status(PlatformStatus.on_left) and x_component_velocity < self._x_velocity_max:
             delta_x += self._change
-
+            self._facing = 1
+            
         # slow down if neither left nor right key is pressed while on platform
         if (not is_pressed(self._keys['right']) == Switch.down and not is_pressed(self._keys['left']) == Switch.down) and super().get_platform_status(PlatformStatus.on_top):
             if x_component_velocity > 0:

@@ -26,7 +26,7 @@ class Bomb(RigidBody):
         # bomb fuse
         self._fuse_timer = Timer()
         self._fuse_timer.restart()
-        self._fuse_limit = 4
+        self._fuse_limit = 3
 
         # explosion duration timer
         self._explosion_timer = Timer()

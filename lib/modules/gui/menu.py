@@ -48,7 +48,8 @@ class Menu(View):
         # for show, have bomb list
         self._physics = Physics(False)
         self._bomb_list = []
-        
+
+        # add buttons to list
         for button in buttons:
             self.add_button(button[0], button[1])
         
@@ -72,25 +73,26 @@ class Menu(View):
 
         self._buttons.append(Button(normal_surface, hover_surface, callback))
 
-    def create_bomb(self, position):
+    def create_bomb(self):
         '''Create bomb and append to bomb list'''
         s_dimensions = super().return_screen_dimensions()
         screen_width = s_dimensions.x()
         screen_height = s_dimensions.y()
         
-        random_x = position.x()
-        random_y = position.y()
+        random_x = randint(0, super().return_screen_dimensions().x())
+        random_y = randint(0, super().return_screen_dimensions().y())
 
-        random_magnitude = randint(1,4)/100
-        random_direction = randint(-180,180)
+        random_x_comp = randint(1,4)
+        random_y_comp = randint(1,4)
 
         random_type = randint(0,1)
+
         if random_type == 0:
             random_type = 'implosion'
         else:
             random_type = 'explosion'
         
-        self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), magnitude=random_magnitude, direction=random_direction), random_type))
+        self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), x_component=random_x_comp, y_component=random_y_comp), random_type))
 
     def update(self, event):
         '''Will update the menu with realtime events, such as the mouse events. It also updates the buttons in the menu'''
@@ -103,12 +105,15 @@ class Menu(View):
             if button.is_clicked():
                 button.return_callback()(Menu, self._parameters)
 
+                
         # render buttons
         super().render(self._title_surface.get_surface_and_pos(screen.get_size()[0]), *[button.return_surface().get_surface_and_pos(screen.get_size()[0]) for button in self._buttons])
         
         # update physics with only bombs
         self._physics.update(event, [], self._bomb_list, [])    
         
+
+        # showy stuff
         # draw bombs
         for bomb in self._bomb_list:
             
@@ -116,10 +121,9 @@ class Menu(View):
                 super().render_rectangle(bomb.return_rect(), color=bomb.get_color())
             
         # randomly create a bomb with 1 / 11 chance of spawning any given tick
-        create_bomb = randint(0,10)
-       
-        if create_bomb == 4:
-            self.create_bomb(event.mouse().get_position())
+        create_bomb = randint(0,5)
+        if create_bomb == 2:
+            self.create_bomb()
 
         
         
