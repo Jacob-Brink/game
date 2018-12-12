@@ -67,9 +67,10 @@ class Player(RigidBody):
         self._health_bar = HealthBar(Rectangle((0,0), (100, 20)))
         
         self._throw_bomb_callback = throw_bomb_callback
-        self._bomb_timer = Timer()
-        self._bomb_charge_timer = Timer()
-
+        self._bomb_reload_timer = Timer()
+        self._bomb_reload_timer.restart()
+        self._bomb_reload_time = .2
+    
         
     def jump(self, change):
         '''Adds upward velocity'''
@@ -86,8 +87,13 @@ class Player(RigidBody):
             
     def fire_bomb(self):
         '''Fires bomb'''
-        self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_charge_timer.read()*20))
-        self._bomb_charge_timer.stop()
+        if self._bomb_reload_timer.read() > 0 and self._bomb_reload_timer.read() > self._bomb_reload_time:
+            self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_reload_timer.read()*20))
+            self._bomb_reload_timer.stop()
+            
+        elif self._bomb_reload_timer.read() < 0:
+            self._bomb_reload_timer.restart()
+
             
     def update(self, events):
         '''To be called on every game tick'''
@@ -108,14 +114,9 @@ class Player(RigidBody):
             
         if events.keyboard().is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
             self.jump(change)
-
-        if events.keyboard().is_pressed(self._keys['fire']) == Switch.pushed_down:
-            self._bomb_charge_timer.restart()
-
+            
         if events.keyboard().is_pressed(self._keys['fire']) == Switch.pushed_up:
-            if self._bomb_charge_timer.read() > 0:
-                self.fire_bomb()
-    
+            self.fire_bomb()
         user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
 
         self._health_bar.change_bottom_left(super().return_rect().get_top_left())
