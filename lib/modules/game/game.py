@@ -132,11 +132,12 @@ class Game(View):
         elif self._done:
             
             super().render(Text(self._message_string, 100, (100, 200, 100), 'middle', self._screen.get_height()/2).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
-            super().render(Text('Restarting in:'+str(round(self._restart_delay-self._restart_timer.read())), 100, (100, 200, 100), 'middle', self._screen.get_height()/2+110).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
+            super().render(Text('Restarting in: '+str(round(self._restart_delay-self._restart_timer.read())), 100, (100, 200, 100), 'middle', self._screen.get_height()/2+110).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
 
 
         # when restart timer finishes, game restarts
         if self._restart_timer.read() > self._restart_delay:
+
             self._restart_timer.stop()
             self.start_game(self._debug)
             self._done = False

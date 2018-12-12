@@ -25,11 +25,11 @@ class Bomb(RigidBody):
         # bomb fuse
         self._fuse_timer = Timer()
         self._fuse_timer.restart()
-        self._fuse_limit = 10
+        self._fuse_limit = 3
 
         # explosion duration timer
         self._explosion_timer = Timer()
-        self._explosion_duration = 10
+        self._explosion_duration = 5
 
     def color_transition(self, color_value):
         '''Returns next color in color transition'''

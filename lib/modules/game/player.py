@@ -69,7 +69,7 @@ class Player(RigidBody):
         self._throw_bomb_callback = throw_bomb_callback
         self._bomb_reload_timer = Timer()
         self._bomb_reload_timer.restart()
-        self._bomb_reload_time = .2
+        self._bomb_reload_time = .01
     
         
     def jump(self, change):

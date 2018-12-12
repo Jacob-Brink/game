@@ -113,18 +113,20 @@ class Physics:
                 
                 for player in player_list:
 
-                    if self._collision.circle_rect(b_center, b_radius, player.return_rect()):
-                        p_center = player.return_rect().get_center()
-                        dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                        player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(10*b_radius/(.1+dist_centers))))
-
-                        player.change_health(b_radius/(.1+dist_centers*dist_centers))
+                    #if self._collision.circle_rect(b_center, b_radius, player.return_rect()):
+                    p_center = player.return_rect().get_center()
+                    dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
+                    player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(50*b_radius/(.1+dist_centers))))
+                    
+                    player.change_health(b_radius/(.1+dist_centers*dist_centers))
 
                 for bomby in bomb_list:
-                    if self._collision.circle_rect(b_center, b_radius, bomby.return_rect()) and bomby is not bomb:
+                    
+                    #if self._collision.circle_rect(b_center, b_radius, bomby.return_rect()) and bomby is not bomb:
+                    if bomby is not bomb:
                         p_center = bomby.return_rect().get_center()
                         dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                        bomby.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(20*b_radius/(.1+dist_centers))))
+                        bomby.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(60*b_radius/(.1+dist_centers))))
 
                         
                 if bomb.finished_exploding():

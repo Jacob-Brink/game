@@ -160,6 +160,7 @@ class Event:
         else:
             self._fps = int(1/self._delta_time*1000)
 
+    
     def was_resized(self):
         '''Returns boolean value of whether or not the screen was resized'''
         return self._resized

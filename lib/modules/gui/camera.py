@@ -44,8 +44,7 @@ class Camera(Rectangle):
         view_height = self._screen_rect.height/self._zoom
       
         self._view_rect.change_width(view_width)
-        self._view_rect.change_height(view_height)
-        
+        self._view_rect.change_height(view_height)        
 
     def zoom_values(self, *values):
         '''Given any width or height returns the displayed width and height with zoom'''
