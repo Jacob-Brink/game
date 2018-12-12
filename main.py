@@ -5,6 +5,7 @@ from lib.modules.gui.menu import Menu
 from handler import Handler
 from lib.modules.gui.events import Event
 
+
 FPS_CAP = 60
 
 running = True
@@ -32,12 +33,13 @@ def main():
 
     while handler.is_running() and running:
         # measure change in time for each frame
-        delta_time = pygame.time.Clock().tick(120)
+
+        delta_time = pygame.time.Clock().tick(FPS_CAP)/1000
 
         if delta_time <= 0:
-            print(delta_time)
             delta_time =.0000001
 
+            
 
         # calls update which gets all events from pygame.events.get() and updates all values
         e.update(delta_time)

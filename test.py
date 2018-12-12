@@ -140,7 +140,11 @@ class TestGame(unittest.TestCase):
 
         for point in noncolliding_points:
             assert rect.collide_point(point) == False
-        
+
+        # test adding rectangles
+        r1 = Rectangle(0,0,4,4)
+        r2 = Rectangle(4,4,4,4)
+        assert r1+r2 == Rectangle(0,4,8,8)
         
     def test_camera(self):
         '''Test camera'''

@@ -11,15 +11,26 @@ from lib.modules.game.bomb import Bomb
 from lib.modules.physics.physics import PlatformStatus
 from lib.modules.game.timer import Timer
 
-class HealthBar(Rectangle):
+# Map of keys
+KEYS_MAP = [{'left': pygame.K_a, 'right': pygame.K_d, 'down': pygame.K_s, 'up': pygame.K_w, 'fire explosion': pygame.K_f, 'fire implosion': pygame.K_r}, {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'down': pygame.K_DOWN, 'up': pygame.K_UP, 'fire explosion': pygame.K_RCTRL, 'fire implosion': pygame.K_RSHIFT}]
 
+# player color
+PLAYER_COLOR = [(255, 0, 0), (0, 0, 255)]
+
+# size and offsets
+HEALTH_BAR_SIZE = Point(100, 20)
+OFFSET = HEALTH_BAR_SIZE.y()*4
+
+
+class HealthBar(Rectangle):
+    '''Models a health bar'''
     def __init__(self, rectangle):
         '''Constructs a health bar'''
         super().__init__(rectangle.get_top_left(), rectangle.get_size())
         self._green = 255
         self._red = 0
         self._initial_width = super().get_w()
-
+        
     def get_color(self):
         '''Sets color based on red and green values'''
         return (self._red, self._green, 0)
@@ -31,15 +42,11 @@ class HealthBar(Rectangle):
         self._green = 255*percentage
         self._red = 255*(1-percentage)
 
-        
+        # change rectangle width without moving left position
         original_position = super().get_top_left()
         super().change_width(self._initial_width*percentage)
         super().change_top_left(original_position)
 
-        
-image_path = 'lib/data/assets/'
-
-KEYS_MAP = [{'left': pygame.K_a, 'right': pygame.K_d, 'down': pygame.K_s, 'up': pygame.K_w, 'fire explosion': pygame.K_f, 'fire implosion': pygame.K_r}, {'left': pygame.K_LEFT, 'right': pygame.K_RIGHT, 'down': pygame.K_DOWN, 'up': pygame.K_UP, 'fire explosion': pygame.K_RCTRL, 'fire implosion': pygame.K_RSHIFT}]
 
 
 class Player(RigidBody):
@@ -48,86 +55,99 @@ class Player(RigidBody):
     def __init__(self, keyboard_layout, debug_mode, throw_bomb_callback):
         '''Constructs a new player with rigid body as Base Class'''
 
-        self._surface = Image(image_path+'test.png').return_surface()
-        super().__init__(Rectangle((0,0), self._surface.get_size()), 200)
+        super().__init__(Rectangle((0,0), (100,150)), 200)
 
+        self._color = PLAYER_COLOR[keyboard_layout]
+        
         self._debug = debug_mode
         self._player_num = keyboard_layout
         self._keys = KEYS_MAP[keyboard_layout]
 
-        self._x_velocity_max = 1
-
+        self._x_velocity_max = 5
+        self._change = 10
+        
         self._jump_timer = Timer()
+        self._jump_timer.restart()
         self._jump_limit = 2
         self._jumps = 0
 
         self._alive = True
         self._health_total = 10
         self._health = 10
-        self._health_bar = HealthBar(Rectangle((0,0), (100, 20)))
+        self._health_bar = HealthBar(Rectangle(Point(0,0), HEALTH_BAR_SIZE))
         
         self._throw_bomb_callback = throw_bomb_callback
         self._bomb_reload_timer = Timer()
         self._bomb_reload_timer.restart()
-        self._bomb_reload_time = .01
+        self._bomb_reload_time = .1
     
         
     def jump(self, change):
         '''Adds upward velocity'''
-        if super().get_platform_status(PlatformStatus.on_top) and self._jump_timer.read() == -1:
+        # handle jump when on ground
+        if super().get_platform_status(PlatformStatus.on_top):
             self._jumps = 0
-            super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change))
+            super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change*2))
             self._jump_timer.restart()
-            
+
+        # handle double jump
         elif self._jumps < self._jump_limit and self._jump_timer.read() > .1:
             self._jumps += 1
-            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change*2))
-            self._jump_timer.stop()
+            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change*1.5))
+            self._jump_timer.restart()
 
             
     def fire_bomb(self, bomb_type):
         '''Fires bomb'''
-        if self._bomb_reload_timer.read() > 0 and self._bomb_reload_timer.read() > self._bomb_reload_time:
-            self._throw_bomb_callback(Vector(super().return_rect().get_center(), direction=super().return_velocity_vector().return_direction(), magnitude=self._bomb_reload_timer.read()**2), bomb_type)
-            self._bomb_reload_timer.stop()
-            
-        elif self._bomb_reload_timer.read() < 0:
+        if self._bomb_reload_timer.read() > self._bomb_reload_time:
+            self._throw_bomb_callback(super().return_velocity_vector()*8, bomb_type)
             self._bomb_reload_timer.restart()
-
+        
             
     def update(self, events):
         '''To be called on every game tick'''
-        pressed = events.keyboard().down
+        is_pressed = events.keyboard().is_pressed
         delta_x = 0
         delta_y = 0
 
-        change = 5
-
         x_component_velocity = super().return_velocity_vector().return_x_component()
-        
-        if pressed(self._keys['left']) and  not super().get_platform_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
-            delta_x -= change
-    
-        if pressed(self._keys['right']) and not super().get_platform_status(PlatformStatus.on_left) and x_component_velocity < self._x_velocity_max:
-            delta_x += change
-            
-        if events.keyboard().is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
-            self.jump(change)
-            
-        if events.keyboard().is_pressed(self._keys['fire explosion']) == Switch.pushed_up:
+
+        # go left when left key is pressed
+        if is_pressed(self._keys['left']) == Switch.down and  not super().get_platform_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
+            delta_x -= self._change
+
+        # go right when right key is pressed
+        if is_pressed(self._keys['right']) == Switch.down and not super().get_platform_status(PlatformStatus.on_left) and x_component_velocity < self._x_velocity_max:
+            delta_x += self._change
+
+        # slow down if neither left nor right key is pressed while on platform
+        if (not is_pressed(self._keys['right']) == Switch.down and not is_pressed(self._keys['left']) == Switch.down) and super().get_platform_status(PlatformStatus.on_top):
+            if x_component_velocity > 0:
+                delta_x -= .2*x_component_velocity
+            elif x_component_velocity < 0:
+                delta_x -= .2*x_component_velocity
+
+        # jump
+        if is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
+            self.jump(self._change)
+
+        # fire explosive bomb
+        if is_pressed(self._keys['fire explosion']) == Switch.pushed_up:
             self.fire_bomb('explosion')
 
-        if events.keyboard().is_pressed(self._keys['fire implosion']) == Switch.pushed_up:
+        # fire implosive bomb
+        if is_pressed(self._keys['fire implosion']) == Switch.pushed_up:
             self.fire_bomb('implosion')
 
-            
+        # compile velocity from key presses    
         user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
         delta_time = events.delta_time()
         
-        self._health_bar.change_bottom_left(super().return_rect().get_top_left())
         super().add_velocity(user_velocity)
         super().update(delta_time)
 
+        # set health bar rectangle to be above player
+        self._health_bar.change_bottom_left(super().return_rect().get_top_left()+Point(0,-OFFSET/4))
         
     def is_alive(self):
         '''Returns true if player is still alive'''
@@ -150,11 +170,10 @@ class Player(RigidBody):
         '''Return rectangle and color'''
         return self._health_bar, self._health_bar.get_color()
 
-    
     def return_surface_and_pos(self):
+        '''Returns debug mode surface'''
+        return [Text('Player '+str(self._player_num), 64, (200,255,255), 'left', 10).get_surface(), super().return_rect().get_top_left()+Point(0,-OFFSET)]
+    
+    def return_rectangle_and_color(self):
         '''Returns array of surface and point of x and y position. (Used for easy blitting)'''
-
-        if self._debug:
-            return [Text('Player'+str(self._player_num) + 'Pos: ' + str(super().return_rect()), 64, (200,255,255), 'left', 10).get_surface(), super().return_rect().get_top_left()]
-        else:
-            return [self._surface, super().return_rect().get_top_left()]
+        return [super().return_rect().copy(), self._color]

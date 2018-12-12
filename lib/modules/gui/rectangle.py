@@ -2,7 +2,15 @@ import pygame
 
 class Point:
     '''Represents a 2 dimensional point with x and y values'''
+    def check_invariance(self, value):
+        '''Raises exception if value is not int or float'''
+        if not (isinstance(value, int) or isinstance(value, float)):
+            raise ValueError('Point: All values must be type int or float')
+
     def __init__(self, x, y):
+        '''Constructs a point object'''
+        self.check_invariance(x)
+        self.check_invariance(y)
         self._x = x
         self._y = y
 
@@ -16,15 +24,22 @@ class Point:
     
     def change_x(self, new_x):
         '''Change x to new_x'''
+        self.check_invariance(new_x)
         self._x = new_x
 
     def change_y(self, new_y):
         '''Change y to new_y'''
+        self.check_invariance(new_y)
         self._y = new_y
         
     def return_tuple(self):
         '''Returns tuple of x and y'''
         return self._x, self._y
+
+    def __add__(self, other):
+        '''Adds two points together by adding x components and then y components'''
+        return Point(self._x+other._x, self._y+other._y)
+
     def __str__(self):
         '''Returns string of points'''
         return '<' + str(self._x) + ',' + str(self._y) + '>'
@@ -48,6 +63,10 @@ class Rectangle:
         '''Returns iterable list of values x,y, w, and h'''
         return [self._x, self._y, self._w, self._h]
 
+    def list_four_points(self):
+        '''Returns iterable list of four corners'''
+        return [self._top_left, self._top_right, self._bottom_left, self._bottom_right]
+    
     def raise_error(self, error):
         '''Raises error wrapper function'''
         raise ValueError(str(error))
@@ -148,6 +167,7 @@ class Rectangle:
 
         # reset values based on x,y,w, and h values
         self.set_values()
+        
     def get_x(self):
         '''Return x'''
         return self._x
@@ -184,6 +204,22 @@ class Rectangle:
         '''Return top right'''
         return self._top_right 
 
+    def get_left(self):
+        '''Return left x coordinate'''
+        return self._x
+
+    def get_right(self):
+        '''Return right x coordinate'''
+        return self._x+self._w
+
+    def get_top(self):
+        '''Return top y coordinate'''
+        return self._y
+
+    def get_bottom(self):
+        '''Return bottom y coordinate'''
+        return self._y+self._h
+    
     def change_top_left(self, top_left_point):
         '''Change top left, recalculate corners, and leave width and height alone'''
         self._x = top_left_point.x()
@@ -230,6 +266,24 @@ class Rectangle:
         self._y += point_delta.y()
         self.set_values()
 
+    def __add__(self, other):
+        '''Returns the smallest rectangle that contains both rectangles'''
+
+        dist_centers_x = self._center.x()-other._center.x()
+        dist_centers_y = self._center.y()-other._center.y()
+
+        # make a random rectangle for mutating
+        r = Rectangle(Point(0,0),Point(1,1))
+
+        # make center average center
+        r.set_center(Point(other._center.x()+dist_centers_x/2, other._center.y()+dist_centers_y/2))
+
+        # change size
+        r.change_width(abs(dist_centers_x)+self.get_w()/2+other.get_w()/2)
+        r.change_height(abs(dist_centers_y)+self.get_h()/2+other.get_h()/2)
+
+        return r
+        
     def __str__(self, rounding=True):
         '''Return string for pretty print'''
         return str(round(self._x)) + ' ' + str(round(self._y)) + ' ' + str(round(self._w)) + ' ' +str(round(self._h)) if rounding else  str(self._x) + ' ' + str(self._y) + ' ' + str(self._w) + ' ' +str(self._h)

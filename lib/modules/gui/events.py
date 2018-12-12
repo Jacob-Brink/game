@@ -158,7 +158,7 @@ class Event:
         if self._delta_time == 0:
             self._fps = '99999'
         else:
-            self._fps = int(1/self._delta_time*1000)
+            self._fps = int(1/self._delta_time)
 
     
     def was_resized(self):

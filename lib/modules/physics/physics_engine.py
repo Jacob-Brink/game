@@ -19,10 +19,11 @@ class Physics:
         self._debug_mode = debug_mode
         self._collision = Collision()
         self._MARGIN_PIXEL = 1
-        self._gravity_magnitude = 2
+        self._gravity_magnitude = 40
         
     def next_to(self, value, side_value):
-        return side_value - 4 <= value <= side_value + 4
+        '''Return tru if value is next to other value give or take 4'''
+        return side_value - self._MARGIN_PIXEL <= value <= side_value + self._MARGIN_PIXEL
         
     def return_side_platform(self, rect, platform):
         '''Returns which side the rectangle is adjacent to'''
@@ -71,28 +72,33 @@ class Physics:
 
     def apply_gravity(self, rigid_body):
         '''Applies gravity vector to rigid body'''
-        rigid_body.apply_force(Vector(rigid_body.return_rect().get_center(), direction=90, magnitude=self._gravity_magnitude*self._delta_time))
+        rigid_body.apply_force(Vector(rigid_body.return_rect().get_center(), direction=90, magnitude=self._gravity_magnitude))
 
     def reposition(self, rigid_body, platform_list):
-        
-            for platform in platform_list:
+        '''Repositions rigid body'''
+        for platform in platform_list:
 
-                # if a collision occurs, figure out how what side the rigid_body collided
-                if rigid_body.return_rect().collides_with(platform):
+            # if a collision occurs, figure out how what side the rigid_body collided
+            past_rect = rigid_body.return_past_rect()
+            
+            if self._collision.rigid_body_and_platform(rigid_body, platform):
+                # reposition rigid_body
+                rigid_body.set_rect(self.return_new_rect_reposition(past_rect, platform))             
 
-                    # reposition rigid_body
-                    rigid_body.set_rect(self.return_new_rect_reposition(rigid_body.return_past_rect(), platform))             
+            rigid_body.change_platform_status(self.return_side_platform(rigid_body.return_rect(), platform), True)
+            
+            # set velocity to either x component or y component depending on where the rigid body was touching
+            center = rigid_body.return_rect().get_center()
+            x_component = rigid_body.return_velocity_vector().return_x_component()
+            y_component = rigid_body.return_velocity_vector().return_y_component()
+            
+            if rigid_body.get_platform_status(PlatformStatus.on_top) or rigid_body.get_platform_status(PlatformStatus.on_bottom):
 
-                rigid_body.change_platform_status(self.return_side_platform(rigid_body.return_rect(), platform), True)
+                rigid_body.set_velocity(Vector(center, x_component=x_component, y_component=0))
 
-                # set velocity to 0
-                if rigid_body.get_platform_status(PlatformStatus.on_top) or rigid_body.get_platform_status(PlatformStatus.on_bottom):
+            elif rigid_body.get_platform_status(PlatformStatus.on_left) or rigid_body.get_platform_status(PlatformStatus.on_right):
 
-                    rigid_body.set_velocity(Vector(Point(0,0), x_component=rigid_body.return_velocity_vector().return_x_component(), y_component=0))
-
-                elif rigid_body.get_platform_status(PlatformStatus.on_left) or rigid_body.get_platform_status(PlatformStatus.on_right):
-
-                    rigid_body.set_velocity(Vector(Point(0,0), x_component=0, y_component=rigid_body.return_velocity_vector().return_y_component()))
+                rigid_body.set_velocity(Vector(center, x_component=0, y_component=y_component))
         
 
     def update(self, events, player_list, bomb_list, platform_list):
@@ -103,8 +109,15 @@ class Physics:
         # updates bomb rigid body
         for bomb in bomb_list:
 
+
+            if not bomb.get_platform_status(PlatformStatus.on_top):
+                self.apply_gravity(bomb)
+            
             bomb.update(self._delta_time)
-            self.apply_gravity(bomb)
+
+            bomb.reset_platform_status()
+            
+
             
             if bomb.exploded():
 
@@ -119,55 +132,39 @@ class Physics:
                 
                 for player in player_list:
 
-                    #if self._collision.circle_rect(b_center, b_radius, player.return_rect()):
-                    p_center = player.return_rect().get_center()
-                    dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                    player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=coefficient*(50*b_radius/(.1+dist_centers))))
-                    
-                    player.change_health(b_radius/(.1+dist_centers*dist_centers))
+                    if self._collision.circle_rect(b_center, b_radius, player.return_rect()):
+                        p_center = player.return_rect().get_center()
+                        dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
+                        player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=coefficient*(20*b_radius/(.1+dist_centers))))
+
+                        # only explosive bombs deal damage, cuz if imploding bombs dealt damage, the game would end really fast
+                        if bomb.get_type() == 'explosion':
+                            player.change_health(b_radius/(.1+dist_centers*dist_centers))
 
                 for bomby in bomb_list:
-                    
-                    #if self._collision.circle_rect(b_center, b_radius, bomby.return_rect()) and bomby is not bomb:
-                    if bomby is not bomb:
-                        p_center = bomby.return_rect().get_center()
-                        dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                        bomby.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=coefficient*(60*b_radius/(.1+dist_centers))))
 
-                        
+                    # check if bomb is within radius of explosion and that the bomb is not exploding or imploding itself
+                    if self._collision.circle_rect(b_center, b_radius, bomby.return_rect()) and bomby is not bomb:
+                        if bomby is not bomb:
+                            p_center = bomby.return_rect().get_center()
+                            dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
+                            bomby.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=coefficient*(10*b_radius/(.1+dist_centers))))
+
                 if bomb.finished_exploding():
 
                     bomb_list.remove(bomb)
 
             self.reposition(bomb, platform_list)
 
-            
+        # loop through players, apply gravity if not on platform, reset platform status, update and reposition if necessary
         for player in player_list:
-            
-            player.update(events)
-            player.reset_platform_status()
-            
-            self.reposition(player, platform_list)
             
             if not player.get_platform_status(PlatformStatus.on_top):
                 self.apply_gravity(player)
+
+            player.update(events)
+
+            player.reset_platform_status()
             
-    
-            
-
-
-        
-
-
-            
-
-        
-if __name__ == '__main__':
-    '''Tests'''
-
-    p = Physics()
-    rectangle = pygame.Rect(0,0,10, 5)
-    vertical = Vector((0,0), direction=0, magnitude=50)
-    print(p.return_greatest_parallelogram(rectangle, vertical))
-
+            self.reposition(player, platform_list)
     

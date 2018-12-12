@@ -50,6 +50,8 @@ class Game(View):
         self._restart_timer.restart()
         self._message_string = message_string
 
+        self._winner_message = Text(self._message_string, 100, (100, 200, 100), 'middle', self._screen.get_height()/2)
+
     def start_game(self):
         '''Restarts game'''
         # reset players
@@ -98,6 +100,15 @@ class Game(View):
             if super().is_visible(platform):
                 super().render_rectangle(platform, color=(0,0,0))
         
+        # render appropriate players
+        for player in self._player_list:
+            super().render_rectangle(player.return_healthbar_and_color()[0], color=player.return_healthbar_and_color()[1])
+            super().render_rectangle(player.return_rectangle_and_color()[0], color=player.return_rectangle_and_color()[1])
+            super().render(player.return_surface_and_pos())
+            
+            if self._debug:
+                super().render_line(player.return_velocity_vector()*100)
+
         
         # render appropriate bomb
         for bomb in self._bomb_list:
@@ -105,15 +116,10 @@ class Game(View):
             if super().is_visible(bomb.return_rect()):
                 super().render_rectangle(bomb.return_rect(), color=bomb.get_color())
 
-        # render appropriate players
-        for player in self._player_list:
-            super().render(player.return_surface_and_pos())
-            super().render_rectangle(player.return_healthbar_and_color()[0], color=player.return_healthbar_and_color()[1])
-            if self._debug:
-                super().render_line(player.return_velocity_vector()*100)
-
-        
+                
+        # display fps
         super().render(Text(str(events.fps()), 20, (100,40, 100), 'left', 10).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
+
         # handle end game
         if not self._done:
             
@@ -128,7 +134,7 @@ class Game(View):
 
         elif self._done:
             
-            super().render(Text(self._message_string, 100, (100, 200, 100), 'middle', self._screen.get_height()/2).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
+            super().render(self._winner_message.get_surface_and_pos(self._screen.get_width()), relative_screen=True)
             super().render(Text('Restarting in: '+str(round(self._restart_delay-self._restart_timer.read())), 100, (100, 200, 100), 'middle', self._screen.get_height()/2+110).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
 
 

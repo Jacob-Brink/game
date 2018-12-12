@@ -1,5 +1,6 @@
 from enum import Enum
-from lib.modules.gui.rectangle import Point
+from lib.modules.gui.rectangle import *
+from lib.modules.physics.line import Line
 
 class PlatformStatus(Enum):
     on_top = 1
@@ -24,7 +25,73 @@ class Collision:
     def circle_rect(self, center_point, radius, rect):
         '''Given radius and rectangle, determine collision'''
         return self.one_dimensional_collision((center_point.x()-radius, center_point.x()+radius), (rect.get_x(), rect.get_x()+rect.get_w())) and self.one_dimensional_collision((center_point.y()-radius, center_point.y()+radius), (rect.get_y(), rect.get_y()+rect.get_y()))
-    
+
     def rect_rect(self, rect1, rect2):
+        '''Returns boolean value of whether or not two rectangles collide'''
+        return rect1.collides_with(rect2)
+
+    def rigid_body_and_platform(self, rigid_body, platform):
         '''Return boolean value of any intersection between two given pygame rects'''
-        return rect1.get_x() <= rect2.get_x()+rect2.get_w() and rect1.get_x()+rect1.get_w() >= rect2.get_x() and rect1.get_y() <= rect2.get_y()+rect2.get_h() and rect1.get_y()+rect1.get_h() >= rect2.get_y()
+
+        # if a simple overlap occurs, exit and return True
+        if self.rect_rect(rigid_body.return_rect(), platform):
+            return True
+        
+        # make a big box containing the initial and final position of rigid body and motion between tick
+        general_collision_area = rigid_body.return_past_rect()+rigid_body.return_rect()
+
+        # only if the platform is in the general collision box does specific collision get detected
+        if self.rect_rect(general_collision_area, platform):
+            
+            
+            # if no simple overlap occurs and yet the platform is in the general collision box, do something complicated that I don't understand lol
+            # my main idea was to have a line of motion drawn through past and present rectangle and see if any collisions occurred around the platforms
+            r_velocity = rigid_body.return_past_velocity()
+            r_rect = rigid_body.return_past_rect()
+            r_center = r_rect.get_center()
+            
+            # find the line of motion created by the velocity vector through the centers of the past and future rigid body rectangle
+            motion_path_line_thru_center = Line(r_velocity.return_slope(), r_center, r_velocity.return_x_component(), r_velocity.return_y_component())
+            
+            # check for collision along line
+            platform_top = platform.get_top()
+            platform_bottom = platform.get_bottom()
+            platform_left = platform.get_left()
+            platform_right = platform.get_right()
+            
+            # create base rectangle with same size as rigid body and arbitrary position
+            r = Rectangle(Point(0,0), Point(r_rect.get_w(), r_rect.get_h()))
+            
+            if motion_path_line_thru_center.is_in_y_range(platform_top):
+                r_x = motion_path_line_thru_center.x_value(platform_top)
+                r.set_center(Point(r_x, platform_top))
+                
+                if self.rect_rect(r, platform):
+                    return True
+                         
+            if motion_path_line_thru_center.is_in_y_range(platform_bottom):
+                r_x = motion_path_line_thru_center.x_value(platform_bottom)
+                r.set_center(Point(r_x, platform_bottom))
+                    
+                if self.rect_rect(r, platform):
+                    return True
+            
+            if motion_path_line_thru_center.is_in_x_range(platform_left):
+                r_y = motion_path_line_thru_center.y_value(platform_left)
+                r.set_center(Point(platform_left, r_y))
+
+                if self.rect_rect(r, platform):
+                    return True
+
+            if motion_path_line_thru_center.is_in_x_range(platform_right):
+                r_y = motion_path_line_thru_center.y_value(platform_right)
+                r.set_center(Point(platform_right, r_y))
+                
+                if self.rect_rect(r, platform):
+                    return True
+            
+        return False
+
+        
+        
+

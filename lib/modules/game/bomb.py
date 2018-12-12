@@ -9,13 +9,13 @@ class Bomb(RigidBody):
         '''Models an exploding bomb'''
         # set rigid body
         self._width = 20
-        self._mass = 200
+        self._mass = 90
         super().__init__(Rectangle(initial_velocity.return_start_position(), Point(self._width, self._width)), self._mass)
         super().set_velocity(initial_velocity)
 
         # exploded
         self._exploded = False
-        self._explosion_radius = 800
+        self._explosion_radius = 2000
         self._bomb_type = bomb_type
         
         # color flash stuff
@@ -26,11 +26,11 @@ class Bomb(RigidBody):
         # bomb fuse
         self._fuse_timer = Timer()
         self._fuse_timer.restart()
-        self._fuse_limit = 3
+        self._fuse_limit = 4
 
         # explosion duration timer
         self._explosion_timer = Timer()
-        self._explosion_duration = 5
+        self._explosion_duration = 2
 
     def get_type(self):
         '''Returns type of bomb'''

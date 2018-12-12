@@ -1,22 +1,20 @@
+from lib.modules.gui.rectangle import Point
 
 class Line:
     def __init__(self, slope, point, x_range, y_range):
 
         # check invariants for slope being a number or infinite
-        if slope == 'infinite' or type(slope) == int or type(slope) == float:
+        if slope == 'infinite' or self.isnumber(slope):
             self._slope = slope
         else:
             raise ValueError('Slope must be any real number or string infinite')
 
         # check invariants for points being type tuple and only numbers
-        if isinstance(point, tuple) and len(point) == 2:
-            if self.isnumber(point[0]) and self.isnumber(point[1]):
-                self._x = point[0]
-                self._y = point[1]
-            else:
-                raise ValueError('Line->Constructor: point should have integer or float values')
+        if isinstance(point, Point):
+            self._x = point.x()
+            self._y = point.y()
         else:
-            raise ValueError('Line->Constructor: point should be tuple with only two elements which should be numbers')
+            raise ValueError('Line->Constructor: point should be Point type')
 
         # checks invariants for range
         if self.isnumber(x_range) and self.isnumber(y_range):
@@ -24,8 +22,6 @@ class Line:
             self.range_y = y_range
         else:
             raise ValueError('Line->Constructor: ranges should be integer or float values')
-
-    
         
     def isnumber(self, value):
         '''Returns boolean state of value being integer or float'''

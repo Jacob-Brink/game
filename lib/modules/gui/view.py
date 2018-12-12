@@ -15,9 +15,9 @@ class View(Camera):
 
     def render_rectangle(self, rect, **keywords):
         '''Given rect with absolute coordinates, draw rectangle'''
-        try:
+        if 'color' in keywords:
             pygame.draw.rect(self._screen, keywords['color'], super().return_disp_rect(rect))
-        except:
+        else:
             print(self._screen)
             pygame.draw.rect(self._screen, (255,0,0), super().return_disp_rect(rect))
             

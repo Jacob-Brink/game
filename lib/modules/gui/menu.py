@@ -90,7 +90,7 @@ class Menu(View):
         else:
             random_type = 'explosion'
         
-        self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), magnitude=random_magnitude, direction=random_direction),random_type))
+        self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), magnitude=random_magnitude, direction=random_direction), random_type))
 
     def update(self, event):
         '''Will update the menu with realtime events, such as the mouse events. It also updates the buttons in the menu'''
@@ -115,10 +115,10 @@ class Menu(View):
             if super().is_visible(bomb.return_rect()):
                 super().render_rectangle(bomb.return_rect(), color=bomb.get_color())
             
-        # randomly create a bomb by random numbers
-        create_bomb = randint(0,4)
+        # randomly create a bomb with 1 / 11 chance of spawning any given tick
+        create_bomb = randint(0,10)
        
-        if create_bomb == 1:
+        if create_bomb == 4:
             self.create_bomb(event.mouse().get_position())
 
         

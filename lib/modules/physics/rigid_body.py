@@ -68,7 +68,7 @@ class RigidBody():
     def return_past_velocity(self):
         '''Return velocity vector of last tick'''
         return self._past_velocity
-        
+    
     def return_velocity_vector(self):
         '''Return the velocity vector'''
         return self._velocity
@@ -81,8 +81,12 @@ class RigidBody():
 
     def limit_velocity(self):
         '''Limits velocity based on max velocity magnitude'''
+        # restrict upper bound
         if self._velocity.return_magnitude() > self._max_velocity_magnitude:
             self._velocity = Vector(self._velocity.return_start_position(), direction=self._velocity.return_direction(), magnitude=self._max_velocity_magnitude)
+        # restrict lower bound
+        elif self._velocity.return_magnitude() < -self._max_velocity_magnitude:
+            self._velocity = Vector(self._velocity.return_start_position(), direction=self._velocity.return_direction(), magnitude=-self._max_velocity_magnitude)
             
     def set_velocity(self, new_velocity):
         '''Sets the velocity to new velocity'''
@@ -101,7 +105,8 @@ class RigidBody():
             self._acceleration += force * (1/self._mass)
     
         # velocity and past velocity are set
-        self._past_velocity = self._velocity    
+        self._past_velocity = self._velocity
+        print(delta_time, 'delta time')
         self._velocity = (self._acceleration + self._velocity)
         
         self._past_rect = self._rect.copy()
@@ -115,11 +120,11 @@ class RigidBody():
 
     def return_past_rect(self):
         '''Returns rect that is distinguishably different than current rect'''
-        return self._past_rect.copy()
+        return self._past_rect
         
     def return_rect(self):
         '''Returns rectangle of type pygame.Rect'''
-        return self._rect.copy()
+        return self._rect
 
     def return_mass(self):
         '''Returns mass'''
