@@ -17,12 +17,8 @@ class Cursor(Enum):
     start_position2 = 4
     none = 5
 
-START_SIZE = Point(400, 400)
-
 TITLE_COLOR = (255,0,0)
-RECTANGLE_COLOR = (0,0,0)
-HIGHLIGHT_COLOR = (0, 0, 255)
-UNFINISHED_COLOR = (0,255,0)
+
 
 
 class Editor(View):
@@ -45,7 +41,7 @@ class Editor(View):
         self._first_click = False
         self.first_pos = None
         self.second_pos = None
-        self._unfinished_rect = None
+        self._unfinished_rect = Platform(Rectangle(Point(0,0), Point(0,0)))
 
         # handle platforms
         self._level = Level(level)
@@ -56,7 +52,8 @@ class Editor(View):
         '''Changes cursor and is given to buttons in the menu'''
         if self._cursor == Cursor.eraser and not self._cursor == new_cursor:
             for platform in self._platforms:
-                platform.change_color(RECTANGLE_COLOR)
+                platform.change_highlight(False)
+                
         self._cursor = new_cursor                
         
     def place_start_position(self, mouse_pos, current_click):
@@ -90,11 +87,11 @@ class Editor(View):
         # If eraser collides with rectangle, highlight it
         for platform in self._platforms:
             if platform.collide_point(super().return_true_position(mouse_pos)):
-                platform.change_color(HIGHLIGHT_COLOR)
+                platform.change_highlight(True)
                 if current_click == Switch.pushed_down:
                     self._platforms.remove(platform)
             else:
-                platform.change_color(RECTANGLE_COLOR)
+                platform.change_highlight(False)
         
         
     def _return_rect(self, first_pos, second_pos):
@@ -111,31 +108,51 @@ class Editor(View):
         if current_click == Switch.pushed_down and not self._first_click:
 
             self._first_click = True
+            
             # get true first position
             self.first_pos = super().return_true_position(mouse_position)
-
+            self._unfinished_rect.change_top_left(super().return_true_position(mouse_position))
+            self._unfinished_rect.change_finished(False)
+            
         # Continue drawing rectangle
         if current_click == Switch.down and self._first_click:
 
             # get true second position
             self.second_pos = super().return_true_position(mouse_position)
+            self._unfinished_rect = Platform(Rectangle(self.first_pos, Point(self.second_pos.x() - self.first_pos.x(), self.second_pos.y()-self.first_pos.y())))
 
-            self._unfinished_rect = Platform(self._return_rect(self.first_pos, self.second_pos), UNFINISHED_COLOR)
+            # handle placeability
+            self._unfinished_rect.change_placeability(True)
             
+            for player_position in self._player_positions:
+                if player_position.collides_with(self._unfinished_rect):
+                    self._unfinished_rect.change_placeability(False)
+
+            self._unfinished_rect.change_finished(False)
 
         # End drawing of rectangle on second click event
         if self._first_click == True and current_click == Switch.pushed_up:
 
+            for player_position in self._player_positions:
+                if player_position.collides_with(self._unfinished_rect):
+                    self._unfinished_rect.change_placeability(False)
+            
             # reset first click so new rectangle can be created
             self._first_click = False
+            
+            
+            if self._unfinished_rect.get_placeability():
 
-            # get true second position
-            self.second_pos = super().return_true_position(mouse_position)
+                self._unfinished_rect.change_finished(True)
+                
+                submitted_rectangle = self._unfinished_rect.copy()
+                submitted_rectangle.change_finished(True)
 
-            # return rectangles with from two true positions
-            self._platforms.append(Platform(self._return_rect(self.first_pos, self.second_pos), RECTANGLE_COLOR))
-            # remove temp rectangle
-            self._unfinished_rect = None
+                # get true second position
+                self._platforms.append(submitted_rectangle)
+
+            # reset unfinished rectangle
+            self._unfinished_rect = Platform(Rectangle(Point(0,0), Point(0,0)))
 
            
     def handle_keyboard(self, events):
@@ -212,7 +229,7 @@ class Editor(View):
                 super().render_rectangle(platform, color=platform.get_color())
 
         # if unfinished rectangle exists, draw it
-        if not self._unfinished_rect == None:
+        if not self._unfinished_rect.get_size() == Point(0,0):
             super().render_rectangle(self._unfinished_rect, color=self._unfinished_rect.get_color())
 
         # render player position rectangles

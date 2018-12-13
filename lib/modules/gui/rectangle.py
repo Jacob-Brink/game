@@ -236,25 +236,25 @@ class Rectangle:
         '''Change bottom right corner of rectangle given point'''
         self._x = bottom_left_point.x()
         self._y = bottom_left_point.y()-self._h
-        self.set_values()
+        self.normalize()
         
     def change_bottom_right(self, bottom_right_point):
         '''Change bottom right point'''
         self._x = bottom_right_point.x()-self._w
         self._y = bottom_right_point.y()-self._h
-        self.set_values()
+        self.normalize()
 
     def change_width(self, new_width):
         '''Changes width to new_width'''
         self._x = self._center.x()-new_width/2
         self._w = new_width
-        self.set_values()
+        self.normalize()
 
     def change_height(self, new_height):
         '''Changes height to new_height'''
         self._y = self._center.y()-new_height/2
         self._h = new_height
-        self.set_values()
+        self.normalize()
         
     def get_size(self):
         '''Return size in point form'''

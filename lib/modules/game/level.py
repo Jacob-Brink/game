@@ -74,7 +74,7 @@ class Level:
                         self._player_positions[line_num] = PlayerPosition(Point(float(string_integers[0]), float(string_integers[1])), line_num)
                         print(self._player_positions[line_num])
                     else:
-                        self._platforms.append(Platform(Rectangle(*[float(string_integer) for string_integer in string_integers]), RECTANGLE_COLOR))
+                        self._platforms.append(Platform(Rectangle(*[float(string_integer) for string_integer in string_integers])))
 
                     line_num += 1
 
