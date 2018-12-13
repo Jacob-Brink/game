@@ -35,6 +35,13 @@ class Game(View):
         self._platforms = self._level.get_platforms()
         self._bomb_list = []
 
+        # find kill height by lowest platform bottom y
+        lowest_y = self._platforms[0].get_bottom()
+        for platform in self._platforms:
+            if platform.get_bottom() > lowest_y:
+                lowest_y = platform.get_bottom()
+        self._lowest_y = lowest_y + 100
+        
         self._done = False
         self._restart_timer = Timer()
         self._restart_delay = 10
@@ -54,8 +61,8 @@ class Game(View):
     def start_game(self):
         '''Restarts game'''
         # reset players
-        self._player1 = Player(self._level.get_player_positions()[0].get_top_left() , 0, self._debug, self.throw_bomb_wrapper())
-        self._player2 = Player(self._level.get_player_positions()[1].get_top_left() , 1, self._debug, self.throw_bomb_wrapper())
+        self._player1 = Player(self._level.get_player_positions()[0].get_top_left() , 0, self._debug, self.throw_bomb_wrapper(), self._lowest_y)
+        self._player2 = Player(self._level.get_player_positions()[1].get_top_left() , 1, self._debug, self.throw_bomb_wrapper(), self._lowest_y)
         self._player_list = [self._player1, self._player2]
 
         # clear bomb list

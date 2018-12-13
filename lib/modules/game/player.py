@@ -52,7 +52,7 @@ class HealthBar(Rectangle):
 class Player(RigidBody):
     '''Models a player'''
 
-    def __init__(self, start_position_point, keyboard_layout, debug_mode, throw_bomb_callback):
+    def __init__(self, start_position_point, keyboard_layout, debug_mode, throw_bomb_callback, kill_height):
         '''Constructs a new player with rigid body as Base Class'''
 
         super().__init__(Rectangle(start_position_point, Point(100,150)), 200)
@@ -71,11 +71,13 @@ class Player(RigidBody):
         self._health = 10
         self._health_bar = HealthBar(Rectangle(Point(0,0), HEALTH_BAR_SIZE))
 
-        
         self._jump_timer = Timer()
         self._jump_timer.restart()
         self._jump_limit = 2
         self._jumps = 0
+        self._jump_delay = .1
+
+        self._kill_height = kill_height
         
         self._throw_bomb_callback = throw_bomb_callback
         self._bomb_reload_timer = Timer()
@@ -93,7 +95,7 @@ class Player(RigidBody):
         
         # if reload time has ended throw next bomb
         if self._bomb_reload_timer.read() > self._bomb_reload_time:
-            self._throw_bomb_callback(p_vector+Vector(self.return_rect().get_center(), x_component=self._facing*self._bomb_speed, y_component=-self._bomb_speed), bomb_type)
+            self._throw_bomb_callback(p_vector+Vector(self.return_rect().get_center(), x_component=self._facing*self._bomb_speed, y_component=-self._bomb_speed/3), bomb_type)
             self._bomb_reload_timer.restart()
         
             
@@ -116,9 +118,9 @@ class Player(RigidBody):
             self.fire_bomb('implosion')
 
         
-            
-        if not p_status(PlatformStatus.on_top) and not p_status(PlatformStatus.on_left) and not p_status(PlatformStatus.on_right) and not p_status(PlatformStatus.on_bottom):
 
+        if not p_status(PlatformStatus.on_top) and not p_status(PlatformStatus.on_left) and not p_status(PlatformStatus.on_right) and not p_status(PlatformStatus.on_bottom):
+            print('Marker')
             if is_pressed(self._keys['left']) == Switch.down:
                 delta_x -= .1*self._change
                 self._facing = -1
@@ -144,16 +146,26 @@ class Player(RigidBody):
             if (is_pressed(self._keys['right']) == Switch.up and is_pressed(self._keys['left']) == Switch.up):
                 
                 if x_component_velocity > 0:
-                    delta_x -= .4*x_component_velocity
+                    delta_x -= .3*x_component_velocity
                 elif x_component_velocity < 0:
-                    delta_x -= .4*x_component_velocity
+                    delta_x -= .3*x_component_velocity
+        
+        if is_pressed(self._keys['up']) == Switch.pushed_down and (not p_status(PlatformStatus.on_bottom)):
 
-            # jump
-            if is_pressed(self._keys['up']) == Switch.pushed_down and (not p_status(PlatformStatus.on_bottom)) and p_status(PlatformStatus.on_top):
+            if super().get_platform_status(PlatformStatus.on_top):
+                delta_y -= self._change*5
+                self._jump_timer.restart()
+                self._jumps = 0
 
-                    delta_y -= self._change*5
+            if self._jump_timer.read() > .001 and self._jumps < 3:
+                delta_y -= self._change*3
+                self._jumps += 1
 
 
+
+        if super().return_rect().get_y() > self._kill_height:
+            self._alive = False
+                    
 
                           
         # compile velocity from key presses    
