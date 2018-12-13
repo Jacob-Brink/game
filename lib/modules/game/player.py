@@ -82,7 +82,7 @@ class Player(RigidBody):
         self._throw_bomb_callback = throw_bomb_callback
         self._bomb_reload_timer = Timer()
         self._bomb_reload_timer.restart()
-        self._bomb_reload_time = .1
+        self._bomb_reload_time = .4
         self._bomb_speed = 200
 
         # 1 indicates facing right, while -1 indicates facing left

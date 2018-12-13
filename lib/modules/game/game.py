@@ -46,12 +46,18 @@ class Game(View):
 
     def return_kill_height(self):
         '''Returns kill height by adding 100 to the bottom y value'''
-        lowest_y = self._platforms[0].get_bottom()
-        for platform in self._platforms:
-            if platform.get_bottom() > lowest_y:
-                lowest_y = platform.get_bottom()
+        try:
+            lowest_y = self._platforms[0].get_bottom()
+            
+            for platform in self._platforms:
+                if platform.get_bottom() > lowest_y:
+                    lowest_y = platform.get_bottom()
                 
-        return lowest_y+100
+            return lowest_y+100
+        
+        except:
+            
+            return 200
         
         
     def _game_over(self, message_string):

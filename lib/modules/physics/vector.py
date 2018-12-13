@@ -23,11 +23,25 @@ class Vector:
         elif 'x_component' in keywords and 'y_component' in keywords:
             self._x_component = keywords['x_component']
             self._y_component = keywords['y_component']
-            self._direction = math.atan2(self._y_component, self._x_component)
-            self._magnitude = math.sqrt((self._x_component)**2+(self._y_component)**2)
+            self.component_set_values()
         else:
             raise TypeError('Parameters must include position point as first arg, then either direction and magnitude or x_component and y_component')
 
+    def component_set_values(self):
+        '''When component is changed, run this to reset other related values'''
+        self._direction = math.atan2(self._y_component, self._x_component)
+        self._magnitude = math.sqrt((self._x_component)**2+(self._y_component)**2)
+        
+    def change_y_component(self, new_y):
+        '''Changes y component'''
+        self._y_component = new_y
+        self.component_set_values()
+
+    def change_x_component(self, new_x):
+        '''Changes x component'''
+        self._x_component = new_x
+        self.component_set_values()
+        
     def return_slope(self):
         '''Returns slope of vector'''
         if self.return_x_component() == 0:

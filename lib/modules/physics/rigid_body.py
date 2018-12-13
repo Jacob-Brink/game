@@ -93,7 +93,34 @@ class RigidBody():
     def add_velocity(self, velocity):
         '''Set velocity to given velocity'''
         self._velocity += velocity
+
+    def remove_unecessary_velocity(self):
+        '''Given platform status and velocity, remove any components that cause collision'''
+
+        # ensure no movement occurs into blocks
+        p_status = self.get_platform_status
+        v = self._velocity
+        v_y = self._velocity.return_y_component()
+        v_x = self._velocity.return_x_component()
+
         
+        # if on top side and velocity goes down
+        if p_status(PlatformStatus.on_top) and v_y > 0:
+            v.change_y_component(0)
+
+        # if on right side and velocity goes left
+        if p_status(PlatformStatus.on_right) and v_x < 0:
+            v.change_x_component(0)
+
+        # if on left side and velocity goes right
+        if p_status(PlatformStatus.on_left) and v_x > 0:
+            v.change_x_component(0)
+
+        # if on bottom side and velocity goes up
+        if p_status(PlatformStatus.on_bottom) and v_y < 0:
+            v.change_y_component(0)
+
+            
     def update(self, delta_time):
         '''Updates RigidBody object to translate force into acceleration and acceleration into new velocity. To be called after physics repositioning'''
 
@@ -109,9 +136,14 @@ class RigidBody():
         
         self._past_rect = self._rect.copy()
         
+        self.remove_unecessary_velocity()
+        
         # changes rectangle from last velocity
         delta_point = Point(self._velocity.return_x_component(), self._velocity.return_y_component())
+
         self._rect.move(delta_point)
+
+
         self._forces = []
 
         self.limit_velocity()

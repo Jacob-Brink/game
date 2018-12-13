@@ -2,7 +2,7 @@ import os
 import time
 
 from lib.modules.gui.tutorial import GameTutorial
-from lib.modules.gui.editor import Editor
+from lib.modules.editor.editor import Editor
 from lib.modules.gui.menu import Menu
 from lib.modules.game.game import Game
 
