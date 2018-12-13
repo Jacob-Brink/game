@@ -6,8 +6,6 @@ import pygame
 import math
 
 
-
-
 class RigidBody():
     def __init__(self, rect, mass):
         '''Constructs a new RigidBody object with given pygame.Rect rectangle and integer mass'''
@@ -18,7 +16,7 @@ class RigidBody():
         self._rect = rect
         self._past_rect = self._rect.copy()
         
-        self._platform_status = {PlatformStatus.on_top: False, PlatformStatus.on_left: False, PlatformStatus.on_right: False, PlatformStatus.on_bottom: False}
+        self._platform_status = {PlatformStatus.on_top: False, PlatformStatus.on_left: False, PlatformStatus.on_right: False, PlatformStatus.on_bottom: False, PlatformStatus.alone:True}
         
         self._velocity = Vector(self._rect.get_center(), direction=0, magnitude=0)
         self._past_velocity = self._velocity

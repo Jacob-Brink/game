@@ -65,48 +65,35 @@ class Player(RigidBody):
 
         self._x_velocity_max = 10
         self._change = 13
+    
+        self._alive = True
+        self._health_total = 10
+        self._health = 10
+        self._health_bar = HealthBar(Rectangle(Point(0,0), HEALTH_BAR_SIZE))
+
         
         self._jump_timer = Timer()
         self._jump_timer.restart()
         self._jump_limit = 2
         self._jumps = 0
-
-        self._alive = True
-        self._health_total = 10
-        self._health = 10
-        self._health_bar = HealthBar(Rectangle(Point(0,0), HEALTH_BAR_SIZE))
         
         self._throw_bomb_callback = throw_bomb_callback
         self._bomb_reload_timer = Timer()
         self._bomb_reload_timer.restart()
         self._bomb_reload_time = .1
-        self._bomb_speed = 60
+        self._bomb_speed = 200
 
         # 1 indicates facing right, while -1 indicates facing left
         self._facing = 1
+
         
-    def jump(self, change):
-        '''Adds upward velocity'''
-        # handle jump when on ground
-        if super().get_platform_status(PlatformStatus.on_top):
-            self._jumps = 0
-            super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change*3))
-            self._jump_timer.restart()
-
-        # handle double jump
-        elif self._jumps < self._jump_limit and self._jump_timer.read() > .1:
-            self._jumps += 1
-            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change*2))
-            self._jump_timer.restart()
-
-            
     def fire_bomb(self, bomb_type):
         '''Fires bomb'''
         p_vector = super().return_velocity_vector()
         
         # if reload time has ended throw next bomb
         if self._bomb_reload_timer.read() > self._bomb_reload_time:
-            self._throw_bomb_callback(Vector(super().return_rect().get_center(), x_component=self._facing*self._bomb_speed, y_component=self._bomb_speed), bomb_type)
+            self._throw_bomb_callback(p_vector+Vector(self.return_rect().get_center(), x_component=self._facing*self._bomb_speed, y_component=-self._bomb_speed), bomb_type)
             self._bomb_reload_timer.restart()
         
             
@@ -117,37 +104,9 @@ class Player(RigidBody):
         delta_y = 0
 
         x_component_velocity = super().return_velocity_vector().return_x_component()
-
-            
-        # go left when left key is pressed
-        if is_pressed(self._keys['left']) == Switch.down and not super().get_platform_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
-            delta_x -= self._change
-            self._facing = -1
-
-        # go right when right key is pressed
-        if is_pressed(self._keys['right']) == Switch.down and not super().get_platform_status(PlatformStatus.on_left) and x_component_velocity < self._x_velocity_max:
-            delta_x += self._change
-            self._facing = 1
-
-        # apply friction
-        if (is_pressed(self._keys['right']) == Switch.up and is_pressed(self._keys['left']) == Switch.up) and super().get_platform_status(PlatformStatus.on_top):
-            if x_component_velocity > 0:
-                delta_x -= .2*x_component_velocity
-            elif x_component_velocity < 0:
-                delta_x -= .2*x_component_velocity
-
-            
-        '''
-        # slow down if neither left nor right key is pressed while on platform
-        if (not is_pressed(self._keys['right']) == Switch.down and not is_pressed(self._keys['left']) == Switch.down) and super().get_platform_status(PlatformStatus.on_top):
-            
-
-        '''
-
-        # jump
-        if is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
-            self.jump(self._change)
-
+        p_status = super().get_platform_status
+        
+        
         # fire explosive bomb
         if is_pressed(self._keys['fire explosion']) == Switch.pushed_up:
             self.fire_bomb('explosion')
@@ -156,11 +115,52 @@ class Player(RigidBody):
         if is_pressed(self._keys['fire implosion']) == Switch.pushed_up:
             self.fire_bomb('implosion')
 
+        
+            
+        if not p_status(PlatformStatus.on_top) and not p_status(PlatformStatus.on_left) and not p_status(PlatformStatus.on_right) and not p_status(PlatformStatus.on_bottom):
+
+            if is_pressed(self._keys['left']) == Switch.down:
+                delta_x -= .1*self._change
+                self._facing = -1
+                
+            if is_pressed(self._keys['right']) == Switch.down:
+                delta_x += .1*self._change
+                self._facing = 1
+                
+        else:
+
+            # go left when left key is pressed
+            if is_pressed(self._keys['left']) == Switch.down and not p_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
+                delta_x -= self._change
+                self._facing = -1
+
+            # go right when right key is pressed
+            if is_pressed(self._keys['right']) == Switch.down and not p_status(PlatformStatus.on_left) and x_component_velocity < self._x_velocity_max:
+                delta_x += self._change
+                self._facing = 1
+
+                          
+            # apply friction
+            if (is_pressed(self._keys['right']) == Switch.up and is_pressed(self._keys['left']) == Switch.up):
+                
+                if x_component_velocity > 0:
+                    delta_x -= .4*x_component_velocity
+                elif x_component_velocity < 0:
+                    delta_x -= .4*x_component_velocity
+
+            # jump
+            if is_pressed(self._keys['up']) == Switch.pushed_down and (not p_status(PlatformStatus.on_bottom)) and p_status(PlatformStatus.on_top):
+
+                    delta_y -= self._change*5
+
+
+
+                          
         # compile velocity from key presses    
         user_velocity = Vector(self.return_rect().get_center(), x_component=delta_x, y_component=delta_y)
-        delta_time = events.delta_time()
-        
         super().add_velocity(user_velocity)
+
+        delta_time = events.delta_time()
         super().update(delta_time)
 
         # set health bar rectangle to be above player

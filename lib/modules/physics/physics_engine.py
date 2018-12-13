@@ -28,7 +28,7 @@ class Physics:
         
     def next_to(self, value, side_value):
         '''Return tru if value is next to other value give or take 4'''
-        return side_value - self._MARGIN_PIXEL <= value <= side_value + self._MARGIN_PIXEL
+        return side_value - 1 <= value <= side_value+1
         
     def return_side_platform(self, rect, platform):
         '''Returns which side the rectangle is adjacent to'''
@@ -98,11 +98,9 @@ class Physics:
             y_component = rigid_body.return_velocity_vector().return_y_component()
             
             if rigid_body.get_platform_status(PlatformStatus.on_top) or rigid_body.get_platform_status(PlatformStatus.on_bottom):
-
                 rigid_body.set_velocity(Vector(center, x_component=x_component, y_component=0))
 
             elif rigid_body.get_platform_status(PlatformStatus.on_left) or rigid_body.get_platform_status(PlatformStatus.on_right):
-
                 rigid_body.set_velocity(Vector(center, x_component=0, y_component=y_component))
         
 
@@ -113,7 +111,6 @@ class Physics:
         
         # updates bomb rigid body
         for bomb in bomb_list:
-
 
             if not bomb.get_platform_status(PlatformStatus.on_top):
                 self.apply_gravity(bomb)
@@ -145,7 +142,7 @@ class Physics:
                     # only explosive bombs deal damage, cuz if imploding bombs dealt damage, the game would end really fast
                     if bomb.get_type() == 'explosion':
                         player.change_health(b_radius/(.1+dist_centers*dist_centers))
-
+                        
                 for bomby in bomb_list:
 
                     if bomby is not bomb:
