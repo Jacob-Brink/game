@@ -13,7 +13,34 @@ class Collision:
     '''Class for organizing collision functions'''
     def __init__(self):
         pass
+    
+    def return_collision_line_x(self, x_value, rect, platform, platform_value):
+        '''If value is infinite or value is none return appropriate boolean value'''
+        if x_value == 'infinite':
+            return True
+        
+        elif x_value == None:
+            return False
+        
+        else:
+            rect.set_center(Point(x_value, platform_value))
+            if self.rect_rect(rect, platform):
+                return True
 
+    def return_collision_line_y(self, y_value, rect, platform, platform_value):
+        '''If value is infinite or value is none return appropriate boolean value'''
+        if y_value == 'infinite':
+            return True
+        
+        elif y_value == None:
+            return False
+        
+        else:
+            rect.set_center(Point(platform_value, y_value))
+            if self.rect_rect(rect, platform):
+                return True
+
+    
     def vector_rect(self, vector, rect):
         '''Return boolean value of any intersection between vector and rect'''
         return self._line_collides_rect(vector.return_slope(), vector.return_start_position(), rect, (vector.return_x_component(), vector.return_y_component()))
@@ -63,33 +90,33 @@ class Collision:
             r = Rectangle(Point(0,0), Point(r_rect.get_w(), r_rect.get_h()))
             
             if motion_path_line_thru_center.is_in_y_range(platform_top):
-                r_x = motion_path_line_thru_center.x_value(platform_top)
-                r.set_center(Point(r_x, platform_top))
-                
-                if self.rect_rect(r, platform):
+                r_x = motion_path_line_thru_center.x_value(platform_top)         
+
+                # check collision where center is on platform top
+                if self.return_collision_line_x(r_x, r_rect, platform, platform_top):
                     return True
                          
             if motion_path_line_thru_center.is_in_y_range(platform_bottom):
                 r_x = motion_path_line_thru_center.x_value(platform_bottom)
-                r.set_center(Point(r_x, platform_bottom))
-                    
-                if self.rect_rect(r, platform):
+
+                # check collision where center in on platform bottom y
+                if self.return_collision_line_x(r_x, r_rect, platform, platform_bottom):
                     return True
-            
+                
             if motion_path_line_thru_center.is_in_x_range(platform_left):
                 r_y = motion_path_line_thru_center.y_value(platform_left)
-                r.set_center(Point(platform_left, r_y))
 
-                if self.rect_rect(r, platform):
+                # check collision where center is on platform left x
+                if self.return_collision_line_y(r_y, r_rect, platform, platform_left):
                     return True
-
+                
             if motion_path_line_thru_center.is_in_x_range(platform_right):
                 r_y = motion_path_line_thru_center.y_value(platform_right)
-                r.set_center(Point(platform_right, r_y))
-                
-                if self.rect_rect(r, platform):
+
+                # check collision where center is on platform right x
+                if self.return_collision_line_y(r_y, r_rect, platform, platform_right):
                     return True
-            
+                
         return False
 
         

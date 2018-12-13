@@ -44,7 +44,7 @@ class RigidBody():
         '''Resets values to False'''
         for key in self._platform_status:
             self._platform_status[key] = False
-        
+            
     def get_platform_status(self, key):
         '''Given key, will return boolean value'''
         return self._platform_status[key]

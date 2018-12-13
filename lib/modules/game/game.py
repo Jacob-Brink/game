@@ -29,18 +29,14 @@ class Game(View):
         self._go_back = go_back
 
         self._physics = Physics(debug_mode)
-        
+
         # player, platform, and bomb list
         self._level = Level(level)
         self._platforms = self._level.get_platforms()
         self._bomb_list = []
-
-        # find kill height by lowest platform bottom y
-        lowest_y = self._platforms[0].get_bottom()
-        for platform in self._platforms:
-            if platform.get_bottom() > lowest_y:
-                lowest_y = platform.get_bottom()
-        self._lowest_y = lowest_y + 100
+        
+        # find lowest y
+        self._lowest_y = self.return_kill_height()
         
         self._done = False
         self._restart_timer = Timer()
@@ -48,22 +44,33 @@ class Game(View):
 
         self.start_game()
 
+    def return_kill_height(self):
+        '''Returns kill height by adding 100 to the bottom y value'''
+        lowest_y = self._platforms[0].get_bottom()
+        for platform in self._platforms:
+            if platform.get_bottom() > lowest_y:
+                lowest_y = platform.get_bottom()
+                
+        return lowest_y+100
+        
         
     def _game_over(self, message_string):
         '''Ends game'''
         self._done = True
         self._restart_timer.restart()
         self._message_string = message_string
-
         self._winner_message = Text(self._message_string, 100, (100, 200, 100), 'middle', self._screen.get_height()/2)
 
         
     def start_game(self):
         '''Restarts game'''
-        # reset players
-        self._player1 = Player(self._level.get_player_positions()[0].get_top_left() , 0, self._debug, self.throw_bomb_wrapper(), self._lowest_y)
-        self._player2 = Player(self._level.get_player_positions()[1].get_top_left() , 1, self._debug, self.throw_bomb_wrapper(), self._lowest_y)
-        self._player_list = [self._player1, self._player2]
+
+        self._player_list = []
+        
+        # create list of players
+        for i in range(0,2):
+            self._player = Player(self._level.get_player_positions()[i].get_top_left() , i, self._debug, self.throw_bomb_wrapper(), self._lowest_y)
+            self._player_list.append(self._player)
 
         # clear bomb list
         self._bomb_list = []
@@ -85,13 +92,11 @@ class Game(View):
         if events.keyboard().is_pressed(pygame.K_ESCAPE) == Switch.pushed_down:
             self._go_back()
 
-        self._screen = events.screen()
-        
         if events.was_resized():
-            super().update(self._screen)
+            super().update(events.screen())
 
         # set camera to track two players
-        super().track(self._player1, self._player2)        
+        super().track(self._player_list[0], self._player_list[1])        
         
         # physics sim
         self._physics.update(events, self._player_list, self._bomb_list, self._platforms)
@@ -121,20 +126,20 @@ class Game(View):
         # display fps
         super().render(Text(str(events.fps()), 20, (100,40, 100), 'left', 10).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
 
-        # handle end game
+        # handle end game when one or both players die
         if not self._done:
             
-            if not self._player1.is_alive() and not self._player2.is_alive():
+            if not self._player_list[0].is_alive() and not self._player_list[1].is_alive():
                 self._game_over('Tie')
                 
-            elif not self._player1.is_alive():
+            elif not self._player_list[0].is_alive():
                 self._game_over('Player 1 is the winner!')
             
-            elif not self._player2.is_alive():
+            elif not self._player_list[1].is_alive():
                 self._game_over('Player 0 is the winner!')
 
         elif self._done:
-            
+            # handle game over screen
             super().render(self._winner_message.get_surface_and_pos(self._screen.get_width()), relative_screen=True)
             super().render(Text('Restarting in: '+str(round(self._restart_delay-self._restart_timer.read())), 100, (100, 200, 100), 'middle', self._screen.get_height()/2+110).get_surface_and_pos(self._screen.get_width()), relative_screen=True)
 

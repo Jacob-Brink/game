@@ -119,8 +119,6 @@ class Physics:
 
             bomb.reset_platform_status()
             
-
-            
             if bomb.exploded():
 
                 coefficient = 1
@@ -145,7 +143,7 @@ class Physics:
                         
                 for bomby in bomb_list:
 
-                    if bomby is not bomb:
+                    if bomby is not bomb and not bomb.return_rect().get_center() == bomby.return_rect().get_center():
                         p_center = bomby.return_rect().get_center()
                         dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
                         bomby.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=coefficient*(10*b_radius/(.1+dist_centers))))

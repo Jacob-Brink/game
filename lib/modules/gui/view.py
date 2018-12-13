@@ -15,6 +15,7 @@ class View(Camera):
 
     def render_rectangle(self, rect, **keywords):
         '''Given rect with absolute coordinates, draw rectangle'''
+
         if 'color' in keywords:
             pygame.draw.rect(self._screen, keywords['color'], super().return_disp_rect(rect))
         else:
@@ -23,6 +24,7 @@ class View(Camera):
             
     def render_line(self, vector, **keywords):
         '''Renders a vector with absolute position as a line'''
+
         if 'relative_screen' in keywords and keywords['relative_screen'] == True:   
             pygame.draw.line(self._screen, (200, 100, 240), vector.return_start_position().return_tuple(), vector.return_end_position().return_tuple())
         else:
@@ -30,8 +32,6 @@ class View(Camera):
         
     def render(self, *surface_pos, **keywords):
         '''Given a screen and surfaces, render the surfaces'''
-        #CHANGE PARAMETERS IF NO ERROR OCCURS WITH self._screen = screen commented
-        
         # renders surface pos types
         for surface in surface_pos:
             if 'relative_screen' in keywords and keywords['relative_screen'] == True:
