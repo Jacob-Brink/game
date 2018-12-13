@@ -103,7 +103,6 @@ class Game(View):
             
             if self._debug:
                 super().render_line(player.return_velocity_vector()*100)
-
         
         # render appropriate bomb
         for bomb in self._bomb_list:

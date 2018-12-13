@@ -14,12 +14,16 @@ def list_points(_rect):
 
 class Physics:
 
-    def __init__(self, debug_mode=False):
+    def __init__(self, debug_mode=False, slow_mo=False):
         '''Construct Physics object'''
         self._debug_mode = debug_mode
         self._collision = Collision()
         self._MARGIN_PIXEL = 1
-        self._gravity_magnitude = 80
+        self._constant = 1
+        if slow_mo:
+            self._constant = .2
+        self._gravity_magnitude = 1
+        
         
     def next_to(self, value, side_value):
         '''Return tru if value is next to other value give or take 4'''
@@ -72,7 +76,7 @@ class Physics:
 
     def apply_gravity(self, rigid_body):
         '''Applies gravity vector to rigid body'''
-        rigid_body.apply_force(Vector(rigid_body.return_rect().get_center(), direction=90, magnitude=self._gravity_magnitude))
+        rigid_body.add_velocity(Vector(rigid_body.return_rect().get_center(), direction=90, magnitude=self._gravity_magnitude*self._constant))
 
     def reposition(self, rigid_body, platform_list):
         '''Repositions rigid body'''

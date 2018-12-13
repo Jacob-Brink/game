@@ -36,7 +36,7 @@ class Editor(View):
         super().__init__(screen)
 
         # construct title surface
-        self._title = Text('Editor Shortcuts: (w,a,s,d for panning),  1: rectangle, 2: eraser, 3: place starting position, (left click for painting), (ESC to save and exit)', 16, TITLE_COLOR, 'left', 30)
+        self._title = Text('Editor Shortcuts: WASD for panning  1 rectangle 2 eraser 3,4 starting position ESC to save and exit', 16, TITLE_COLOR, 'left', 30)
 
         self._cursor = Cursor.platform
         

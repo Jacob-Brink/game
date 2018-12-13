@@ -64,6 +64,7 @@ class Keyboard:
         
     def is_pressed(self, key_key):
         '''Returns boolean state of given key'''
+        print(key_key)
         return self._keys[key_key]
 
     def set_key(self, key_key, key_value):

@@ -1,9 +1,12 @@
 import os
 import time
 
+from lib.modules.gui.tutorial import GameTutorial
 from lib.modules.gui.editor import Editor
 from lib.modules.gui.menu import Menu
 from lib.modules.game.game import Game
+
+tutorial_level = 'lib/data/levels/slot1'
 
 class Handler:
 
@@ -28,9 +31,8 @@ class Handler:
         
     def switch(self, constructor, *args):
         '''Switches view to given class. Class must be child of view.'''
+        del self._current_view
         self._current_view = self.initiate_new_view(constructor, *args)
-        # adds delay so mouse click won't click through multiple menus at once
-        #ADD DELAY THING
         
     def go_back(self, *args):
         '''When called by a button for example, switches view to previous view'''
@@ -59,6 +61,7 @@ class Handler:
         # Create start menu, with buttons, with callbacks for initiating new views with more buttons and callbacks so on and so forth...
         start_menu = Menu(self._screen, 'middle', 'Start Menu', [
             ('Play', self.switch_view_callback(Menu, self._screen, 'left', 'GAME: CHOOSE YOUR LEVEL', [(level_file, self.switch_view_callback(Game, self._screen, 'lib/data/levels/' + level_file, self.go_back, False)) for level_file in os.listdir('lib/data/levels')] + [('Exit', self.go_back)])),
+            ('Tutorial', self.switch_view_callback(GameTutorial, self._screen, tutorial_level, self.go_back)),
             ('Debug Play', self.switch_view_callback(Menu, self._screen, 'left', 'GAME: CHOOSE YOUR LEVEL', [(level_file, self.switch_view_callback(Game, self._screen, 'lib/data/levels/' + level_file, self.go_back, True)) for level_file in os.listdir('lib/data/levels')] + [('Exit', self.go_back)])),
             ('Editor', self.switch_view_callback(Menu, self._screen, 'left', 'EDITOR: CHOOSE LEVEL TO EDIT', [(level_file, self.switch_view_callback(Editor, self._screen, 'lib/data/levels/' + level_file, self.go_back)) for level_file in os.listdir('lib/data/levels')] + [('Exit', self.go_back)])),
             ('Exit', self.go_back)])

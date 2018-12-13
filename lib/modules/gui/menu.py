@@ -46,7 +46,7 @@ class Menu(View):
         self._margin = 10
 
         # for show, have bomb list
-        self._physics = Physics(False)
+        self._physics = Physics(False, True)
         self._bomb_list = []
 
         # add buttons to list

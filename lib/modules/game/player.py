@@ -127,13 +127,18 @@ class Player(RigidBody):
         if is_pressed(self._keys['right']) == Switch.down and not super().get_platform_status(PlatformStatus.on_left) and x_component_velocity < self._x_velocity_max:
             delta_x += self._change
             self._facing = 1
-            
+
+
+        
+        '''
         # slow down if neither left nor right key is pressed while on platform
         if (not is_pressed(self._keys['right']) == Switch.down and not is_pressed(self._keys['left']) == Switch.down) and super().get_platform_status(PlatformStatus.on_top):
             if x_component_velocity > 0:
                 delta_x -= .2*x_component_velocity
             elif x_component_velocity < 0:
                 delta_x -= .2*x_component_velocity
+
+        '''
 
         # jump
         if is_pressed(self._keys['up']) == Switch.pushed_down and not super().get_platform_status(PlatformStatus.on_bottom):
