@@ -11,6 +11,7 @@ from lib.modules.physics.physics_engine import Physics
 
 from lib.modules.gui.rectangle import Rectangle
 
+from lib.modules.game.level import Level
 from lib.modules.game.bomb import Bomb
 from lib.modules.game.timer import Timer
 
@@ -25,24 +26,21 @@ class Game(View):
         
         super().__init__(self._screen)
         self._menu = Menu(self._screen, 'right', 'Press Escape to Quit', [('Quit', go_back)])
-
         self._go_back = go_back
 
-        self.start_game()
-        
         self._physics = Physics(debug_mode)
         
         # player, platform, and bomb list
-        self._platforms = []
+        self._level = Level(level)
+        self._platforms = self._level.get_platforms()
         self._bomb_list = []
-
-        # load level
-        self._level = level
-        self._load_level()
 
         self._done = False
         self._restart_timer = Timer()
         self._restart_delay = 10
+
+        self.start_game()
+
         
     def _game_over(self, message_string):
         '''Ends game'''
@@ -52,21 +50,18 @@ class Game(View):
 
         self._winner_message = Text(self._message_string, 100, (100, 200, 100), 'middle', self._screen.get_height()/2)
 
+        
     def start_game(self):
         '''Restarts game'''
         # reset players
-        self._player1 = Player(0, self._debug, self.throw_bomb_wrapper())
-        self._player2 = Player(1, self._debug, self.throw_bomb_wrapper())
+        self._player1 = Player(self._level.get_player_positions()[0].get_top_left() , 0, self._debug, self.throw_bomb_wrapper())
+        self._player2 = Player(self._level.get_player_positions()[1].get_top_left() , 1, self._debug, self.throw_bomb_wrapper())
         self._player_list = [self._player1, self._player2]
 
         # clear bomb list
         self._bomb_list = []
-        
-    def _load_level(self):
-        '''Loads level platforms into game'''
-        with open(self._level, 'r') as level_file:
-            [self._platforms.append(Rectangle(*[float(string_integer) for string_integer in line.strip().split()])) for line in level_file]
 
+        
     def throw_bomb_wrapper(self):
         '''Returns throw bomb callback'''
         def throw_bomb_callback(velocity, bomb_type):

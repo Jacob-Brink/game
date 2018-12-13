@@ -42,7 +42,7 @@ class Point:
 
     def __str__(self):
         '''Returns string of points'''
-        return '<' + str(self._x) + ',' + str(self._y) + '>'
+        return str(self._x) + ' ' + str(self._y)
 
     def __eq__(self, other):
         '''Returns boolean value of whether or not two points are equal to each other'''

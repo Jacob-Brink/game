@@ -3,26 +3,22 @@ from lib.modules.gui.events import Switch
 from lib.modules.gui.view import View
 from lib.modules.gui.rectangle import *
 from lib.modules.gui.platform import Platform
+from lib.modules.game.level import Level, PlayerPosition
 
 from enum import Enum
 import pygame
 
-def init():
-    pygame.init()
-    screen = pygame.display.set_mode((640,480))
-    pygame.display.set_caption('The Game')
-    pygame.display.flip()
-
-    return screen
 
 # Cursor enum
 class Cursor(Enum):
     platform = 1
     eraser = 2
-    start_position_1 = 3
-    start_positoin_2 = 4
+    start_position1 = 3
+    start_position2 = 4
+    none = 5
 
 START_SIZE = Point(400, 400)
+
 TITLE_COLOR = (255,0,0)
 RECTANGLE_COLOR = (0,0,0)
 HIGHLIGHT_COLOR = (0, 0, 255)
@@ -43,50 +39,46 @@ class Editor(View):
         self._title = Text('Editor Shortcuts: (w,a,s,d for panning),  1: rectangle, 2: eraser, 3: place starting position, (left click for painting), (ESC to save and exit)', 16, TITLE_COLOR, 'left', 30)
 
         self._cursor = Cursor.platform
-        self._platforms = []
-        self._level = level
-
-        # coin
-        self._coins = []
-
-        # start
-        self._start = None
         
         # platforms
         self._first_click = False
         self.first_pos = None
         self.second_pos = None
         self._unfinished_rect = None
-        
-        self.read_level()
 
-    
+        # handle platforms
+        self._level = Level(level)
+        self._platforms = self._level.get_platforms()
+        self._player_positions = self._level.get_player_positions()
+        
     def change_cursor(self, new_cursor):
         '''Changes cursor and is given to buttons in the menu'''
-        self._cursor = new_cursor
+        self._cursor = new_cursor                
         
-    def write_level(self):
-        '''Write to level all platforms and items'''
-        with open(self._level, 'w') as level_file:
-            for platform in self._platforms:
-                level_file.write(str(platform.copy())+'\n')
-
-    def read_level(self):
-        '''Load level platforms into level editor'''
-        with open(self._level) as level_file:
-            [self._platforms.append(Platform(Rectangle(*[float(string_integer) for string_integer in line.strip().split()]), RECTANGLE_COLOR)) for line in level_file]
-
-
-    def place_start_position(self, current_click, mouse_pos):
+    def place_start_position(self, mouse_pos, current_click):
         '''Place start position'''
-        r = Rectangle((0,0), (START_SIZE.x(), START_SIZE.y()))
-        r.set_center(Point(mouse_pos))
+        
+        # select right start position
+        if self._cursor == Cursor.start_position1:
+            current_position = self._player_positions[0]
+        else:
+            current_position = self._player_positions[1]
+
+        current_position.set_center(super().return_true_position(mouse_pos))
+            
+        placeable = True
+        
         for platform in self._platforms:
-            if not platform.collides_with(r):
-                pass
-            #ADD CODE HERE
-                # add position to list of position starts
+            
+            if platform.collides_with(current_position):
+
+                placeable = False
                 
+        current_position.change_placeability(placeable)
+
+        if current_click == Switch.pushed_down and current_position.is_placeable():
+            self._cursor = Cursor.none    
+        
             
     def erase(self, mouse_pos, current_click):
         '''Given mouse position and a click, erases a rectangle'''
@@ -99,7 +91,6 @@ class Editor(View):
                     self._platforms.remove(platform)
             else:
                 platform.change_color(RECTANGLE_COLOR)
-                    
         
         
     def _return_rect(self, first_pos, second_pos):
@@ -139,26 +130,15 @@ class Editor(View):
 
             # return rectangles with from two true positions
             self._platforms.append(Platform(self._return_rect(self.first_pos, self.second_pos), RECTANGLE_COLOR))
-
             # remove temp rectangle
             self._unfinished_rect = None
 
-        
-    def _collides_platform(self, rect):
-        '''Checks for collisions, returns boolean value'''
-        for rectangle in self._platforms:
-            if rectangle.colliderect(rect):
-                return True
-        return False
-    
+           
     def handle_keyboard(self, events):
         '''Handle Keyboard events'''
-
         delta_x = 0
         delta_y = 0
-        
         change = 5
-        
         pressed = events.keyboard().is_pressed
 
         if pressed(pygame.K_w) == Switch.down:
@@ -171,20 +151,31 @@ class Editor(View):
             delta_x = change
 
         super().move(delta_x, delta_y)
-        
+
+        # set cursor to platform
         if pressed(pygame.K_1) == Switch.pushed_down:
             self.change_cursor(Cursor.platform)
 
-        if pressed(pygame.K_2) == Switch.pushed_down:
+        # change cursor to eraser
+        elif pressed(pygame.K_2) == Switch.pushed_down:
             self.change_cursor(Cursor.eraser)
 
-        if pressed(pygame.K_z) == Switch.pushed_down:
+        # undo command
+        elif pressed(pygame.K_z) == Switch.pushed_down:
             if len(self._platforms) >= 1:
                 del self._platforms[-1]
 
+        # set cursor to start position 1
+        elif pressed(pygame.K_3) == Switch.pushed_down:
+            self.change_cursor(Cursor.start_position1)
+
+        # set cursor to start position 2
+        elif pressed(pygame.K_4) == Switch.pushed_down:
+            self.change_cursor(Cursor.start_position2)
+        
         # save and exit if esc is pressed
         if pressed(pygame.K_ESCAPE) == Switch.pushed_down:
-            self.write_level()
+            self._level.write_level()
             self._quit_callback()
         
     
@@ -196,21 +187,34 @@ class Editor(View):
         current_click = events.mouse().left_button()
         mouse_pos = events.mouse().get_position()
 
-        
+        # if platform is platform, run platform function
         if self._cursor == Cursor.platform:
             self.draw_platform(current_click, mouse_pos)
-
+            
+        # if cursor is eraser, run eraser
         elif self._cursor == Cursor.eraser:
             self.erase(mouse_pos, current_click)
-        
-        for platform in self._platforms:
-            super().render_rectangle(platform, color=platform.get_color())
 
+        # if cursor is start position, run place start position
+        elif self._cursor == Cursor.start_position1 or self._cursor == Cursor.start_position2:
+            self.place_start_position(mouse_pos, current_click)
+
+        # draw all platforms
+        for platform in self._platforms:
+            if super().is_visible(platform):
+                super().render_rectangle(platform, color=platform.get_color())
+
+        # if unfinished rectangle exists, draw it
         if not self._unfinished_rect == None:
             super().render_rectangle(self._unfinished_rect, color=self._unfinished_rect.get_color())
 
-        super().render((self._title.get_surface(), Point(10,10)), relative_screen=True)
-        
+        # render player position rectangles
+        for player_position in self._player_positions:
+            if not player_position == None:
+                super().render_rectangle(player_position, color=player_position.get_color())
+            
+        # render screen and handle keyboard events
+        super().render((self._title.get_surface(), Point(10,10)), relative_screen=True) 
         self.handle_keyboard(events)
     
 

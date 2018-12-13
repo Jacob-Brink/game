@@ -6,7 +6,7 @@ from lib.modules.physics.rigid_body import RigidBody
 from lib.modules.gui.image import Image
 from lib.modules.gui.events import *
 from lib.modules.gui.text import Text
-from lib.modules.gui.rectangle import Rectangle
+from lib.modules.gui.rectangle import Rectangle, Point
 from lib.modules.game.bomb import Bomb
 from lib.modules.physics.physics import PlatformStatus
 from lib.modules.game.timer import Timer
@@ -19,7 +19,7 @@ PLAYER_COLOR = [(255, 0, 0), (0, 0, 255)]
 
 # size and offsets
 HEALTH_BAR_SIZE = Point(100, 20)
-OFFSET = HEALTH_BAR_SIZE.y()*4
+OFFSET = HEALTH_BAR_SIZE.y()*5
 
 
 class HealthBar(Rectangle):
@@ -52,10 +52,10 @@ class HealthBar(Rectangle):
 class Player(RigidBody):
     '''Models a player'''
 
-    def __init__(self, keyboard_layout, debug_mode, throw_bomb_callback):
+    def __init__(self, start_position_point, keyboard_layout, debug_mode, throw_bomb_callback):
         '''Constructs a new player with rigid body as Base Class'''
 
-        super().__init__(Rectangle((0,0), (100,150)), 200)
+        super().__init__(Rectangle(start_position_point, Point(100,150)), 200)
 
         self._color = PLAYER_COLOR[keyboard_layout]
         
