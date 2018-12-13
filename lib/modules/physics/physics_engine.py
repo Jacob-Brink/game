@@ -114,28 +114,24 @@ class Physics:
 
             if not bomb.get_platform_status(PlatformStatus.on_top):
                 self.apply_gravity(bomb)
-            
+                
+            # do update and reset platform status
             bomb.update(self._delta_time)
-
             bomb.reset_platform_status()
             
             if bomb.exploded():
 
-                coefficient = 1
-
-                # if the bomb implodes ( or sucks in rigid bodies instead of propelling them ) make the coefficient negative half
-                if bomb.get_type() == 'implosion':
-                    coefficient = -.5
                 
                 b_center = bomb.return_rect().get_center()
                 b_radius = bomb.get_radius()
+                b_power = bomb.get_power()
+                
                 
                 for player in player_list:
 
-
                     p_center = player.return_rect().get_center()
                     dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                    player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=coefficient*(20*b_radius/(.1+dist_centers))))
+                    player.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(b_power*b_radius/(.1+dist_centers))))
 
                     # only explosive bombs deal damage, cuz if imploding bombs dealt damage, the game would end really fast
                     if bomb.get_type() == 'explosion':
@@ -146,7 +142,7 @@ class Physics:
                     if bomby is not bomb and not bomb.return_rect().get_center() == bomby.return_rect().get_center():
                         p_center = bomby.return_rect().get_center()
                         dist_centers = math.sqrt((p_center.x()-b_center.x())**2+(b_center.y()-p_center.y())**2)
-                        bomby.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=coefficient*(10*b_radius/(.1+dist_centers))))
+                        bomby.apply_force(Vector(p_center, direction=math.degrees(math.atan2(p_center.y()-b_center.y(),p_center.x()-b_center.x())), magnitude=(b_power*b_radius/(.1+dist_centers))))
 
                 if bomb.finished_exploding():
 

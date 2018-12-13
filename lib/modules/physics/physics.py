@@ -116,7 +116,7 @@ class Collision:
                 # check collision where center is on platform right x
                 if self.return_collision_line_y(r_y, r_rect, platform, platform_right):
                     return True
-                
+
         return False
 
         

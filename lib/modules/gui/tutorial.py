@@ -7,8 +7,11 @@ from lib.modules.game.timer import Timer
 import pygame
 
 # steps including tile for each step and required key presses for each step in the tutorial
-STEPS = [{'title': 'Press w,a,s,d keys or arrow keys to move', 'required': [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s, pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]},
-         {'title': 'Press f or right control to shoot explosive bombs. Explosive bombs deal damage', 'required': [pygame.K_f, pygame.K_RCTRL]},
+STEPS = [{'title': 'Welcome to the Tutorial! To Continue Press the Space Bar', 'required': [pygame.K_SPACE]},
+         {'title': 'In the tutorial, you must try out every command key before proceeding to the next stage. Press the Space Bar', 'required': [pygame.K_SPACE]},
+         {'title': 'Press w,a,s,d keys or arrow keys to move. Try moving around.', 'required': [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s, pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT]},
+         {'title': 'Jumping in air is possible. Try a double jump with the arrow keys and w key', 'required': [pygame.K_w, pygame.K_w, pygame.K_UP, pygame.K_UP]},
+         {'title': 'Press f or right control to shoot explosive bombs. Explosive bombs deal damage, and can act as force field', 'required': [pygame.K_f, pygame.K_RCTRL]},
          {'title': 'Press r or right shift to shoot implosive bombs. Implosive bombs deal no damage, and are disguised as explosive bombs.', 'required': [pygame.K_r, pygame.K_RSHIFT]},
          {'title': 'Congratulations on completing the tutorial! Press escape to exit to the main menu.', 'required': [pygame.K_ESCAPE]} ]
 
