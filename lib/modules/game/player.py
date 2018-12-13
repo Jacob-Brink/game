@@ -73,7 +73,7 @@ class Player(RigidBody):
 
         self._jump_timer = Timer()
         self._jump_timer.restart()
-        self._jump_limit = 2
+        self._jump_limit = 1
         self._jumps = 0
         self._jump_delay = .1
 
@@ -175,8 +175,6 @@ class Player(RigidBody):
         delta_time = events.delta_time()
         super().update(delta_time)
 
-        # set health bar rectangle to be above player
-        self._health_bar.change_bottom_left(super().return_rect().get_top_left()+Point(0,-OFFSET/4))
         
     def is_alive(self):
         '''Returns true if player is still alive'''
@@ -197,11 +195,13 @@ class Player(RigidBody):
             
     def return_healthbar_and_color(self):
         '''Return rectangle and color'''
+        # set health bar rectangle to be above player
+        self._health_bar.change_bottom_left(super().return_rect().get_top_left()+Point(0,-OFFSET/4))
         return self._health_bar, self._health_bar.get_color()
 
     def return_surface_and_pos(self):
         '''Returns debug mode surface'''
-        return [Text('Player '+str(self._player_num), 64, (200,255,255), 'left', 10).get_surface(), super().return_rect().get_top_left()+Point(0,-OFFSET)]
+        return [Text('Player '+str(self._player_num), 64, (0 ,255,255), 'left', 10).get_surface(), super().return_rect().get_top_left()+Point(0,-OFFSET)]
     
     def return_rectangle_and_color(self):
         '''Returns array of surface and point of x and y position. (Used for easy blitting)'''
