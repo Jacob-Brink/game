@@ -1,5 +1,8 @@
 from lib.modules.gui.rectangle import Rectangle
 
+RECTANGLE_COLOR = (0,0,0)
+
+
 class Platform(Rectangle):
   
     def __init__(self, rectangle, color):
@@ -11,6 +14,14 @@ class Platform(Rectangle):
         else:
             raise TypeError('Platform->Constructor: rectangle must be of type Rectangle. Not pygame rectangle')
 
+    def change_placeability(self, can_place_bool):
+        '''Sets placeability to can place bool'''
+        self._placeable = can_place_bool
+
+    def get_placeability(self):
+        '''Return placeability'''
+        return self._placeable
+        
     def get_color(self):
         '''Returns color'''
         return self._color

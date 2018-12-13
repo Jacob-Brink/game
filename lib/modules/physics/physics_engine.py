@@ -19,10 +19,11 @@ class Physics:
         self._debug_mode = debug_mode
         self._collision = Collision()
         self._MARGIN_PIXEL = 1
-        self._constant = 1
+
         if slow_mo:
-            self._constant = .2
-        self._gravity_magnitude = 1
+            self._gravity_magnitude = .1
+        else:
+            self._gravity_magnitude = .5
         
         
     def next_to(self, value, side_value):
@@ -76,7 +77,7 @@ class Physics:
 
     def apply_gravity(self, rigid_body):
         '''Applies gravity vector to rigid body'''
-        rigid_body.add_velocity(Vector(rigid_body.return_rect().get_center(), direction=90, magnitude=self._gravity_magnitude*self._constant))
+        rigid_body.add_velocity(Vector(rigid_body.return_rect().get_center(), direction=90, magnitude=self._gravity_magnitude))
 
     def reposition(self, rigid_body, platform_list):
         '''Repositions rigid body'''

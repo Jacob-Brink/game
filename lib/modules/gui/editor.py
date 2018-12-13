@@ -38,6 +38,7 @@ class Editor(View):
         # construct title surface
         self._title = Text('Editor Shortcuts: WASD for panning  1 rectangle 2 eraser 3,4 starting position ESC to save and exit', 16, TITLE_COLOR, 'left', 30)
 
+        self._past_cursor = Cursor.platform
         self._cursor = Cursor.platform
         
         # platforms
@@ -53,6 +54,9 @@ class Editor(View):
         
     def change_cursor(self, new_cursor):
         '''Changes cursor and is given to buttons in the menu'''
+        if self._cursor == Cursor.eraser and not self._cursor == new_cursor:
+            for platform in self._platforms:
+                platform.change_color(RECTANGLE_COLOR)
         self._cursor = new_cursor                
         
     def place_start_position(self, mouse_pos, current_click):
@@ -177,7 +181,8 @@ class Editor(View):
         if pressed(pygame.K_ESCAPE) == Switch.pushed_down:
             self._level.write_level()
             self._quit_callback()
-        
+
+
     
     def update(self, events):
         '''Use mouse to drag and make rectangle platforms'''
@@ -187,6 +192,8 @@ class Editor(View):
         current_click = events.mouse().left_button()
         mouse_pos = events.mouse().get_position()
 
+        
+        
         # if platform is platform, run platform function
         if self._cursor == Cursor.platform:
             self.draw_platform(current_click, mouse_pos)

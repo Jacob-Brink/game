@@ -1,8 +1,6 @@
 from lib.modules.gui.rectangle import Rectangle, Point
 from lib.modules.gui.platform import Platform
 
-RECTANGLE_COLOR = (0,0,0)
-
 
 PLAYER_SIZE = Point(100,150)
 
@@ -18,7 +16,7 @@ class PlayerPosition(Rectangle):
         
         self._placeable_color = PLAYER_POSITION_COLOR[player_num]
         self._wrong_color = WRONG_PLACE_COLOR
-        self._is_placeable = False
+        self._is_placeable = True
         self._set_color()
 
     def _set_color(self):

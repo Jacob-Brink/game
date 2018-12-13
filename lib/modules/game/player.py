@@ -64,7 +64,7 @@ class Player(RigidBody):
         self._keys = KEYS_MAP[keyboard_layout]
 
         self._x_velocity_max = 10
-        self._change = 10
+        self._change = 13
         
         self._jump_timer = Timer()
         self._jump_timer.restart()
@@ -90,13 +90,13 @@ class Player(RigidBody):
         # handle jump when on ground
         if super().get_platform_status(PlatformStatus.on_top):
             self._jumps = 0
-            super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change*2))
+            super().add_velocity(Vector(super().return_rect().get_center(), x_component=0, y_component=-change*4))
             self._jump_timer.restart()
 
         # handle double jump
         elif self._jumps < self._jump_limit and self._jump_timer.read() > .1:
             self._jumps += 1
-            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change*1.5))
+            super().add_velocity(Vector(self.return_rect().get_center(), x_component=0, y_component=-change*3))
             self._jump_timer.restart()
 
             
@@ -106,7 +106,7 @@ class Player(RigidBody):
         
         # if reload time has ended throw next bomb
         if self._bomb_reload_timer.read() > self._bomb_reload_time:
-            self._throw_bomb_callback(Vector(super().return_rect().get_center(), x_component=self._facing*self._bomb_speed, y_component=self._bomb_speed/3), bomb_type)
+            self._throw_bomb_callback(Vector(super().return_rect().get_center(), x_component=self._facing*self._bomb_speed, y_component=self._bomb_speed*2), bomb_type)
             self._bomb_reload_timer.restart()
         
             
@@ -118,6 +118,7 @@ class Player(RigidBody):
 
         x_component_velocity = super().return_velocity_vector().return_x_component()
 
+            
         # go left when left key is pressed
         if is_pressed(self._keys['left']) == Switch.down and not super().get_platform_status(PlatformStatus.on_right) and x_component_velocity > -self._x_velocity_max:
             delta_x -= self._change
@@ -128,15 +129,18 @@ class Player(RigidBody):
             delta_x += self._change
             self._facing = 1
 
-
-        
-        '''
-        # slow down if neither left nor right key is pressed while on platform
-        if (not is_pressed(self._keys['right']) == Switch.down and not is_pressed(self._keys['left']) == Switch.down) and super().get_platform_status(PlatformStatus.on_top):
+        # apply friction
+        if (is_pressed(self._keys['right']) == Switch.up and is_pressed(self._keys['left']) == Switch.up) and super().get_platform_status(PlatformStatus.on_top):
             if x_component_velocity > 0:
                 delta_x -= .2*x_component_velocity
             elif x_component_velocity < 0:
                 delta_x -= .2*x_component_velocity
+
+            
+        '''
+        # slow down if neither left nor right key is pressed while on platform
+        if (not is_pressed(self._keys['right']) == Switch.down and not is_pressed(self._keys['left']) == Switch.down) and super().get_platform_status(PlatformStatus.on_top):
+            
 
         '''
 
