@@ -82,8 +82,8 @@ class Menu(View):
         random_x = randint(0, super().return_screen_dimensions().x())
         random_y = randint(0, super().return_screen_dimensions().y())
 
-        random_x_comp = randint(1,4)
-        random_y_comp = randint(1,4)
+        random_x_comp = randint(-4,4)
+        random_y_comp = randint(-4,4)
 
         random_type = randint(0,1)
 
@@ -94,6 +94,7 @@ class Menu(View):
         
         self._bomb_list.append(Bomb(Vector(Point(random_x, random_y), x_component=random_x_comp, y_component=random_y_comp), random_type))
 
+        
     def update(self, event):
         '''Will update the menu with realtime events, such as the mouse events. It also updates the buttons in the menu'''
         screen = event.screen()
@@ -121,10 +122,12 @@ class Menu(View):
                 super().render_rectangle(bomb.return_rect(), color=bomb.get_color())
             
         # randomly create a bomb with 1 / 11 chance of spawning any given tick
-        create_bomb = randint(0,5)
+        create_bomb = randint(1,2)
         if create_bomb == 2:
             self.create_bomb()
 
+        if event.was_resized():
+            super().update(event.screen())
         
         
 

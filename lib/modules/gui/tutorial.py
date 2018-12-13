@@ -32,7 +32,7 @@ class GameTutorial(View):
         self._finished = False
 
         self._timer = Timer()
-        self._time_limit = 4
+        self._time_limit = 2
         
     def set_text(self):
         '''Sets current text to message'''
