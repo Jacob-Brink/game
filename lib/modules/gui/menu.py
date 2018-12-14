@@ -122,9 +122,7 @@ class Menu(View):
                 super().render_rectangle(bomb.return_rect(), color=bomb.get_color())
             
         # randomly create a bomb with 1 / 11 chance of spawning any given tick
-        create_bomb = randint(1,2)
-        if create_bomb == 2:
-            self.create_bomb()
+        self.create_bomb()
 
         if event.was_resized():
             super().update(event.screen())
