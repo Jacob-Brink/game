@@ -20,10 +20,8 @@ class Handler:
         self._switching = False
         
     def update(self, events):
-        '''Assumes current view is class inheriting from View. Updates current view class.'''
-    
+        '''Assumes current view is class inheriting from View. Updates current view class.'''    
         self._current_view.update(events)
-
         
     def is_running(self):
         '''Return boolean state of handler running or not'''

@@ -41,7 +41,7 @@ class PlayerPosition(Rectangle):
 
     def __str__(self):
         '''Returns string for file writing'''
-        top_left = super().get_top_left()
+        top_left = super().get_center()
         return str(top_left.x()) + ' ' + str(top_left.y())
 
 
